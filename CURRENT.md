@@ -21,3 +21,10 @@ No verified Wolf-Coin executable package, broker integration, sportsbook permiss
 ## Resume
 
 Recover current main and feature HEAD, original P0–P12 authority, WX candidate, Tenfold frozen campaign and Patrol current state. Resolve registered project-root access through an authorized privileged path. Only then begin P0/WX-0 implementation with bounded Tenfold tasks and Cookpit MANUAL micro/heavy; no GPT supervisor schedules. Preserve existing risks and avoid live funds.
+
+## Verified manual workforce preparation receipts
+
+- Tenfold Gen1 durable campaign: /home/kratos/projects/Tenfold/.workspace/wolf-coin-20261123/tenfold-authority.db, 24 nodes, revision 1, P0 BLOCKED, zero issued assignments or active leases. This records the actual Patrol blocker, not a completed milestone.
+- Cookpit manual-only preparation profile: /home/kratos/projects/cookpit/.workspace/wolf-coin-preparation-20261123/profile.json. Micro and heavy preparation lanes both PASS against campaign digest 61dfcc86df233db4585daa568c2e036caa16bc3a023958e4d5c886add6e77442 and the documentary SIM receipt.
+- Cookpit evidence: /home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-preparation-only/evidence. No Wolf-Coin canonical registry activation, timers, GPT supervisors, financial execution, or project-source build.
+- The architecture supplement was placed in draft PR #10 for review. Original protected main remains unchanged.
