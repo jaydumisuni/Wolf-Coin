@@ -60,7 +60,8 @@ def review_stake(*, account: AccountState, quote: ThreeWayQuote,
     if expected_return <= policy.minimum_positive_ev:
         return block("no-supported-positive-ev")
     provider_minimum = money(provider_minimum, positive=True)
-    maximum = min(account.available, account.balance * policy.max_fraction)
+    outstanding = account.balance - account.available
+    maximum = min(account.available, max(Decimal("0"), account.balance * policy.max_fraction - outstanding))
     if maximum < provider_minimum or maximum <= 0:
         return block("provider-minimum-exceeds-risk-cap")
     return PaperDecision("PAPER_ELIGIBLE", "positive-ev-paper-only", maximum, expected_return)

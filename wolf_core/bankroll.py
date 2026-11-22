@@ -72,6 +72,11 @@ class PaperBankroll:
             odds = money(payload["odds"], positive=True)
             if odds <= 1 or stake_id in state.used_stakes or stake > state.available:
                 raise FundsError("stake identity, price or bankroll check failed")
+            # Paper-only hard ceiling. Evaluating separate tickets cannot reset
+            # the same account's aggregate risk allowance.
+            outstanding = sum((value[0] for value in state.reserved.values()), Decimal("0"))
+            if outstanding + stake > state.balance * Decimal("0.005"):
+                raise FundsError("aggregate paper sports exposure exceeds 0.5% of balance")
             state.reserved[stake_id] = (stake, odds)
             state.used_stakes.add(stake_id)
         elif kind == "stake_settle":

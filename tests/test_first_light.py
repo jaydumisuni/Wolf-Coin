@@ -119,10 +119,10 @@ def test_withdrawal_cannot_spend_reserved_stake(tmp_path):
     _, book, sports, trading = accounts(tmp_path)
     book.add_paper_funds(sports, amount="100", event_id="dep")
     book.post(sports, event_id="reserve", kind="stake_reserve",
-              payload={"stake_id": "ticket", "amount": "5", "odds": "2"})
+              payload={"stake_id": "ticket", "amount": "0.5", "odds": "2"})
     with pytest.raises(FundsError):
-        book.withdraw_paper_funds(sports, amount="96", event_id="bad-withdraw")
-    assert book.withdraw_paper_funds(sports, amount="95", event_id="withdraw").available == 0
+        book.withdraw_paper_funds(sports, amount="99.6", event_id="bad-withdraw")
+    assert book.withdraw_paper_funds(sports, amount="99.5", event_id="withdraw").available == 0
     with pytest.raises(FundsError):
         book.post(trading, event_id="invalid-ticket", kind="stake_reserve",
                   payload={"stake_id": "ticket", "amount": "1", "odds": "2"})
@@ -215,3 +215,28 @@ def test_canonical_payload_rejects_float_and_different_money_amounts(tmp_path):
         book.post(sports, event_id="zero-stake", kind="stake_reserve",
                   payload={"stake_id": "ticket", "amount": "0", "odds": "1.5"})
     assert len(ledger.events(sports)) == 1
+
+
+def test_split_stakes_do_not_reset_account_risk_allowance(tmp_path):
+    _, book, sports, _ = accounts(tmp_path)
+    book.add_paper_funds(sports, amount="100", event_id="dep")
+    book.post(sports, event_id="one", kind="stake_reserve",
+              payload={"stake_id": "ticket-one", "amount": "0.3", "odds": "2"})
+    now = datetime(2026, 11, 23, tzinfo=timezone.utc)
+    decision = review_stake(account=book.state(sports), quote=quote(now), selection="home",
+                            forecast_probability=Decimal("0.65"), independently_calibrated=True,
+                            provider_minimum=Decimal("0.25"), now=now)
+    assert (decision.verdict, decision.reason) == ("ABSTAIN", "provider-minimum-exceeds-risk-cap")
+    with pytest.raises(FundsError):
+        book.post(sports, event_id="two", kind="stake_reserve",
+                  payload={"stake_id": "ticket-two", "amount": "0.3", "odds": "2"})
+    assert book.state(sports).available == Decimal("99.7")
+
+
+def test_immutable_market_quote_after_validation():
+    prices = {"home": Decimal("2"), "draw": Decimal("3.5"), "away": Decimal("4")}
+    q = ThreeWayQuote("demo", "f1", "m1", datetime.now(timezone.utc).isoformat(), prices, True)
+    prices["home"] = Decimal("1.05")
+    assert q.prices["home"] == Decimal("2")
+    with pytest.raises(TypeError):
+        q.prices["home"] = Decimal("9")

@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
+from types import MappingProxyType
+from typing import Mapping
 
 from wolf_core.contracts import ContractError, identifier, money, utc_timestamp
 
@@ -15,7 +17,7 @@ class ThreeWayQuote:
     fixture_id: str
     market_id: str
     observed_at: str
-    prices: dict[str, Decimal]
+    prices: Mapping[str, Decimal]
     source_rights_confirmed: bool = False
 
     def __post_init__(self) -> None:
@@ -30,6 +32,8 @@ class ThreeWayQuote:
                 raise ContractError("decimal market odds must exceed 1")
         if not isinstance(self.source_rights_confirmed, bool):
             raise ContractError("source_rights_confirmed must be boolean")
+        # Prevent post-validation modification of a candidate market quote.
+        object.__setattr__(self, "prices", MappingProxyType(dict(self.prices)))
 
     @property
     def overround(self) -> Decimal:
