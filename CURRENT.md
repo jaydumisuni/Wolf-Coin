@@ -28,3 +28,12 @@ Recover current main and feature HEAD, original P0–P12 authority, WX candidate
 - Cookpit manual-only preparation profile: /home/kratos/projects/cookpit/.workspace/wolf-coin-preparation-20261123/profile.json. Micro and heavy preparation lanes both PASS against campaign digest 61dfcc86df233db4585daa568c2e036caa16bc3a023958e4d5c886add6e77442 and the documentary SIM receipt.
 - Cookpit evidence: /home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-preparation-only/evidence. No Wolf-Coin canonical registry activation, timers, GPT supervisors, financial execution, or project-source build.
 - The architecture supplement was placed in draft PR #10 for review. Original protected main remains unchanged.
+
+## First-light source construction candidate (new — 2026-11-23)
+
+- The public-safe, **paper-only** candidate source is on draft PR #10, with exact source head `60d02ca23dfe74324ebc89051ef862900d3b6140` (subsequent documentation commits do not change those source blobs).
+- Implemented typed AccountScope/Domain/UTC/Decimal primitives, per-account durable append/replay, paper-only money reconciliation, immutable three-way football quotes, fixed 0.5% aggregate paper sports exposure and the read-only `wolf doctor` command.
+- Isolated Python 3.13.5 verification: **19/19 tests passed**. All committed source file blobs were compared with the tested bytes before branch updates.
+- Cookpit **manual** source micro PASS and heavy PASS; remote head and eight critical code/test file identities were independently read back.
+- See `docs/FIRST_LIGHT_PROOF_2026-11-23.md` for exact commands, source digest bindings, limitations and retained KRATOS receipts.
+- No installed KRATOS runtime, real provider adapter, accepted P0/P1/WX milestone, source-root registration, GPT supervisor or live-capital authority has been established. Tenfold's P0 remains BLOCKED by Patrol's required privileged root creation.
