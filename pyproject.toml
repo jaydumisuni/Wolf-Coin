@@ -9,6 +9,9 @@ description = "Wolf-Coin deterministic research and paper-only first light"
 requires-python = ">=3.11"
 dependencies = []
 
+[project.scripts]
+wolf = "wolf_core.cli:main"
+
 [tool.setuptools.packages.find]
 include = ["wolf_core*", "wolf_sports*", "wolf_guard*"]
 

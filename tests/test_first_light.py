@@ -240,3 +240,8 @@ def test_immutable_market_quote_after_validation():
     assert q.prices["home"] == Decimal("2")
     with pytest.raises(TypeError):
         q.prices["home"] = Decimal("9")
+
+
+def test_paper_policy_cannot_exceed_ledger_hard_cap():
+    with pytest.raises(ContractError):
+        PaperStakePolicy(max_fraction=Decimal("0.02"))

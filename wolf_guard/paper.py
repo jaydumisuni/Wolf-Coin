@@ -17,8 +17,8 @@ class PaperStakePolicy:
     minimum_positive_ev: Decimal = Decimal("0")
 
     def __post_init__(self) -> None:
-        if not 0 < money(self.max_fraction) <= Decimal("0.05"):
-            raise ContractError("max_fraction must be positive and <= 5% in paper mode")
+        if not 0 < money(self.max_fraction) <= Decimal("0.005"):
+            raise ContractError("max_fraction cannot exceed paper ledger's 0.5% hard ceiling")
         if isinstance(self.max_quote_age_seconds, bool) or not 0 < self.max_quote_age_seconds <= 86400:
             raise ContractError("max_quote_age_seconds outside allowed bound")
         if money(self.minimum_positive_ev, nonnegative=True) > 1:
