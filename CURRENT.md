@@ -16,6 +16,15 @@
 
 ---
 
+## New CC0 neural source research — 2026-11-23
+
+- After proving the publisher's limited-use rule, neural training now uses **only OpenFootball CC0 match results** from pinned upstream commit `e6744429`; no Football-Data bookmaker prices entered MLP training.
+- The neural architecture/selection was frozen at Wolf-Coin `170a555` before the first retrieval of 2026/27. Training 2,660; validation 380; 2026/27 snapshot had **45 completed of 380 scheduled** matches, latest through September 20. Source 2025/26 has only 353 scored of 380.
+- MLP scored **0.611911853** Brier vs historical class prior **0.657353561**, but day-cluster bootstrap confidence interval of advantage **[-0.050237688, +0.158399450] includes zero**. It has NOT established market-relative superiority or profit.
+- Separate source audit: 760 historical fixture scores matched a second private source with zero conflicts, no restricted data used in neural training.
+- SUP G5 Director accepted a machine CC0 research-only source receipt and advanced to **AWAIT_CAPABILITY_SNAPSHOT**, no training, deployment or funding authority. SUP-Bit did not train the MLP.
+- The new native evidence view is `/neural` (installed release qualification follows). Source and proof `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md`.
+
 ## Current installed forecast research tool — 2026-11-23
 
 - Wolf-Coin **0.1.0a3** installed on KRATOS at source `7b56d694cade3ee70524a00a495a570d0b3f8faf`. Read-only Forecast CPU page at `http://127.0.0.1:18766/forecast`, alongside original Sports, Trading and Strategy Lab.

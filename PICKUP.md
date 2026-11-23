@@ -1,5 +1,9 @@
 # Wolf-Coin — zero-context pickup
 
+## Latest CC0 neural research (2026-11-23)
+
+Frozen neural source HEAD `170a555` used OpenFootball CC0-only results. The 2026/27 snapshot has just 45 scored matches through September 20, and the 2025/26 source is missing 27 scored fixtures. MLP holdout Brier 0.611911853 vs class-prior 0.657353561, with bootstrap interval crossing zero; no financial edge. A second source exactly matched 760 historical final scores. SUP G5 Director advances to AWAIT_CAPABILITY_SNAPSHOT from CC0 machine research receipt (no signed independent review or execution authority). Read `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md` and immutable private receipts. Do not treat 2026/27 as untouched again.
+
 ## Latest host state: Wolf-Coin 0.1.0a3
 
 KRATOS active resident source `7b56d694cade3ee70524a00a495a570d0b3f8faf`, `wolf-coin-paper-preview.service`, Forecast CPU page `http://127.0.0.1:18766/forecast`. Native wheel SHA in `docs/SUP_FORECAST_INTAKE_PROOF_2026-11-23.md`. Cookpit manual micro/heavy PASS on exact installed source, 227 tests. SUP G5 source-qualification still WAIT; CPU candidate failed independent score baseline; no real funding or neural training. Previous service unit preserved for rollback.

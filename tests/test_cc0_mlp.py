@@ -134,7 +134,7 @@ def test_bad_scores_and_future_labels_refuse_proper_score():
         proper(np.asarray([1],dtype=np.int64),np.asarray([[0.4,0.3,0.2]]))
 
 
-def test_pinned_local_real_coverage_and_manifest_oracle():
+def test_pinned_local_real_coverage_and_manifest_oracle(tmp_path):
     folder=Path('/home/kratos/projects/Wolf-Coin/.workspace/research/external/openfootball-cc0-20261123')
     if not folder.is_dir():
         pytest.skip("real CC0 material only on KRATOS")
@@ -147,7 +147,18 @@ def test_pinned_local_real_coverage_and_manifest_oracle():
     assert not record["financial_edge_proven"] and not record["live_enabled"]
     assert len(record["dataset_sha256"])==8
     assert record["selection"]["candidates"]["mlp"]["brier"]==0.623347533
-    assert not (folder/"2026-27-en.1.json").exists(), "holdout must not be read before source freeze"
+    # The real holdout was fetched only AFTER source commit 170a555.
+    # Prove the freeze function cannot see it: re-run from a private input
+    # directory that has no holdout, then add a tainted future file.
+    from wolf_lab.cc0_pipeline import TRAINING_SEASONS,VALIDATION_SEASON
+    for name in (*TRAINING_SEASONS,VALIDATION_SEASON):
+        (tmp_path/(name+"-en.1.json")).write_bytes((folder/(name+"-en.1.json")).read_bytes())
+    (tmp_path/"CC0-LICENSE.md").write_bytes((folder/"CC0-LICENSE.md").read_bytes())
+    before=freeze_training(tmp_path,source_head="a"*40)
+    (tmp_path/"2026-27-en.1.json").write_text("untrusted final data")
+    after=freeze_training(tmp_path,source_head="a"*40)
+    assert before==after==record
+    assert "2026-27" not in record["dataset_sha256"]
 
 
 def test_forged_freeze_or_unseen_does_not_create_live_authority():

@@ -59,7 +59,7 @@ def page(domain: Domain, report: dict, database: Path) -> bytes:
 <span class="tag">NO LIVE EXECUTION</span></div><span class="tag">Manual / virtual funds</span></header>
 <nav><a class="{'selected' if domain is Domain.SPORTS else ''}" href="/sports">Sports</a>
 <a class="{'selected' if domain is Domain.TRADING else ''}" href="/trading">Trading</a>
-<a href="/lab">Strategy Lab</a><a href="/forecast">Forecast CPU</a>
+<a href="/lab">Strategy Lab</a><a href="/forecast">Forecast CPU</a><a href="/neural">Neural</a>
 <a href="/funding">Funding readiness</a></nav>
 <section class="grid"><div class="card"><p>Virtual balance</p><div class="value">{value('balance')}</div><small>Not real ZMW, deposits or winnings</small></div>
 <div class="card"><p>Virtual available</p><div class="value">{value('available')}</div><small>Committed exposure is excluded</small></div></section>
@@ -89,7 +89,7 @@ def funding_page() -> bytes:
 <span class="tag">NO DEPOSIT / WITHDRAWAL ACCESS</span></div>
 <span class="tag">Independent release required</span></header>
 <nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
-<a href="/forecast">Forecast CPU</a><a class="selected" href="/funding">Funding readiness</a></nav>
+<a href="/forecast">Forecast CPU</a><a href="/neural">Neural</a><a class="selected" href="/funding">Funding readiness</a></nav>
 <section class="grid">{item(sports)}{item(trading)}</section>
 <div class="card"><h2>Current blockers</h2>
 <p>No selected and permitted automated sportsbook; no verified broker/demo account;
@@ -155,7 +155,7 @@ def lab_page(reports: tuple[Path, Path] | None) -> bytes:
 <body><main><header><div><p>WOLF-COIN · EVIDENCE LAB</p><h1>Strategy results</h1>
 <span class="tag">PRIVATE HISTORICAL RESEARCH · NO LIVE FUNDS</span></div></header>
 <nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
-<a class="selected" href="/lab">Strategy Lab</a><a href="/forecast">Forecast CPU</a>
+<a class="selected" href="/lab">Strategy Lab</a><a href="/forecast">Forecast CPU</a><a href="/neural">Neural</a>
 <a href="/funding">Funding readiness</a></nav>
 <section class="grid">{first}{second}</section>
 <div class="card"><h2>Engineering verdict</h2>
@@ -213,7 +213,7 @@ def forecast_page(report_path: Path | None) -> bytes:
 <body><main><header><div><p>WOLF-COIN · SUP RESEARCH</p><h1>CPU forecasting comparison</h1>
 <span class="tag">UNQUALIFIED RESEARCH · NO MONEY EXECUTION</span></div></header>
 <nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
-<a href="/lab">Strategy Lab</a><a class="selected" href="/forecast">Forecast CPU</a>
+<a href="/lab">Strategy Lab</a><a class="selected" href="/forecast">Forecast CPU</a><a href="/neural">Neural</a>
 <a href="/funding">Funding readiness</a></nav>{panel}
 <div class="card"><h2>Independent qualification</h2>
 <p>The SUP Director requires a source-qualified learning package. Its
@@ -226,8 +226,71 @@ measured host fit for a declared small CPU workload, not neural training quality
 
 
 
+
+def neural_page(report_path: Path | None) -> bytes:
+    """Static CC0 experiment evidence. Never loads model weights or train data."""
+    data=None
+    if report_path is not None:
+        try:
+            path=report_path.expanduser().resolve(strict=True)
+            if path.is_file() and 0 < path.stat().st_size < 16_000:
+                value=json.loads(path.read_text(encoding="utf-8"))
+                if (isinstance(value,dict) and value.get("schema")=="wolf.cc0-neural-public-summary.v1"
+                    and value.get("live_enabled") is False and value.get("financial_edge_proven") is False):
+                    data=value
+        except (OSError,ValueError,UnicodeError,TypeError):
+            pass
+    def e(value):
+        return escape(str(value),quote=True)
+    if data is None:
+        content='<div class="card"><p>CC0 neural research evidence unavailable.</p></div>'
+    else:
+        lohi=data.get("holdout_brier_gain_interval",[])
+        if not isinstance(lohi,list) or len(lohi)!=2:
+            lohi=["?", "?"]
+        content=(f'<section class="grid">'
+                 f'<div class="card"><p>Training matches</p><div class="value">{e(data.get("training_rows"))}</div></div>'
+                 f'<div class="card"><p>Validation matches</p><div class="value">{e(data.get("validation_rows"))}</div></div>'
+                 f'<div class="card"><p>2026/27 completed</p><div class="value">{e(data.get("holdout_scored_matches"))}</div>'
+                 f'<small>{e(data.get("holdout_unscored_matches"))} still unscored in pinned archive</small></div>'
+                 f'</section>'
+                 f'<div class="card"><h2>Validation: historical-frequency vs MLP</h2>'
+                 f'<p>Frequency baseline Brier {e(data.get("validation_class_prior_brier"))} · '
+                 f'linear {e(data.get("validation_linear_brier"))} · '
+                 f'MLP {e(data.get("validation_neural_brier"))}</p></div>'
+                 f'<div class="card"><h2>Fresh, but partial, 2026/27 evaluation</h2>'
+                 f'<p>Frequency baseline Brier {e(data.get("holdout_class_prior_brier"))} · '
+                 f'MLP {e(data.get("holdout_neural_brier"))}</p>'
+                 f'<p>95% match-day bootstrap gain interval: {e(lohi[0])} to {e(lohi[1])}.</p>'
+                 f'<span class="tag">INTERVAL CROSSES ZERO · NO PROVEN ADVANTAGE</span></div>'
+                 f'<div class="card"><h2>SUP research handoff</h2>'
+                 f'<p>Director: <strong>{e(data.get("sup_director_stage"))}</strong></p>'
+                 f'<p>{e(data.get("historical_score_crosscheck_count"))} externally cross-checked scores; '
+                 f'{e(data.get("historical_score_crosscheck_conflicts"))} discrepancies.</p>'
+                 f'<small>Frozen model {e(data.get("model_frozen_digest"))}</small></div>')
+    return (f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wolf-Coin · CC0 Neural Lab</title><meta http-equiv="refresh" content="60">
+<style>{STYLE}</style></head>
+<body><main><header><div><p>WOLF-COIN · CC0 NEURAL LAB</p><h1>Neural forecasting proof</h1>
+<span class="tag">RESEARCH ONLY · NO SUP TRAINING LEASE · NO FUNDS</span></div></header>
+<nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
+<a href="/lab">Strategy Lab</a><a href="/forecast">Forecast CPU</a>
+<a class="selected" href="/neural">Neural</a><a href="/funding">Funding readiness</a></nav>
+{content}
+<div class="card"><h2>Engineering boundary</h2>
+<p>Public-domain CC0 results only for neural training. The restricted historical
+bookmaker archive was used for a separate private outcome audit only. The source
+snapshot has 45 completed 2026/27 matches, latest through September 20.
+SUP-Bit has NOT trained this MLP. No bookmaker edge or future profit is proven.</p></div>
+<footer>Source-pinned local proof · only static evidence, no external requests</footer>
+</main></body></html>""").encode("utf-8")
+
+
+
 def handler(db: Path, account_id: str, *, lab_reports: tuple[Path, Path] | None = None,
-            forecast_report: Path | None = None):
+            forecast_report: Path | None = None,
+            neural_report: Path | None = None):
     class DashboardHandler(BaseHTTPRequestHandler):
         def _send(self, code: int, data: bytes, content_type: str) -> None:
             self.send_response(code)
@@ -250,6 +313,8 @@ def handler(db: Path, account_id: str, *, lab_reports: tuple[Path, Path] | None 
                 return self._send(200,lab_page(lab_reports),'text/html; charset=utf-8')
             if path == '/forecast':
                 return self._send(200,forecast_page(forecast_report),'text/html; charset=utf-8')
+            if path == '/neural':
+                return self._send(200,neural_page(neural_report),'text/html; charset=utf-8')
             if path == '/funding':
                 return self._send(200,funding_page(),'text/html; charset=utf-8')
             if path == '/api/funding-readiness':

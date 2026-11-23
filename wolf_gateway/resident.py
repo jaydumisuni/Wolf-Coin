@@ -56,14 +56,16 @@ def verify_paper_state(database: Path) -> dict:
 
 def serve(database: Path, account: str, port: int,
           *, lab_reports: tuple[Path, Path] | None = None,
-          forecast_report: Path | None = None) -> int:
+          forecast_report: Path | None = None,
+          neural_report: Path | None = None) -> int:
     identifier(account)
     if not 1024 <= port <= 65535:
         raise ResidentBlocked("port out of allowed loopback range")
     with instance_lock(database) as path:
         verify_paper_state(path)
         with ThreadingHTTPServer(("127.0.0.1", port), handler(path, account, lab_reports=lab_reports,
-                                                         forecast_report=forecast_report)) as server:
+                                                         forecast_report=forecast_report,
+                                                         neural_report=neural_report)) as server:
             server.daemon_threads = True
             print(json.dumps({
                 "status": "PAPER_RESEARCH_ONLY",
@@ -87,6 +89,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--lab-first", type=Path, help="local historical 2024/25 report JSON")
     p.add_argument("--lab-walkforward", type=Path, help="local three-window report JSON")
     p.add_argument("--forecast-report", type=Path, help="read-only CPU model score comparison")
+    p.add_argument("--neural-summary", type=Path, help="static CC0 neural evidence summary")
     p.add_argument("--check", action="store_true", help="verify source ledger without starting server")
     args = p.parse_args(argv)
     try:
@@ -98,7 +101,8 @@ def main(argv: list[str] | None = None) -> int:
             raise ResidentBlocked("both local lab evidence files are required")
         lab=(args.lab_first,args.lab_walkforward) if args.lab_first is not None else None
         return serve(args.db, args.account, args.port, lab_reports=lab,
-                     forecast_report=args.forecast_report)
+                     forecast_report=args.forecast_report,
+                     neural_report=args.neural_summary)
     except (ResidentBlocked, ContractError, OSError, ValueError) as exc:
         print(json.dumps({"status": "BLOCKED", "reason": str(exc), "live_enabled": False}), file=__import__("sys").stderr)
         return 2
