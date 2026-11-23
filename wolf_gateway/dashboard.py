@@ -59,6 +59,7 @@ def page(domain: Domain, report: dict, database: Path) -> bytes:
 <span class="tag">NO LIVE EXECUTION</span></div><span class="tag">Manual / virtual funds</span></header>
 <nav><a class="{'selected' if domain is Domain.SPORTS else ''}" href="/sports">Sports</a>
 <a class="{'selected' if domain is Domain.TRADING else ''}" href="/trading">Trading</a>
+<a href="/lab">Strategy Lab</a>
 <a href="/funding">Funding readiness</a></nav>
 <section class="grid"><div class="card"><p>Virtual balance</p><div class="value">{value('balance')}</div><small>Not real ZMW, deposits or winnings</small></div>
 <div class="card"><p>Virtual available</p><div class="value">{value('available')}</div><small>Committed exposure is excluded</small></div></section>
@@ -100,7 +101,73 @@ is disabled independently of this page.</p></div>
 </main></body></html>''').encode("utf-8")
 
 
-def handler(db: Path, account_id: str):
+def lab_page(reports: tuple[Path, Path] | None) -> bytes:
+    """One optional local-only research view, never execution authority."""
+    if reports is None:
+        earlier, subsequent = None, None
+    else:
+        def read_one(path: Path, expected: str) -> dict | None:
+            try:
+                # The operator supplies fixed report paths at service startup.
+                # Never resolve arbitrary paths from request parameters.
+                resolved = path.expanduser().resolve(strict=True)
+                if not resolved.is_file() or resolved.stat().st_size > 350_000:
+                    return None
+                data = json.loads(resolved.read_text(encoding='utf-8'))
+                if not isinstance(data, dict) or data.get('schema') != expected:
+                    return None
+                return data
+            except (OSError, ValueError, TypeError, UnicodeError):
+                return None
+        earlier=read_one(reports[0], 'wolf.historical-odds-replay.v1')
+        subsequent=read_one(reports[1], 'wolf.walk-forward-three-window.v1')
+    def text(value: object) -> str:
+        return escape(str(value), quote=True)
+    if earlier is None:
+        first='<div class="card"><p>First historical strategy: no verified local result loaded.</p></div>'
+    else:
+        first=(f'<div class="card"><h2>First strategy — 2024/25 historical test</h2>'
+               f'<p>Virtual K{text(earlier.get("starting_virtual_ZMW"))} → '
+               f'K{text(earlier.get("ending_virtual_ZMW"))}</p>'
+               f'<div class="value">Net K{text(earlier.get("net_virtual_ZMW"))}</div>'
+               f'<p>{text(earlier.get("bets"))} historical paper selections · '
+               f'ROI on wagers {text(earlier.get("roi_on_wagers_percent"))}%</p>'
+               f'<p>Model Brier {text(earlier.get("model_brier"))} · '
+               f'Market baseline {text(earlier.get("market_no_vig_brier"))}</p>'
+               f'<span class="tag">NOT PROFITABLE / NOT RELEASED</span></div>')
+    if subsequent is None:
+        second='<div class="card"><p>Walk-forward evaluation: no verified local result loaded.</p></div>'
+    else:
+        x=subsequent.get('final',{})
+        if not isinstance(x,dict):
+            x={}
+        second=(f'<div class="card"><h2>Three-window qualification — 2025/26</h2>'
+                f'<p>Validation decision: <strong>{text(subsequent.get("decision"))}</strong></p>'
+                f'<div class="value">{text(x.get("bets"))} admitted historical paper bets</div>'
+                f'<p>Ending virtual K{text(x.get("final_virtual_ZMW"))} · '
+                f'Net K{text(x.get("net_virtual_ZMW"))}</p>'
+                f'<p>Final model/market Brier: {text(x.get("candidate_brier"))} / '
+                f'{text(x.get("market_brier"))}</p>'
+                f'<span class="tag">NO VALIDATED PREDICTION EDGE · NO LIVE EXECUTION</span></div>')
+    return (f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Wolf-Coin · Strategy Lab</title><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="60"><style>{STYLE}</style></head>
+<body><main><header><div><p>WOLF-COIN · EVIDENCE LAB</p><h1>Strategy results</h1>
+<span class="tag">PRIVATE HISTORICAL RESEARCH · NO LIVE FUNDS</span></div></header>
+<nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
+<a class="selected" href="/lab">Strategy Lab</a><a href="/lab">Strategy Lab</a>
+<a href="/funding">Funding readiness</a></nav>
+<section class="grid">{first}{second}</section>
+<div class="card"><h2>Engineering verdict</h2>
+<p>A successful test suite proves deterministic software behavior, not a profitable strategy.
+The tested football strategy lost virtual funds; a later out-of-sample qualification rejected
+all candidate models. No automatic learning, deposits, account authentication or orders are active.</p>
+<p>Historical bookmaker opening odds do not prove those prices were available to this account.</p></div>
+<footer>Read-only local report · independent release still required · no external browser requests</footer>
+</main></body></html>""").encode('utf-8')
+
+
+def handler(db: Path, account_id: str, *, lab_reports: tuple[Path, Path] | None = None):
     class DashboardHandler(BaseHTTPRequestHandler):
         def _send(self, code: int, data: bytes, content_type: str) -> None:
             self.send_response(code)
@@ -119,6 +186,8 @@ def handler(db: Path, account_id: str):
                 return self._send(200,data,'application/json; charset=utf-8')
             if path == '/':
                 self.send_response(302);self.send_header('Location','/sports');self.end_headers();return
+            if path == '/lab':
+                return self._send(200,lab_page(lab_reports),'text/html; charset=utf-8')
             if path == '/funding':
                 return self._send(200,funding_page(),'text/html; charset=utf-8')
             if path == '/api/funding-readiness':

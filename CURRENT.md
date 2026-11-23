@@ -16,6 +16,12 @@
 
 ---
 
+## Latest research lab evidence (2026-11-23)
+
+- Two real Premier League seasons with recorded historical opening odds produced a first ELO strategy failure: **102 hypothetical bets; K100 virtual balance fell to K78.61** (net **-K21.39**). Prediction accuracy also trailed the bookmaker market baseline.
+- Historical replay source and three-window candidate-selection rule were frozen at `738f819` before inspecting the separate 2025/26 final season. Validation rejected all predictive candidates; final test made **0 bets** (K100 unchanged), which is capital preservation, NOT profit.
+- A native `wolf-lab` / `wolf-lab-walkforward` CLI and read-only `/lab` dashboard are now implemented and tested. No strategy is promoted; no customer money is connected. See `docs/HISTORICAL_REPLAY_PROOF_2026-11-23.md`.
+
 ## Latest construction work — paper execution and real-money admission review
 
 - A new isolated feature worktree implements a stricter paper-only execution journal, risk/account preflight, read-only Tenfold pilot gate report and mock-tested MT5 demo inspection. The existing installed paper console is unchanged.

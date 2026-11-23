@@ -33,3 +33,23 @@ Commands provided after installation:
 Both commands are offline; outputs are static HTML + JSON, private and immutable on rerun, with SHA-256 input binding and chronological refusal checks.
 
 **Limits:** Football-Data historical opening prices are not proven obtainable at a sportsbook available in Zambia, and pre-kickoff timestamps are not established per quote. First backtest is hypothetical research, not actual bets. Data are not redistributed in the public Wolf-Coin source. No real-money interface added.
+
+
+## New final window — run after source freeze
+
+The source and fixed three-window selection law were frozen at commit `738f81922c66dc4707445835ca467c68e8f072aa` before retrieving 2025/26.
+
+- Final 2025/26 independent input SHA-256: `3e3a8352f9ada6789c508d6ca184424421fed56a30400904a4a327c583407e62`; 380 matches, 15 August 2025 through 24 May 2026.
+- The validation period did **not** admit any model, so the frozen final protocol issued **0 bets** across 114 historical match days. Virtual K100 remained K100, net K0.
+- Final bookmaker no-vig Brier score: **0.611512**. With no model admitted, candidate Brier is the market baseline at **0.611512**.
+- **Finding: strategy evidence is INSUFFICIENT; NO PROFIT SIGNAL OR REAL-MONEY RELEASE.** A zero-loss abstention is not a profitable strategy.
+- First real historical ELO trial remains a recorded **-K21.39** virtual loss; do not erase or reframe that failure.
+- Reports are retained privately on KRATOS:
+  - `/home/kratos/projects/Wolf-Coin/.workspace/proof-history/odds-replay-20261123/epl-odds-holdout.json`
+  - `/home/kratos/projects/Wolf-Coin/.workspace/proof-history/odds-replay-20261123/epl-three-window-2025-26.json`
+
+## Operator UI
+
+The read-only, loopback-only `/lab` dashboard displays the two candidate results. It reads only the two explicit report files configured at service startup and does not expose historical source CSVs, credentials or execution endpoints. The navigation includes Sports / Trading / Strategy Lab / Funding readiness. No optimization against the final season is permitted for this frozen model generation.
+
+The laboratory's future purpose is to evaluate genuinely different data features and model families using new training/validation partitions and a **new untouched evaluation period**. Neither favorable code tests nor historic odds by themselves qualify automated betting.

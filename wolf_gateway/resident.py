@@ -54,13 +54,14 @@ def verify_paper_state(database: Path) -> dict:
     return status
 
 
-def serve(database: Path, account: str, port: int) -> int:
+def serve(database: Path, account: str, port: int,
+          *, lab_reports: tuple[Path, Path] | None = None) -> int:
     identifier(account)
     if not 1024 <= port <= 65535:
         raise ResidentBlocked("port out of allowed loopback range")
     with instance_lock(database) as path:
         verify_paper_state(path)
-        with ThreadingHTTPServer(("127.0.0.1", port), handler(path, account)) as server:
+        with ThreadingHTTPServer(("127.0.0.1", port), handler(path, account, lab_reports=lab_reports)) as server:
             server.daemon_threads = True
             print(json.dumps({
                 "status": "PAPER_RESEARCH_ONLY",
@@ -81,6 +82,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--db", type=Path, required=True)
     p.add_argument("--account", default="pilot-1")
     p.add_argument("--port", type=int, default=8765)
+    p.add_argument("--lab-first", type=Path, help="local historical 2024/25 report JSON")
+    p.add_argument("--lab-walkforward", type=Path, help="local three-window report JSON")
     p.add_argument("--check", action="store_true", help="verify source ledger without starting server")
     args = p.parse_args(argv)
     try:
@@ -88,7 +91,10 @@ def main(argv: list[str] | None = None) -> int:
             status = verify_paper_state(args.db)
             print(json.dumps({"status": "PAPER_READY", "ledger": status["status"], "live_enabled": False}))
             return 0
-        return serve(args.db, args.account, args.port)
+        if (args.lab_first is None) != (args.lab_walkforward is None):
+            raise ResidentBlocked("both local lab evidence files are required")
+        lab=(args.lab_first,args.lab_walkforward) if args.lab_first is not None else None
+        return serve(args.db, args.account, args.port, lab_reports=lab)
     except (ResidentBlocked, ContractError, OSError, ValueError) as exc:
         print(json.dumps({"status": "BLOCKED", "reason": str(exc), "live_enabled": False}), file=__import__("sys").stderr)
         return 2
