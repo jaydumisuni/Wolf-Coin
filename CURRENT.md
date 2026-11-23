@@ -1,5 +1,24 @@
 # Wolf-Coin — CURRENT
 
+## Owner-directed removal of app PAPER/research fallback (2026-11-24)
+
+- **The old application default `RESEARCH_ONLY` restriction was not user-approved and is removed** in the isolated `0.1.0a10` backend. Financial actions remain context-selectable: `PLACE_BET`, `CANCEL_BET`, `PLACE_TRADE` and `CLOSE_POSITION`. Intelligence research/learning is available as a separate task, not a restrictive app operating mode.
+- The unconditional `live_enabled=false`/`financial_execution_authorized=false` response keys were removed; the response protocol is now `wolf.app.bridge.v2`, request still `wolf.app.request.v1`. The `--research-unkeyed` product CLI flag is removed. Native browser workflow selection and actual platform outcome receipts remain distinct: only the host/browser can execute and verify an actual order.
+- Existing v1 app DBs migrate to schema 2, archiving old status labels as `ANALYSIS_ARCHIVED` with audit preservation, including cached idempotent outputs. Historical paper simulator and trained research source are retained as development evidence, **not a product mode**. KRATOS paper lab service and user frontend remain untouched.
+- Source implementation `b29288f`, a10 offline wheel SHA-256 `a2974856bf5c325183acb8e447d0405c49b8bef6c03db04abb923711ebf6f9cf`, **409/409 PASS**, Cookpit micro/heavy PASS, installed signed IPC proof SHA-256 `202cc5c3d1b8941ac5df09a33b958ecfc583eb8cc769940c20d782b36338117b`. No real website or money action has been performed.
+- See `docs/WOLF_APPLICATION_BACKEND_HANDOFF_2026-11-23.md` for current a10 interface; older a8/a9 notes are historical, not current restrictions.
+
+---
+
+## Context-aware capability routing correction — 2026-11-24
+
+- Wolf-Coin **must select what capability to use, when and on which site/account**; it is not a research-only trading bot. The a8 `RESEARCH_ONLY`-only decision path was overly narrow, not an approved product restriction. Isolated a9 candidate implements signed IPC `context.route` for learning, research, browser interaction, financial sync, trading/betting and position exits.
+- The router chooses `READY`, `DISCOVER` or `RECOVER` based on actual task, account/domain, authenticated session, freshness/conflicts, site affordance and scoped permissions. **No global capability lock was added.** Context-ready financial `decision.propose` persists `BROWSER_HANDOFF_READY`; a native submission receipt remains awaiting platform reconciliation.
+- Source implementation `40e5937` and offline wheel a9 SHA-256 `3fdb152d158b5837c2d01390531a244c3f275bd19dde074d326661d4bc0e2438` pass **404/404 tests**; Cookpit micro/heavy PASS, with an installed signed-IPC proof SHA `77e6151ea4dff2bbdc45c06ba815907b8b6ddde3c54d16dc647d05349e62357f`. No new lock or money/website execution was introduced.
+- This is deterministic action selection/handoff, not a trained general browser model, a connected Chromium/WebView host, a real order or proof of profitability. Frontend/browser/installer implementation remains with its owner; paper model and active service unchanged. See `docs/WOLF_APPLICATION_BACKEND_HANDOFF_2026-11-23.md` and `contracts/wolf-app-bridge-v1.schema.json`.
+
+---
+
 ## New isolated application-backend integration candidate (2026-11-23)
 
 - A separate versioned backend `0.1.0a8` now provides source-owned `wolf_app`, **no browser, UI or app-packaging replacement**. It implements native host signed JSON-line IPC, account registration/removal, session state and startup revalidation, evidence-hashed financial snapshots and transactions, cross-source conflict detection, currency-separated financial overview, paged history, audit chain, explicit read-only sync planning and durable browser observation jobs with UNKNOWN reconciliation. Decision proposals are RESEARCH_ONLY; no orders, funds or API dependencies.

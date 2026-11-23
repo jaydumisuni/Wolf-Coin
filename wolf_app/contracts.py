@@ -1,4 +1,4 @@
-"""Wolf-Coin application's browser-to-backend contract. No credentials or real effects.
+"""Wolf-Coin's browser-to-backend contract. No website credentials in IPC.
 
 Source of truth: Browser supplies observations, never authority. Native host
 must authenticate the IPC transport separately; all browser-originated values
@@ -14,7 +14,7 @@ import re
 
 from wolf_core.contracts import ContractError, utc_timestamp
 
-BRIDGE_SCHEMA = "wolf.app.bridge.v1"
+BRIDGE_SCHEMA = "wolf.app.bridge.v2"
 REQUEST_SCHEMA = "wolf.app.request.v1"
 MAX_MESSAGE = 64_000
 ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,95}\Z")
@@ -116,5 +116,4 @@ def response(request_id: str, status: str, data: dict) -> dict:
     return {
         "schema": BRIDGE_SCHEMA, "request_id": request_id,
         "status": status, "data": data,
-        "live_enabled": False, "financial_execution_authorized": False,
     }

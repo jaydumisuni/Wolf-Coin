@@ -1,10 +1,10 @@
 # Wolf-Coin Application Backend — Versioned Integration Handoff
 
-**Protocol:** `wolf.app.request.v1` / response `wolf.app.bridge.v1`. **Backend candidate:** `0.1.0a8`. This is an independent application backend, **not** a replacement for the nine-screen frontend, Wolf Browser, Chromium/CDP, D-XQT or the native application packaging.
+**Current protocol:** request `wolf.app.request.v1` / response **`wolf.app.bridge.v2`**. **Current backend candidate:** `0.1.0a10` (a8/a9 history retained below). This is an independent application backend, **not** a replacement for the nine-screen frontend, Wolf Browser, Chromium/CDP, D-XQT or the native application packaging.
 
 ## Transport and trust
 
-The native Windows/Linux/Android host owns the bridge process and website credentials. The backend runs a **private child process using newline-delimited JSON on stdin/stdout**, never a network server or exposed HTTP port. First-time native host setup: `wolf-app-bridge --init-key APP_KEY`. This writes 32 random bytes at 0600 permissions on Unix, refuses overwrite and never prints the secret. For operation: `wolf-app-bridge --db PRIVATE_APP.sqlite3 --key-file APP_KEY`. Requests must have `auth_tag` equal to HMAC-SHA256 using the native key over the canonical JSON request excluding `auth_tag` (recursively sorted object keys, compact separators, UTF-8 without escaped non-ASCII). Do not expose that key to website JS. Unsigned or tampered messages fail. `--research-unkeyed` exists **only for local fixtures** and must never be configured by the installable native host.
+The native Windows/Linux/Android host owns the bridge process and website credentials. The backend runs a **private child process using newline-delimited JSON on stdin/stdout**, never a network server or exposed HTTP port. First-time native host setup: `wolf-app-bridge --init-key APP_KEY`. This writes 32 random bytes at 0600 permissions on Unix, refuses overwrite and never prints the secret. For operation: `wolf-app-bridge --db PRIVATE_APP.sqlite3 --key-file APP_KEY`. Requests must have `auth_tag` equal to HMAC-SHA256 using the native key over the canonical JSON request excluding `auth_tag` (recursively sorted object keys, compact separators, UTF-8 without escaped non-ASCII). Do not expose that key to website JS. Unsigned or tampered messages fail. The unkeyed/research-only product CLI switch is removed; the native host uses signed IPC normally.
 
 On every native application launch, send a unique signed `host.startup` request with `{"host_instance_id":"unique_native_run_id"}`. Previously active sessions become PAUSED and in-flight observation jobs become UNKNOWN. Accounts and history are preserved. Wolf Browser then validates the restored authenticated session and sends `session.record ACTIVE` plus a **new** observation before financial data is current again. A persisted local label is not session validity.
 
@@ -14,7 +14,7 @@ All browser observations are classed UNVERIFIED until real provider acceptance. 
 
 `{"schema":"wolf.app.request.v1","request_id":"unique_001","operation":"account.register","payload":{...},"auth_tag":"64_hex_hmac"}`
 
-Every request returns one JSON object with the same request ID, `schema=wolf.app.bridge.v1`, `status=OK` or `REJECTED`, and `live_enabled=false` / `financial_execution_authorized=false`. Unknown or extra fields are denied. File `contracts/wolf-app-bridge-v1.schema.json` describes the envelope.
+Every request returns one JSON object with the same request ID, `schema=wolf.app.bridge.v2` and `status=OK` or `REJECTED`. There are **no unconditional `live_enabled=false` or `financial_execution_authorized=false` fields**; the task-specific state determines the next step. Unknown or extra fields are denied. File `contracts/wolf-app-bridge-v1.schema.json` describes the envelope.
 
 | Operation | Inputs / function | Intended existing screen |
 |---|---|---|
@@ -30,7 +30,7 @@ Every request returns one JSON object with the same request ID, `schema=wolf.app
 | `activity.list` | Bounded hash-chain-checked audit readback, not externally anchored | Activity |
 | `sync.plan` | Read-only refresh recommendations, not clicks | Settings, Accounts |
 | `sync.enqueue` / `sync.claim` / `sync.receipt` / `sync.reconcile` / `sync.cancel` / `sync.inbox` | Durable OBSERVE_ACCOUNT work; ambiguous effects never automatically retried | Browser, Activity |
-| `decision.propose` / `decisions.list` / `decision.receipt` | RESEARCH_ONLY proposals and NOT_EXECUTED / CANCELLED / UNKNOWN receipts; no placement authority | Overview, Activity |
+| `decision.propose` / `decisions.list` / `decision.receipt` | Contextual financial action intents (PLACE_BET, CANCEL_BET, PLACE_TRADE, CLOSE_POSITION), browser handoff and platform receipt reconciliation | Overview, Activity |
 
 The backend will not add a tenth top-level UI screen. The KRATOS paper `/neural` and `/gates` pages are **development surfaces**, not approved product navigation.
 
@@ -86,3 +86,54 @@ New isolated app-backend modules and native-host mock tests passed **49 applicat
 - **Installed running paper service remains exactly** `wolf-coin-paper-preview.service` source `45b2e3345cb465082614fcf25807b6e7db3faf40`, on loopback `127.0.0.1:18766`, mode PAPER, live false, remote false; no change to ledger, accounts, research model, provider or funds. The a8 backend is an **isolated integration candidate**, not a replacement for the legacy paper service.
 
 **Acceptance boundary:** Backend API, account persistence, reconciliation, local workflow scheduling, report/decision drafts, signed child-IPC and guarded backup/recovery are **source- and host-verified for offline use**. Actual Wolf Browser DOM/CDP/WebView, session-cookie persistence, frontend D-XQT wiring, Windows/Linux installer and Android APK acceptance belong to the separate frontend/native implementation and subsequent joint integration. Real platform login, authorization, independent model profitability, Formula/SUP production method admission and money release remain unproven.
+
+
+## Context-aware route extension (a9, 2026-11-24)
+
+**Correction to the a8 implementation:** `RESEARCH_ONLY` was unintentionally treated as the sole decision path. This a9 statement is superseded by a10: the application-level fallback mode is removed. Historical research/paper source remains as laboratory evidence, not a product operating mode.
+
+- `context.route` is a new read operation in the existing signed native-host IPC, backed by `wolf_app.context_router`. It selects by **goal, account domain, registered account state, site affordances, browser scope, freshness/conflicts and action context**. It has no site-name allowlist, API requirement or global feature lock.
+- Research, learning, analysis and strategy comparison can be selected without login. Ordinary navigation, inspection, clicking, typing, scrolling, tabs, uploads and downloads use their appropriate native browser capabilities. Opening a website does **not** require transaction permission. Unknown affordances, targets or site permissions result in a *discovery/recovery* step, not permanent disablement.
+- `SYNC_FINANCES` prefers reauthentication when logged out, observation when stale, and reconciliation when fresh; it never silently upgrades offline balances to current.
+- Sports actions `PLACE_BET`/`CANCEL_BET` and trading actions `PLACE_TRADE`/`CLOSE_POSITION` are separate account-scoped goals. Once the host identifies the actual site affordance, authenticated account, permissions and current unconflicted account evidence, the financial goal can become `HANDOFF_TO_NATIVE_FINANCIAL_WORKFLOW`. For a placement a bounded action amount and scoped budget apply. Cancelling an existing bet or closing a position requires its target identity, **not a new spending allocation**.
+- `decision.propose` accepts only the four financial intent categories. `RESEARCH_BET` and `RESEARCH_TRADE` are no longer accepted as application decisions; research and learning use `context.route`. Context-ready intents persist as `BROWSER_HANDOFF_READY`, never forcibly as a research-only mode. If context is not ready the response gives an actionable `CONTEXT_STEP_REQUIRED` without inventing a money effect.
+- `decision.receipt` stores native-reported submissions as `AWAITING_PLATFORM_RECONCILIATION` only when an evidence hash is supplied. That is *not* final settlement or proof of money won; unknown results are not automatically resubmitted. Browser and financial reconciliation must confirm actual outcomes.
+- This changes **decision selection, representation and handoff**, not website execution. Wolf Browser, native Chromium/WebView adapters, production venue permissions, platform execution/readback, integration and application UI remain separate. The deterministic router is **not a newly trained neural site-operation model**.
+
+User-approved design remains authoritative: Wolf-Coin should know **what, when, where and why**. Context and risk facts are inputs to choosing the right action, not a blanket permission to disable capabilities. The a9 candidate does not replace the active KRATOS a6 paper console.
+
+
+## Installed a9 native review and Cookpit receipts — 2026-11-24
+
+- Frozen **implementation source** `40e5937f110ff91383b8b135e38217a0bd4efa3a` in isolated worktree `work/context-aware-orchestrator-20261124`, built offline wheel `wolf_coin_core-0.1.0a9-py3-none-any.whl` SHA-256 `3fdb152d158b5837c2d01390531a244c3f275bd19dde074d326661d4bc0e2438`.
+- Installed native source into a **separate, isolated** KRATOS venv `.workspace/proof-history/context-router-20261124/venv` with no NumPy, no websites or money accounts touched. Rehearsed signed local IPC with a host-owned 0600 key, a registered synthetic ZMW account, login, stale-evidence recovery, a current observation, `PLACE_BET` contextual handoff, and native-reported synthetic receipt requiring platform reconciliation. Duplicate financial receipt refused and post-restart session revalidation held. Real website actions, bets and trading orders **were not executed**.
+- The machine-verified private rehearsal is `.workspace/proof-history/context-router-20261124/native-rehearsal.json`, SHA-256 `77e6151ea4dff2bbdc45c06ba815907b8b6ddde3c54d16dc647d05349e62357f`. It explicitly states that no website was visited, no real transaction occurred and no neural browser-control training happened.
+- Native source tests **404/404 PASS**, including **26 context-router tests**. Manual Cookpit **micro PASS** at source `40e5937`: `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-context-router/evidence/20261123T225556Z-micro-2fab927bac9e.json`. Manual Cookpit **heavy PASS**: `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-context-router/evidence/20261123T225557Z-heavy-2fab927bac9e.json`. An earlier micro failure from a missing source `PYTHONPATH` in the external verifier was corrected; the negative run remains in evidence.
+- Active production-facing KRATOS legacy PAPER-only service remains `0.1.0a6`, healthy and unchanged; older trained forecasting models, Formula/SUP records, existing user frontend, nine-screen visual design, browser engine and platform packaging were not changed. No new supervisor, capital approval or autonomous web effect was created.
+
+**Result:** Context selection and typed native-browser **handoff readiness** now exist without a blanket product lock. Actual intelligence training for previously unseen websites and real browser execution/readback **remain integration/research work**, not something this receipt proves.
+
+
+## Product mode removal (a10, 2026-11-24)
+
+**Owner direction:** Wolf-Coin must determine what to use, when and where, rather than globally disabling its browser or financial capabilities. The old application-only forced research/PAPER fallback and always-false mode flags were not approved product requirements.
+
+- Backend `0.1.0a10` has no global operating mode switch or fallback to paper/research for action intents. Requests remain `wolf.app.request.v1`, while the response is intentionally versioned `wolf.app.bridge.v2` after removing `live_enabled` and `financial_execution_authorized` as global response flags.
+- Research, learning and analysis are independent intelligence **tasks** via `context.route`, not financial execution modes. `decision.propose` handles `PLACE_BET`, `CANCEL_BET`, `PLACE_TRADE` and `CLOSE_POSITION`. Financial actions are routed from account/site/session/evidence context. Absent information yields a specific discovery/recovery step, not a universal denial.
+- Native action receipts are stored for browser/platform reconciliation. An unconfirmed order is not misreported as a settled win. Context-aware selection is not evidence that an actual order was placed: the native Wolf Browser adapter is being developed separately.
+- The `--research-unkeyed` product CLI switch is removed. Native application IPC uses the same signed host connection for all capabilities.
+- Schema v1 application databases migrate to schema 2; historical `RESEARCH_ONLY` decision rows become `ANALYSIS_ARCHIVED`, with an appended audit event and normalized cached idempotency responses. Old backups are inspected read-only and only migrated into new databases on restore.
+- The old standalone paper simulator, frozen training and historical test evidence remain intact as **developer fixtures**, not a Wolf-Coin application operating mode. Active KRATOS a6 lab preview is not silently changed. No frontend/browser files were overwritten.
+- Real browser automation and actual financial actions will be verified after integration of the separately built native browser, as the user specified.
+
+This a10 section is the current contract; earlier a8/a9 notes below document historical engineering, not operative product restrictions.
+
+
+## Verified a10 mode removal — 2026-11-24
+
+- Implementation commit `b29288fe14ea30d74012a7ebb0bedc80ba8c71e6`. The isolated `0.1.0a10` native wheel `wolf_coin_core-0.1.0a10-py3-none-any.whl` SHA-256 `a2974856bf5c325183acb8e447d0405c49b8bef6c03db04abb923711ebf6f9cf` was built and installed on KRATOS without network dependencies.
+- Actual installed native signed-IPC rehearsal verified **response v2 without global false mode flags**, learning/navigation, account context recovery, `PLACE_BET` intent `BROWSER_HANDOFF_READY`, synthetic native result `AWAITING_PLATFORM_RECONCILIATION`, duplicate result refusal, and restored account session revalidation. Obsolete `RESEARCH_BET` was refused as an application decision, not silently converted to a paper-only mode.
+- Accepted private evidence `/home/kratos/projects/Wolf-Coin/.workspace/proof-history/no-global-app-mode-20261124/native-app-mode-removal.json` SHA-256 `202cc5c3d1b8941ac5df09a33b958ecfc583eb8cc769940c20d782b36338117b`. The test fixture and key are private, separate from the user's frontend.
+- Source suite **409/409 PASS**, including legacy v1→v2 schema conversion, cached old status archival, signed native transport, old schema backup without unintended mutation, and contextual browser/financial routing. Cookpit micro **PASS** (**75 focused tests**) receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-remove-forced-app-mode/evidence/20261123T231441Z-micro-74bf8e8ec9d7.json`; Cookpit heavy **PASS** (**409 tests**, installed wheel, legacy a6 lab unchanged) receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-remove-forced-app-mode/evidence/20261123T231443Z-heavy-74bf8e8ec9d7.json`. Earlier Cookpit source-path negative receipts were retained and corrected. No recurring new supervisor.
+- An old historical PAPER-only laboratory executable may still exist in the original a6 release and as source fixture; it is **not a Wolf-Coin application operating mode**, and is not used in `wolf_app` selection. Existing training evidence/strategy weights, account test data and the independently built frontend are preserved.
+- Real browser operation and financial settlement remain untested pending the user's requested post-integration live test. This is a technical boundary, **not** a hidden global feature lock.

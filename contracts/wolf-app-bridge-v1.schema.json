@@ -28,6 +28,7 @@
         "accounts.list",
         "activity.list",
         "bridge.capabilities",
+        "context.route",
         "decision.propose",
         "decision.receipt",
         "decisions.list",

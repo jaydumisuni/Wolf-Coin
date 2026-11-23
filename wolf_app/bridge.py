@@ -98,7 +98,7 @@ def process(store:ApplicationStore,raw:str,*,key:bytes|None=None)->dict:
 
 def main(argv=None)->int:
     p=argparse.ArgumentParser(prog="wolf-app-bridge",
-        description="Wolf-Coin native app IPC backend (no network/listener/orders)")
+        description="Wolf-Coin native IPC for contextual browser and financial workflows")
     p.add_argument("--db",type=Path)
     p.add_argument("--once",help="one JSON request string instead of stdin loop")
     p.add_argument("--verify-audit",action="store_true")
@@ -106,27 +106,24 @@ def main(argv=None)->int:
                    help="native host-owned 0600 file with 32 random secret bytes")
     p.add_argument("--init-key",type=Path,
                    help="atomically create the native host IPC key once; never print secret")
-    p.add_argument("--research-unkeyed",action="store_true",
-                   help="explicit offline testing only, never production/native distribution")
     args=p.parse_args(argv)
     try:
         if args.init_key:
-            if args.key_file or args.research_unkeyed or args.once or args.verify_audit or args.db:
+            if args.key_file or args.once or args.verify_audit or args.db:
                 raise ContractError("key initialization cannot be combined with bridge operation")
             _initialize_native_key(args.init_key)
             print(json.dumps({"status":"NATIVE_IPC_KEY_CREATED",
-                 "key_material_printed":False,"live_enabled":False}))
+                 "key_material_printed":False}))
             return 0
         if not args.db:
             raise ContractError("--db required")
-        if args.research_unkeyed==bool(args.key_file):
-            raise ContractError("choose exactly one of --key-file or --research-unkeyed")
-        key=_read_native_key(args.key_file) if args.key_file else None
+        if not args.key_file:
+            raise ContractError("native host key required for signed application IPC")
+        key=_read_native_key(args.key_file)
         store=ApplicationStore(args.db)
         if args.verify_audit:
             print(json.dumps({"schema":"wolf.app.audit-check.v1",
-                "records_checked":store.verify_audit(),"externally_signed":False,
-                "live_enabled":False},sort_keys=True))
+                "records_checked":store.verify_audit(),"externally_signed":False},sort_keys=True))
             return 0
         if args.once is not None:
             print(json.dumps(process(store,args.once,key=key),sort_keys=True))
@@ -137,7 +134,7 @@ def main(argv=None)->int:
         return 0
     except (ContractError,sqlite3.DatabaseError,OSError,AppConflict) as exc:
         print(json.dumps({"status":"BLOCKED","error":type(exc).__name__,
-                          "live_enabled":False}),file=sys.stderr)
+                          "reason":"INVALID_NATIVE_BRIDGE_STATE"}),file=sys.stderr)
         return 2
 
 

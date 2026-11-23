@@ -1,8 +1,8 @@
 """Wolf-Coin application-state store: account/session/finance lifecycle.
 
 SQLite transactions provide idempotent requests and durable recovery.
-No credential ingestion, browser control or financial live dispatch. External
-observations remain UNVERIFIED pending independently qualified adapters.
+Website interaction and financial execution belong to the native Wolf Browser
+host and its reconciled platform receipts, not a global paper/research mode.
 """
 from __future__ import annotations
 
@@ -17,13 +17,14 @@ import sqlite3
 from typing import Any
 
 from wolf_core.contracts import ContractError, Domain, utc_now
+from .context_router import route_context
 from .contracts import (
     BRIDGE_SCHEMA, MONEY_KEYS, NONNEGATIVE_KEYS, SESSION_STATES, SOURCES,
     TRANSACTION_KINDS, TRANSACTION_STATES, amount, check_no_secrets,
     currency, digest, ident, obj, parse_request, response, time,
 )
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 FRESH_SECONDS = 300
 def session_tag(ref: str) -> str:
     """Derive internal identity from a nonsecret browser-local session label."""
@@ -33,7 +34,7 @@ def session_tag(ref: str) -> str:
 READ_OPS = frozenset({
     "accounts.list", "account.read", "financial.overview",
     "activity.list", "decisions.list", "bridge.capabilities",
-    "sync.plan", "sync.inbox", "financial.history",
+    "sync.plan", "sync.inbox", "financial.history", "context.route",
 })
 MUTATIONS = frozenset({
     "account.register", "account.remove", "session.record",
@@ -60,7 +61,7 @@ class ApplicationStore:
             db.executescript("""
               CREATE TABLE IF NOT EXISTS app_meta(
                   key TEXT PRIMARY KEY, value TEXT NOT NULL);
-              INSERT OR IGNORE INTO app_meta VALUES ('schema','1');
+              INSERT OR IGNORE INTO app_meta VALUES ('schema','2');
 
               CREATE TABLE IF NOT EXISTS app_accounts(
                   domain TEXT NOT NULL, account_id TEXT NOT NULL,
@@ -126,7 +127,43 @@ class ApplicationStore:
                   response_json TEXT NOT NULL);
             """)
             v=db.execute("SELECT value FROM app_meta WHERE key='schema'").fetchone()
-            if v is None or v[0]!=str(SCHEMA_VERSION):
+            if v is None:
+                raise AppConflict("missing application-store schema")
+            if v[0]=="1":
+                # Preserve the historical event chain while removing legacy
+                # research-only decision states from the application.
+                self.verify_audit()
+                db.execute("BEGIN IMMEDIATE")
+                try:
+                    old_count=db.execute("""SELECT COUNT(*) FROM app_decisions
+                        WHERE status='RESEARCH_ONLY'""").fetchone()[0]
+                    db.execute("""UPDATE app_decisions SET status='ANALYSIS_ARCHIVED'
+                        WHERE status='RESEARCH_ONLY'""")
+                    cached_count=0
+                    for old_id,response_json in db.execute(
+                            "SELECT request_id,response_json FROM app_requests").fetchall():
+                        cached=json.loads(response_json)
+                        if cached.get("status")=="RESEARCH_ONLY":
+                            cached["status"]="ANALYSIS_ARCHIVED"
+                            for obsolete in ("browser_action_authorized",
+                                             "live_execution_authorized",
+                                             "may_submit_order"):
+                                cached.pop(obsolete,None)
+                            cached["historical_analysis_record"]=True
+                            db.execute("""UPDATE app_requests SET response_json=?
+                                WHERE request_id=?""",(json.dumps(cached,sort_keys=True),old_id))
+                            cached_count+=1
+                    db.execute("UPDATE app_meta SET value='2' WHERE key='schema'")
+                    self._audit(db,"app-schema-v1-to-v2","schema.migrate",{
+                        "from":1,"to":2,"archived_legacy_analysis":old_count,
+                        "archived_cached_responses":cached_count,
+                        "execution_status":"NO_PLATFORM_EFFECT_FROM_MIGRATION"})
+                    db.execute("COMMIT")
+                except BaseException:
+                    db.execute("ROLLBACK")
+                    raise
+                v=("2",)
+            if v[0]!=str(SCHEMA_VERSION):
                 raise AppConflict("unsupported application-store schema")
         if os.name == "posix":
             os.chmod(self.path, 0o600)
@@ -178,7 +215,12 @@ class ApplicationStore:
 
     def verify_audit(self) -> int:
         with closing(self._db()) as db:
-            rows=db.execute("""SELECT seq,event_id,event_kind,event_json,previous_sha256,
+            return self.verify_audit_connection(db)
+
+    @staticmethod
+    def verify_audit_connection(db) -> int:
+        """Check an existing DB connection without initiating a schema migration."""
+        rows=db.execute("""SELECT seq,event_id,event_kind,event_json,previous_sha256,
                  record_sha256,happened_at FROM app_audit ORDER BY seq""").fetchall()
         previous="0"*64
         for position,(seq,event_id,kind,payload,prev,recorded,when) in enumerate(rows,1):
@@ -206,7 +248,10 @@ class ApplicationStore:
                 "network_listener":False,
                 "credential_storage":False,
                 "all_observations_external_unverified":True,
-                "live_order_submission":False,
+                "financial_intent_kinds":[
+                    "PLACE_BET","CANCEL_BET","PLACE_TRADE","CLOSE_POSITION"],
+                "financial_workflow":"CONTEXTUAL_NATIVE_BROWSER_HANDOFF",
+                "native_host_adapter":"REQUIRES_APPLICATION_BINDING",
                 "transport_authentication":"NATIVE_HOST_REQUIRED",
             })
         if operation in READ_OPS:
@@ -414,27 +459,44 @@ class ApplicationStore:
 
     def _propose(self,db,request_id,payload):
         obj(payload,{"domain","account_id","decision_id","observation_id",
-                     "instrument","action_kind","proposed_amount"})
+                     "instrument","action_kind","proposed_amount"},
+            {"browser_capabilities","platform_permissions","money_budget","target_id"})
         scope=self._scope(payload)
         self._require_account(db,scope)
         session=self._session(db,scope)
-        if session[0]!="ACTIVE":
-            raise AppConflict("no active session; decision proposal blocked")
-        detail=self._account_detail(scope)
-        if (detail["freshness"]!="CURRENT_UNVERIFIED" or
-            detail["reconciliation"]["status"]=="CONFLICT"):
-            raise AppConflict("stale or conflicting financial evidence; no decision proposal")
         decision_id=ident(payload["decision_id"],"decision ID")
         observation_id=ident(payload["observation_id"],"observation ID")
         instrument=ident(payload["instrument"],"instrument")
         kind=payload["action_kind"]
-        if kind not in ("RESEARCH_BET","RESEARCH_TRADE"):
-            raise ContractError("only research action kinds supported")
-        if (scope[0]=="sports" and kind!="RESEARCH_BET") or (scope[0]=="trading" and kind!="RESEARCH_TRADE"):
-            raise ContractError("cross-domain decision action")
         size=amount(payload["proposed_amount"],nonnegative=True)
-        if Decimal(size)<=0:
-            raise ContractError("positive proposal amount required")
+        if Decimal(size)<=0 and kind not in ("CANCEL_BET","CLOSE_POSITION"):
+            raise ContractError("positive proposed amount required for placements")
+        detail=self._account_detail(scope)
+        transaction_goals=("PLACE_BET","CANCEL_BET","PLACE_TRADE","CLOSE_POSITION")
+        financial=kind in transaction_goals
+        if financial:
+            selected=route_context(
+                goal=kind,account=detail,
+                capabilities=payload.get("browser_capabilities",[]),
+                permissions=payload.get("platform_permissions",[]),
+                target=payload.get("target_id"),
+                requested_amount=size,money_budget=payload.get("money_budget"))
+            if selected["state"]!="READY":
+                # Not a feature lock: select the next useful step, without
+                # asserting a money effect or silently changing its budget.
+                return {"decision_id":decision_id,"status":"CONTEXT_STEP_REQUIRED",
+                        "selected_next_step":selected["next_step"],
+                        "reason":selected["context_reasons"],
+                        "capability_available_for_future_context":True}
+        else:
+            raise ContractError(
+                "decision.propose expects a financial action; use context.route "
+                "for LEARN, RESEARCH or ANALYZE")
+        if session[0]!="ACTIVE":
+            raise AppConflict("no active session for proposal")
+        if (detail["freshness"]!="CURRENT_UNVERIFIED" or
+            detail["reconciliation"]["status"]=="CONFLICT"):
+            raise AppConflict("financial evidence is stale or conflicting")
         obs=db.execute("""SELECT observed_at,session_ref FROM app_observations
                WHERE domain=? AND account_id=? AND observation_id=?""",(*scope,observation_id)).fetchone()
         if obs is None or obs[1]!=session[1]:
@@ -449,32 +511,52 @@ class ApplicationStore:
         if db.execute("""SELECT 1 FROM app_decisions WHERE domain=? AND account_id=? AND decision_id=?""",
                       (*scope,decision_id)).fetchone():
             raise AppConflict("decision identity already used")
+        next_status="BROWSER_HANDOFF_READY"
         db.execute("INSERT INTO app_decisions VALUES (?,?,?,?,?,?,?,?,?,?)",
                    (*scope,decision_id,observation_id,instrument,kind,size,
-                    "RESEARCH_ONLY",None,utc_now()))
+                    next_status,None,utc_now()))
         self._audit(db,request_id,"decision.propose",{"domain":scope[0],"account_id":scope[1],
-                    "decision_id":decision_id,"status":"RESEARCH_ONLY"})
-        return {"decision_id":decision_id,"status":"RESEARCH_ONLY",
-                "browser_action_authorized":False,"live_execution_authorized":False,
-                "may_submit_order":False}
+                    "decision_id":decision_id,"status":next_status,
+                    "observation_id":observation_id,"action_kind":kind})
+        return {"decision_id":decision_id,"status":next_status,
+                "context_selection":selected,
+                "native_workflow_ready":True,
+                "browser_action_executed":False,
+                "requires_platform_result_and_reconciliation":True}
     def _receipt(self,db,request_id,payload):
-        obj(payload,{"domain","account_id","decision_id","outcome","result_ref"})
+        obj(payload,{"domain","account_id","decision_id","outcome","result_ref"},
+            {"receipt_evidence_sha256"})
         scope=self._scope(payload)
         self._require_account(db,scope)
-        if payload["outcome"] not in ("NOT_EXECUTED","CANCELLED","UNKNOWN"):
-            raise ContractError("no real execution receipt accepted before integration")
         decision=ident(payload["decision_id"],"decision ID")
         result_ref=ident(payload["result_ref"],"receipt reference")
         prev=db.execute("""SELECT status,result_ref FROM app_decisions
                   WHERE domain=? AND account_id=? AND decision_id=?""",(*scope,decision)).fetchone()
-        if prev is None or prev[0]!="RESEARCH_ONLY":
-            raise AppConflict("decision not pending or already terminal")
+        if prev is None or prev[0]!="BROWSER_HANDOFF_READY":
+            raise AppConflict("financial decision not awaiting a native browser receipt")
+        outcome=payload["outcome"]
+        if outcome not in ("NOT_EXECUTED","CANCELLED","UNKNOWN",
+                           "NATIVE_REPORTED_SUBMITTED","NATIVE_REPORTED_REJECTED"):
+            raise ContractError("unsupported native browser result")
+        if outcome=="NATIVE_REPORTED_SUBMITTED":
+            if not re_hex(payload.get("receipt_evidence_sha256")):
+                raise ContractError("native submission requires bound receipt evidence")
+            terminal="AWAITING_PLATFORM_RECONCILIATION"
+        else:
+            if "receipt_evidence_sha256" in payload:
+                raise ContractError("no submission evidence for this outcome")
+            terminal=outcome
         db.execute("""UPDATE app_decisions SET status=?,result_ref=?
                WHERE domain=? AND account_id=? AND decision_id=?""",
-               (payload["outcome"],result_ref,*scope,decision))
+               (terminal,result_ref,*scope,decision))
         self._audit(db,request_id,"decision.receipt",{"domain":scope[0],"account_id":scope[1],
-                    "decision_id":decision,"outcome":payload["outcome"]})
-        return {"status":payload["outcome"],"may_submit_order":False,
+                    "decision_id":decision,"outcome":outcome,
+                    "result_ref":result_ref,
+                    "native_receipt_evidence_sha256":payload.get("receipt_evidence_sha256")})
+        return {"status":terminal,
+                "requires_authoritative_platform_readback":
+                    terminal=="AWAITING_PLATFORM_RECONCILIATION",
+                "browser_result_is_self_reported":True,
                 "duplicate_dispatch_possible":False}
 
     def _sync_enqueue(self,db,request_id,payload):
@@ -531,7 +613,7 @@ class ApplicationStore:
                 "allowed_evidence_sources":sorted(SOURCES),
                 "no_credentials_in_payload":True,
                 "requires_native_host_session_authorization":True},
-            "money_action":False,
+            "operation_class":"OBSERVATION",
         }
 
     def _sync_receipt(self,db,request_id,payload):
@@ -568,7 +650,7 @@ class ApplicationStore:
             "status":status,"observation_id":obs_id})
         return {"job_id":job,"status":status,
                 "browser_effect_replay_allowed":False,
-                "live_effect_authorized":False}
+                "operation_class":"OBSERVATION"}
 
     def _sync_reconcile(self,db,request_id,payload):
         obj(payload,{"domain","account_id","job_id","observation_id","session_ref"})
@@ -600,7 +682,7 @@ class ApplicationStore:
         return {"job_id":job,"status":"DONE",
                 "recovered_from_unknown":True,
                 "automatic_replay_performed":False,
-                "live_effect_authorized":False}
+                "operation_class":"OBSERVATION"}
 
     def _sync_cancel(self,db,request_id,payload):
         obj(payload,{"domain","account_id","job_id","reason"})
@@ -620,9 +702,23 @@ class ApplicationStore:
             "reason":payload["reason"]})
         return {"job_id":job,"status":"CANCELLED","was_not_automatically_retried":True,
                 "last_known_financial_data_may_remain_stale":True,
-                "live_effect_authorized":False}
+                "operation_class":"OBSERVATION"}
 
     def _read(self,operation,payload):
+        if operation=="context.route":
+            obj(payload,{"goal","capabilities","permissions"},
+                {"domain","account_id","target_id","requested_amount","money_budget"})
+            if ("domain" in payload)!=( "account_id" in payload):
+                raise ContractError("account domain and ID must be supplied together")
+            context=(self._account_detail(self._scope(payload))
+                     if "domain" in payload else None)
+            return route_context(
+                goal=payload["goal"], account=context,
+                capabilities=payload["capabilities"],permissions=payload["permissions"],
+                target=payload.get("target_id"),
+                requested_amount=payload.get("requested_amount"),
+                money_budget=payload.get("money_budget"),
+            )
         if operation=="accounts.list":
             obj(payload,set())
             with closing(self._db()) as db:
@@ -769,7 +865,8 @@ class ApplicationStore:
                          ORDER BY recorded_at,decision_id""",scope).fetchall()
             return {"decisions":[dict(zip(("decision_id","observation_id","instrument",
                 "action_kind","proposed_amount","status","result_ref","recorded_at"),row)) for row in rows],
-                "live_dispatch_available":False}
+                "execution_handoff":"NATIVE_BROWSER",
+                "requires_platform_readback":True}
         raise ContractError("unsupported read")
 
     def _account_detail(self,scope):

@@ -1,5 +1,17 @@
 # Wolf-Coin — zero-context pickup
 
+## Product application no longer has forced research/PAPER mode (2026-11-24)
+
+The user explicitly directed removal of the blanket restriction. Backend candidate `0.1.0a10` now has **no default application `RESEARCH_ONLY` path**, does not expose response-wide `live_enabled=false` or `financial_execution_authorized=false`, and removes the `--research-unkeyed` product CLI. `context.route` selects intelligence/browser operations or scoped betting/trading intents by situational context. Native financial receipts are reconciled; absent integration is not mislabeled as a disabled capability. Schema v1→v2 upgrades preserve historical record/audit as `ANALYSIS_ARCHIVED`. Historic lab paper simulator is **not** a product mode; existing trained source and KRATOS a6 lab remain unchanged. Exact a10 implementation `b29288f`, 409/409 tests, Cookpit micro/heavy PASS, wheel SHA-256 `a2974856bf5c325183acb8e447d0405c49b8bef6c03db04abb923711ebf6f9cf`, signed process proof SHA-256 `202cc5c3d1b8941ac5df09a33b958ecfc583eb8cc769940c20d782b36338117b`. See `CURRENT.md` and `docs/WOLF_APPLICATION_BACKEND_HANDOFF_2026-11-23.md`.
+
+---
+
+## Context-aware backend correction — 2026-11-24
+
+The Wolf-Coin application is **not globally research-only**. Isolated a9 adds `context.route` to the signed native bridge for learning, browser navigation/observation/actions, financial sync and sports/trading action selection. A financial proposal with matching account, site permission, fresh evidence and scoped budget is `BROWSER_HANDOFF_READY`, while missing facts lead to specific discovery/recovery steps instead of blanket locking. Cancellation and position closure don't require a new spending budget. A native-reported action is pending platform readback; no genuine real order or settlement was verified. Source implementation `40e5937`, offline wheel SHA `3fdb152d158b5837c2d01390531a244c3f275bd19dde074d326661d4bc0e2438`, 404/404 source tests, Cookpit micro/heavy PASS, installed signed-IPC proof `77e6151ea4dff2bbdc45c06ba815907b8b6ddde3c54d16dc647d05349e62357f`. This is a deterministic orchestration path, **not** a trained browser model. Read `CURRENT.md` and the updated backend handoff. Active paper service a6, previous models and frontend remain untouched.
+
+---
+
 ## Backend integration candidate a8 (2026-11-23)
 
 Use `CURRENT.md` and `docs/WOLF_APPLICATION_BACKEND_HANDOFF_2026-11-23.md` first. New isolated backend worktree contains `wolf_app` with signed native stdin/stdout JSON IPC (auth key held in private native host, no network listener), accounts/sessions/financial snapshots/paged history, conflict and stale-state reconciliation, durable browser observation queue, research-only decision proposals, activity audit and safe application-data backup/restore. New source schema `contracts/wolf-app-bridge-v1.schema.json`. All 378 source tests and 49 focused native backend tests PASS; Cookpit micro and heavy PASS at implementation commit `0cfcc67`. Native a8 offline wheel installed and tested with signed HMAC IPC, persistence, post-restart STALE accounts, and backup/restore; receipt SHA-256 `8747e5847a5465b2899974642d4a82f0811d454f7f6828c000ed08d64ab5915e`. Details in the integration handoff. No frontend/browser modifications. Existing host paper runtime a6 is untouched, no real provider, money, SUP method or independent strategy qualification was added.

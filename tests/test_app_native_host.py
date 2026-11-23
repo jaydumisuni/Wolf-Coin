@@ -36,8 +36,9 @@ def _run(db,key,requests):
     assert completed.returncode==0,completed.stderr
     responses=[json.loads(line) for line in completed.stdout.splitlines()]
     assert len(responses)==len(requests)
-    assert all(x["schema"]=="wolf.app.bridge.v1" for x in responses)
-    assert all(not x["live_enabled"] and not x["financial_execution_authorized"] for x in responses)
+    assert all(x["schema"]=="wolf.app.bridge.v2" for x in responses)
+    assert all("live_enabled" not in x and
+               "financial_execution_authorized" not in x for x in responses)
     return responses
 
 
