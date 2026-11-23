@@ -1,5 +1,15 @@
 # Wolf-Coin — zero-context pickup
 
+## Current installed KRATOS 0.1.0a6 — five delivery gate evidence
+
+Read `CURRENT.md` and `docs/FIVE_DELIVERY_GATES_2026-11-23.md` first. Wolf-Coin PAPER-only `0.1.0a6` is running at `http://127.0.0.1:18766/gates` on KRATOS, source implementation `45b2e33`. All eight localhost routes are healthy; `POST /gates` is 405, old paper ledger, old release and rollback user-service unit preserved. Manual Cookpit micro 40/40 and heavy 323/323 plus Formula's existing nine advisory contract tests PASS. New strict offline market quote contract, hypothetical-cost audit and a restart-safe single synthetic paper effect were source/host qualified; **no real-money venue, training admission, statistical profit proof or funding**.
+
+The source-pinned illustrative 45-match rehearsal used invented sportsbook odds and yielded 36 hypothetical bets with K5.61 counterfactual simulated gain. This is NOT earnings or evidence of an edge. Sports 0/5 and trading 0/5 external release gates are independently accepted; Tenfold original campaign remains sports 0/24, trading 0/13 proven. SUP Director still `NO_VIABLE_NEURAL_ROUTE`. Official OANDA Global Markets eligible-country list excludes Zambia; GSB prohibits automated scraping, and Betfair Exchange API is not a Sportsbook API. ATHENA has no MT5 client or Python module installed. No source generation can self-certify approval.
+
+Review current source and private evidence under `.workspace/proof-history/five-gates-20261123/` and `docs/FUNDING_AND_PROVIDER_DILIGENCE_2026-11-23.md`. Do not start a new data-training period using the exposed 2026/27 partial holdout or interpret mock quotes as live. No new GPT supervisor created.
+
+---
+
 ## Current release and review state — 2026-11-23
 
 Native KRATOS PAPER-only Wolf-Coin `0.1.0a5` from implementation commit `5219fcc` is running at `http://127.0.0.1:18766/neural`, source test correction `ba3dc49`. The typed `wolf-tabular` CPU route replays source-pinned CC0 MLP training weights exactly and independently verifies the 45 prior-examined forecasts with no NumPy in the verification process. Manual Cookpit after `PYTHONPATH` correction: 35 focused and 283 full PASS; Formula P13 source advisory tests 9/9 PASS. Formula `.workspace/reviews/wolf-coin-tabular-20261123/review-intake.json` is **candidate-only**, not accepted. SUP still `NO_VIABLE_NEURAL_ROUTE`; no signed Formula or SUP route admission; no market edge/funds. Start from `CURRENT.md` and `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md`. Do not replace frozen model, history, validated failures or safe release.
