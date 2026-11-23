@@ -1,5 +1,15 @@
 # Wolf-Coin — CURRENT
 
+## New isolated application-backend integration candidate (2026-11-23)
+
+- A separate versioned backend `0.1.0a8` now provides source-owned `wolf_app`, **no browser, UI or app-packaging replacement**. It implements native host signed JSON-line IPC, account registration/removal, session state and startup revalidation, evidence-hashed financial snapshots and transactions, cross-source conflict detection, currency-separated financial overview, paged history, audit chain, explicit read-only sync planning and durable browser observation jobs with UNKNOWN reconciliation. Decision proposals are RESEARCH_ONLY; no orders, funds or API dependencies.
+- Native host backup/restore uses consistent SQLite copies, private create-only paths and post-restore session revalidation. Browser credentials never enter this backend; native host still owns secure Chromium/WebView profiles, keys, OS app lock and encrypted backup.
+- Backend implementation and full protocol handed off through `docs/WOLF_APPLICATION_BACKEND_HANDOFF_2026-11-23.md` and `contracts/wolf-app-bridge-v1.schema.json`. Source tests **378/378 PASS** at this pre-build checkpoint. Host packaging and independent acceptance still need recorded evidence.
+- Active KRATOS `wolf-coin-paper-preview.service` remains stable a6; no app frontend or Wolf Browser integration has happened yet. Final real platform login, integration, authenticated DOM/network observations, Windows/Linux/Android app acceptance, production model/gate admission and live financial decisions remain separate.
+- **User-approved work division preserved:** frontend/browser/packaging belong to frontend owner; intelligence, finance and backend bridge belong here.
+
+---
+
 ## Latest cross-project gate research (2026-11-23)
 
 - **Installed runtime remains a6**: KRATOS native PAPER-only `0.1.0a6` at `http://127.0.0.1:18766/gates`. Separate offline **installed and Cookpit-verified research package** `0.1.0a7` adds a match-day uncertainty analyzer; do not confuse candidate source with installed PAPER service.

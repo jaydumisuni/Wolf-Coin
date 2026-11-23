@@ -1,5 +1,11 @@
 # Wolf-Coin — zero-context pickup
 
+## Backend integration candidate a8 (2026-11-23)
+
+Use `CURRENT.md` and `docs/WOLF_APPLICATION_BACKEND_HANDOFF_2026-11-23.md` first. New isolated backend worktree contains `wolf_app` with signed native stdin/stdout JSON IPC (auth key held in private native host, no network listener), accounts/sessions/financial snapshots/paged history, conflict and stale-state reconciliation, durable browser observation queue, research-only decision proposals, activity audit and safe application-data backup/restore. New source schema `contracts/wolf-app-bridge-v1.schema.json`. Source integration tests plus prior suites 378 PASS at prebuild checkpoint; native wheel/host qualifications must be separately recorded. No frontend/browser modifications. Existing host paper runtime a6 is untouched, no real provider, money, SUP method or independent strategy qualification was added.
+
+---
+
 ## Updated gate 1 / gate 3 evidence — 2026-11-23
 
 The active KRATOS paper console is still `0.1.0a6`; the `0.1.0a7` research candidate is separately offline-wheel installed and Cookpit verified, never promoted to the paper service. Full release details under `CURRENT.md`. SUP private draft PR #1 adds a separate `sup typed-review` source-bounded numerical intake, 120/120 source tests, but NO training admission/Formula authorization. Wolf source-only match-day bootstrap on the 45 *previously inspected* 2026/27 fixtures yields a 95% uncertainty interval **−K2.5655 to +K13.6205** around the fabricated-odds K5.61 gain; NOT a profit claim. Provider leads (FP Markets Zambia MT5 demo; Smarkets £250 API) still need owner registration, permissions and account proof. See `docs/FIVE_DELIVERY_GATES_2026-11-23.md` and `docs/FUNDING_AND_PROVIDER_DILIGENCE_2026-11-23.md`. All five real-world acceptance gates open, both domains.
