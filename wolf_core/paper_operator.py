@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 from pathlib import Path
 import sys
 
@@ -88,7 +89,7 @@ def run(argv: list[str] | None = None) -> int:
             )
         print(json.dumps(out, sort_keys=True))
         return 0
-    except (ContractError, OSError, ValueError) as exc:
+    except (ContractError, OSError, ValueError, sqlite3.DatabaseError) as exc:
         out.update(status="BLOCKED", error=type(exc).__name__, reason=str(exc))
         print(json.dumps(out, sort_keys=True), file=sys.stderr)
         return 2
