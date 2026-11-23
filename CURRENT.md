@@ -1,5 +1,17 @@
 # Wolf-Coin — CURRENT
 
+## Active verified release / typed research frontier (2026-11-23)
+
+**PAPER-only Wolf-Coin `0.1.0a5` is installed and enabled on KRATOS, with typed tabular CPU research candidate verification; no positive-EV proof or funding authority.**
+
+- Runtime wheel `0.1.0a5`, source `5219fccf13c210ac8308c1bda62bb49bbbf302a9`, loopback `127.0.0.1:18766`; read-only Neural view `http://127.0.0.1:18766/neural`. Existing paper balances and previous release unit preserved.
+- The `wolf-tabular` research CLI reproduces the frozen CC0-only 2,660-training/380-validation MLP weights exactly and replays 45 already-inspected predictions with an **independent standard-library numerical checker in a minimal environment without NumPy**. Maximum probability error `7.732e-13`. It is a **Wolf-Coin-owned research adapter**, NOT a SUP/Soup admitted method or Formula mathematical certificate.
+- Existing Formula P13 Director/SUP boundaries verified with 9/9 native Rust tests; the Formula review manifest is candidate-only and not signed. SUP G5 stage remains `NO_VIABLE_NEURAL_ROUTE` (0/10 borrowed Soup methods qualified for this tabular model).
+- Cookpit micro/heavy **PASS** on corrected test HEAD `ba3dc4971b92dedf96b3d3531ac6e373685c48ce`: 35 focused and 283 complete tests, native host and Formula advisory checks. The earlier failed micro receipt and exact `PYTHONPATH` regression correction remain recorded.
+- Review receipt, SHA hashes, no-money bounds, and rollback: `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md`. Next independent engineering authority: implement and review a genuinely compatible typed SUP/Formula admission route **without inventing Soup/SUP-Bit support**, then gather a larger untouched evaluation and licensed executable odds before even considering funding.
+
+---
+
 ## Authoritative latest status — 2026-11-23
 
 **Patrol registration RESOLVED; native KRATOS paper preview INSTALLED and RUNNING. Live financial execution remains LOCKED.**

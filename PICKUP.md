@@ -1,5 +1,11 @@
 # Wolf-Coin — zero-context pickup
 
+## Current release and review state — 2026-11-23
+
+Native KRATOS PAPER-only Wolf-Coin `0.1.0a5` from implementation commit `5219fcc` is running at `http://127.0.0.1:18766/neural`, source test correction `ba3dc49`. The typed `wolf-tabular` CPU route replays source-pinned CC0 MLP training weights exactly and independently verifies the 45 prior-examined forecasts with no NumPy in the verification process. Manual Cookpit after `PYTHONPATH` correction: 35 focused and 283 full PASS; Formula P13 source advisory tests 9/9 PASS. Formula `.workspace/reviews/wolf-coin-tabular-20261123/review-intake.json` is **candidate-only**, not accepted. SUP still `NO_VIABLE_NEURAL_ROUTE`; no signed Formula or SUP route admission; no market edge/funds. Start from `CURRENT.md` and `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md`. Do not replace frozen model, history, validated failures or safe release.
+
+---
+
 ## SUP missing capability snapshot resolved — now Formula escalation
 
 Frozen-source SUP_SIM input completed from existing project commits. Native SUP Director now returns `NO_VIABLE_NEURAL_ROUTE` rather than `AWAIT_CAPABILITY_SNAPSHOT` (0/10 viable Soup methods). Full Formula / Wolf-Coin Director must qualify a tabular training route; no SUP execution, signed acceptance or money authority. Active owner HEADs have drifted beyond frozen SUP pins. See `scripts/sup_capability_snapshot.py`, `tests/test_sup_snapshot.py` and `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md`. Loopback PAPER Neural UI reflects new stage; `0.1.0a4` installed engine is untouched.
