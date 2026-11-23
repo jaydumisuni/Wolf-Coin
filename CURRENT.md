@@ -1,5 +1,15 @@
 # Wolf-Coin — CURRENT
 
+## Latest cross-project gate research (2026-11-23)
+
+- **Installed runtime remains a6**: KRATOS native PAPER-only `0.1.0a6` at `http://127.0.0.1:18766/gates`. Separate offline candidate `0.1.0a7` adds a match-day uncertainty analyzer; do not confuse candidate source with installed runtime.
+- Private SUP draft [PR #1](https://github.com/jaydumisuni/SUP/pull/1) adds a non-executing product-owned typed candidate intake (120 source tests PASS); `TYPED_CANDIDATE_INTAKE_REVIEW_ONLY`, not an independently admitted SUP/Formula method. Installed SUP unchanged.
+- The fabricated-odds K5.61 hypothetical gain has a **5,000-replicate, 17-day clustered 95% interval of −K2.5655 to +K13.6205** on 36 selections; zero included. Neither market profitability nor fresh unseen test proven.
+- Provider research identifies an official FP Markets Zambia MT5 demo/EA candidate requiring actual account-holder onboarding; Smarkets API has a £250 setup fee and location uncertainty; broad OANDA country navigation differs from division-specific eligibility. No provider account or venue permission proven.
+- Both domain release inventories remain **0/5 externally accepted**. Exact proof and dependencies in `docs/FIVE_DELIVERY_GATES_2026-11-23.md` and `docs/FUNDING_AND_PROVIDER_DILIGENCE_2026-11-23.md`. No funding or live execution.
+
+---
+
 ## Current installed gate-evidence release — 2026-11-23
 
 **KRATOS Wolf-Coin `0.1.0a6` is running PAPER-only, with a new read-only Five gates page `http://127.0.0.1:18766/gates`. All five real-world release gates remain unaccepted.**

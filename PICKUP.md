@@ -1,5 +1,11 @@
 # Wolf-Coin — zero-context pickup
 
+## Updated gate 1 / gate 3 evidence — 2026-11-23
+
+The active KRATOS paper console is still `0.1.0a6`, not the new source-only `0.1.0a7` research candidate. Full release details under `CURRENT.md`. SUP private draft PR #1 adds a separate `sup typed-review` source-bounded numerical intake, 120/120 source tests, but NO training admission/Formula authorization. Wolf source-only match-day bootstrap on the 45 *previously inspected* 2026/27 fixtures yields a 95% uncertainty interval **−K2.5655 to +K13.6205** around the fabricated-odds K5.61 gain; NOT a profit claim. Provider leads (FP Markets Zambia MT5 demo; Smarkets £250 API) still need owner registration, permissions and account proof. See `docs/FIVE_DELIVERY_GATES_2026-11-23.md` and `docs/FUNDING_AND_PROVIDER_DILIGENCE_2026-11-23.md`. All five real-world acceptance gates open, both domains.
+
+---
+
 ## Current installed KRATOS 0.1.0a6 — five delivery gate evidence
 
 Read `CURRENT.md` and `docs/FIVE_DELIVERY_GATES_2026-11-23.md` first. Wolf-Coin PAPER-only `0.1.0a6` is running at `http://127.0.0.1:18766/gates` on KRATOS, source implementation `45b2e33`. All eight localhost routes are healthy; `POST /gates` is 405, old paper ledger, old release and rollback user-service unit preserved. Manual Cookpit micro 40/40 and heavy 323/323 plus Formula's existing nine advisory contract tests PASS. New strict offline market quote contract, hypothetical-cost audit and a restart-safe single synthetic paper effect were source/host qualified; **no real-money venue, training admission, statistical profit proof or funding**.

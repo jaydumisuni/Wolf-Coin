@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wolf-coin-core"
-version = "0.1.0a6"
+version = "0.1.0a7"
 description = "Wolf-Coin deterministic research and paper-only first light"
 requires-python = ">=3.11"
 dependencies = []
