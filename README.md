@@ -120,6 +120,10 @@ A mode transition is a signed state change with audit history. The system may au
 - [`docs/SOURCE_RESEARCH_MAP.md`](docs/SOURCE_RESEARCH_MAP.md) — what to study, adapt, reject, and attribute
 - [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) — external code and attribution register
 
+## Working historical research lab (development branch)
+
+Wolf-Coin's `wolf-lab` and `wolf-lab-walkforward` commands evaluate recorded 1X2 prices and historical football results with strictly separated time windows. They write offline HTML/JSON evidence; they do **not** connect to sportsbooks or use live money. See `docs/HISTORICAL_REPLAY_PROOF_2026-11-23.md`. The first real historical test **lost** virtual funds and was rejected. This is a falsification result, not a successful trading signal.
+
 ## First milestone
 
 The first working milestone is deliberately modest:

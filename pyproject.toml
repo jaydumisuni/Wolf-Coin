@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wolf-coin-core"
+version = "0.1.0a7"
+description = "Wolf-Coin deterministic research and paper-only first light"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+research = ["numpy>=2,<3"]
+
+[project.scripts]
+wolf = "wolf_core.cli:main"
+wolf-paper = "wolf_core.paper_operator:run"
+wolf-dashboard = "wolf_gateway.dashboard:main"
+wolf-resident = "wolf_gateway.resident:main"
+wolf-readiness = "wolf_execution.readiness:main"
+wolf-funding-readiness = "wolf_funding.cli:main"
+wolf-lab = "wolf_lab.cli:main"
+wolf-lab-walkforward = "wolf_lab.walkforward_cli:main"
+wolf-lab-cpu = "wolf_lab.forecast_cli:main"
+wolf-cc0 = "wolf_lab.cc0_pipeline:main"
+wolf-tabular = "wolf_lab.typed_tabular:main"
+wolf-five-gates = "wolf_execution.five_gate_report:main"
+
+[tool.setuptools.packages.find]
+include = ["wolf_core*", "wolf_sports*", "wolf_guard*", "wolf_gateway*", "wolf_execution*", "wolf_markets*", "wolf_funding*", "wolf_lab*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

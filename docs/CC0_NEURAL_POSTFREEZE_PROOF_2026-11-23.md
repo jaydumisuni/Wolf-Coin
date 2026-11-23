@@ -1,0 +1,111 @@
+# Wolf-Coin / CC0 neural research — after the source freeze
+
+**Status:** offline CC0 research implementation, not financial strategy or SUP/SUP-Bit production deployment.
+**Source freeze:** `170a555991910fd3db525c2070ace88568b6f0b4` on November 23, 2026. It committed architecture, features, model selection and tests **before** fetching the future-data file. Those weights and hyperparameters are retained unchanged.
+
+## Source and rights
+
+- CC0-1.0 public-domain results from `https://github.com/openfootball/football.json` at Git commit `e6744429ee395bc86f247348c6184bb08d4eb361`.
+- Exact CC0 license SHA-256: `36ffd9dc085d529a7e60e1276d73ae5a030b020313e6c5408593a6ae2af39673`.
+- Training 2017/18–2023/24: **2,660 matches**. Validation 2024/25: **380 matches**. Neither involved the restricted Football-Data bookmaker dataset.
+- 2025/26 prior-history-only file was **353/380 scored** and is incomplete. Its scored matches are used only for constructing lagged feature history for the next season.
+- After freeze, first pinned 2026/27 result source digest: `bb91f0ab3e8359df163bb9ec98549bfed85e200dd4c32f3bd606b5890d932dd2`. Only **45/380 fixtures had full-time scores**, latest result **September 20, 2026** in the source snapshot. 335 are unscored. Do not assert the whole season has been evaluated.
+- Post-freeze quality audit (private comparison **only**, not ML training): **760/760 exact fixture and final-score matches, zero conflicts**, against two privately retained independent Football-Data CSV season files. Audit file SHA-256 `ac135ee5c3fb5ebbfea94b68843b54b1c08c454ae56ae790a9f0e3c108d1f4af`. The bookmaker service's own usage policy is private/academic analysis only, not an AI training source.
+
+## Frozen model and first holdout result
+
+- Model: NumPy 8-unit tanh MLP, deterministic seed 17, 350 full-batch updates; compared with a linear forecast. CPU research only, **not SUP-Bit neural training**.
+- Frozen model artifact SHA-256 `2eb587952d5fb72dd25fcaa50aac9b46d6c4e6d3be33a02b502bb7e5a09a3fba`; internally sealed digest `sha256:9b0e22f38810950b5920d4ff52ff6c2dbf96691c7e414946dd0e4f9452e48ef7`.
+- 2024/25 validation Brier (lower better): empirical class prior **0.655478614**, linear **0.623560457**, MLP **0.623347533**. The MLP is barely better than linear. Earlier independently measured bookmaker-derived Brier for 2024/25 was **0.578663803**, much better than either model. Thus no market edge.
+- First truly later evaluation: 45 scored 2026/27 fixtures, **MLP Brier 0.611911853 and log-loss 1.023508094**; historical class-prior Brier **0.657353561** and log-loss **1.083257733**. The paired Brier improvement is +0.045441708, but **match-day clustered 5,000-sample bootstrap 95% percentile interval spans -0.050237688 through +0.158399450**. This includes zero.
+- Outcome: **insufficient evidence** to claim repeatable prediction superiority, let alone financial returns. No bookmaker quotes, real bets, virtual bets or funding actions were used in this experiment.
+- Holdout audit SHA-256 `fd3c4c35bcfa4c828681447b0681e196eaf99f23631b4cd59b20ad6fa577cb69`. The stored evidence is under `/home/kratos/projects/Wolf-Coin/.workspace/proof-history/cc0-neural-20261123/`.
+
+## Actual SUP Director
+
+- Scoped **CC0 outcome-only** machine source-qualification receipt matched 760 external scores and upstream CC0 rights. This is a **machine proof**, not an independently signed human approval.
+- The existing G5 SUP Director accepted the exact source/product/evidence-bound receipt and advanced to **`AWAIT_CAPABILITY_SNAPSHOT`**: Cookpit, Formula, Simulation, SRG, Soup and resources still need separately authenticated generation bindings.
+- Director digest `sha256:d3889b05505bbd4672c9d9c553662d1f2d966f66e64ce5e3b81ff8e4171ee8fa`; output explicitly shows `training_executed=false`, `authority_granted=false`, `deployment_authority=false`. It does not approve this model or its financial use.
+- Private SUP intake, receipt, and result under `.workspace/research/sup-sup-bit-forecast-20261123/cc0-mlp-170a555/`. No GPT supervisor was created.
+
+## Engineering and release boundary
+
+The source adds a read-only `/neural` evidence view to the existing loopback-only paper dashboard. No model weights are loaded into the service, and there are no model-triggered orders, payments, cashouts or third-party requests. The core user service has no new NumPy dependency; NumPy is optional for separate offline research.
+
+**No financial profitability gate is proven; no real-money or automated betting admission.** Further work needs current SUP capability snapshots, fresh independently verified match outcomes/quotes, larger untouched scoring windows, source/venue authorization and independent release acceptance.
+
+
+## Native KRATOS release — 0.1.0a4
+
+- Exact tested implementation HEAD: `f5e7acac87db6e30d7bd4fa928eb7036cf5c1680`. The previous frozen source/head `170a555` and external 2026/27 evidence are unchanged.
+- Offline, standalone wheel `wolf_coin_core-0.1.0a4-py3-none-any.whl` SHA-256 `f03186cc39fc5ecedb431e7e27ab81c078aa8a09508cf92dcc01daef1b707249`. Installed native paper console at `/home/kratos/.local/share/wolf-coin-paper/releases/f5e7acac87db6e30d7bd4fa928eb7036cf5c1680/venv` without pulling NumPy into the resident service.
+- The separately installed offline research runner replayed exactly the initial source-bound holdout output. The model weights were not refitted for this re-run.
+- `wolf-coin-paper-preview.service` remains user-level, enabled, `NoNewPrivileges=true`, bound exclusively to `127.0.0.1:18766`. Routes `/sports`, `/trading`, `/lab`, `/forecast`, `/neural`, `/funding`, `/health` returned HTTP 200. The new `/neural` page shows the partial 45-match evidence, wide confidence interval and SUP stage. `POST /neural` returns HTTP 405 and no financial action route exists.
+- The previous installed package, original paper-ledger data and prior service file are preserved; latest rollback service receipt is `/home/kratos/projects/Wolf-Coin/.workspace/proof-history/cc0-neural-20261123/previous-paper-unit.service`.
+- The Neural page was opened in Brave on KRATOS's existing XFCE desktop session.
+- **Cookpit manual micro PASS**, 24 focused source and boundary tests, frozen model/source digest, independent 760-result check, actual SUP stage; receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-cc0-neural-score-lab/evidence/20261123T131310Z-micro-0219b6f12556.json`.
+- **Cookpit manual heavy PASS**, **251/251 tests**, exact wheel digest, pinned native service and localhost-only no-money controls; receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-cc0-neural-score-lab/evidence/20261123T131315Z-heavy-0219b6f12556.json`.
+- No GPT supervisor created, no Tenfold money/training milestone promoted, no SUP-Bit neural inference asserted, and no sportsbook/broker permissions or accounts touched.
+
+**Final decision:** This is a verified source-bound **offline neural score research tool** and safe read-only UI, **not** a positive-EV financial strategy or a funding-ready release. The source data 2026/27 is stale/partial, and the match-day bootstrap interval crosses zero.
+
+
+## SUP capability-snapshot closure (2026-11-23)
+
+**Completed the missing SUP_SIM input**, through the existing SUP G5 Director rather than an independent simulator. This is **frozen-pin contract verification, not independently signed production authority**.
+
+The read-only audit in `scripts/sup_capability_snapshot.py` verified Git commit objects for the exact pinned Cookpit `0d778f2f7591ecf65001b78cc829f38bc7a1468d`, Formula `f4edde73eaace58d6f416fae43d2b5cbb6caec6c`, Sergeant `126eeea5a70a0723a1bfb65b2a5dbeb6a84cf2e0`, TTG-Simulation reviewed source `b142b3dbfef428e43311fcc6b6b37189a82a0449` and evidence commit `3078fbc4ff2ee7a8a7286cefba73d59488dfc11c`. The canonical SUP simulation generation `sha256:3e7d230de3e698c17073add1909066d3220f4c39ab90f335e8767799f98db921` was recovered from the SUP binding. The owner-fork Soup commit `088c4272a6b1102908d85afe2b03e53860d56be8` was verified through GitHub. No donor authority transfer or command execution was enabled.
+
+**All active local repository HEADs differ from the frozen SUP pins.** Pinned Git objects are available, but an available frozen generation does **not** prove the latest owner software is currently approved, or that an independent human signed release acceptance.
+
+Soup's LLM-oriented SFT/LoRA/preference/distillation training methods have **no proved tabular 1X2 adapter**. The earlier SUP-Bit observation only measured fit for a small NumPy CPU workload; that fit cannot be assigned to Soup's unrelated methods. The snapshot conservatively marked all eight borrowed training-method fits as unknown. The native SUP_SIM returned **0 of 10 eligible candidates**: eight hardware/task fit unproved, two donor-unsupported.
+
+- Previous Director: `AWAIT_CAPABILITY_SNAPSHOT`.
+- New Director: **`NO_VIABLE_NEURAL_ROUTE`**, digest `sha256:1f135655dc3be8552dfcc2b3a181821643d7bcc3799cc410f1c7468953482bd2`. Native SUP_SIM digest `sha256:da677fc33963078ae8cfda89ac6247543082fdcb65a01e374231d9f8643d7f5c`.
+- Correct new owner: **Full Formula / Wolf-Coin Director** for qualified tabular training-route development, not execution promotion.
+- Native negative controls refused stale Cookpit generation, enabled Soup execution, and mismatched learning source.
+- No SUP training, Tenfold lease, funding, live betting or independent signed acceptance was asserted.
+
+The immutable private evidence is under `/home/kratos/projects/Wolf-Coin/.workspace/research/sup-sup-bit-forecast-20261123/cc0-mlp-170a555/verified-capability-snapshot-20261123/`. Capability completion receipt SHA-256 `e83c4298c48a07ff85d41814dc57e72ae3bdef2f5c45c169b26ae885e2486fe4`; saved SUP Director result file SHA-256 `1daec246673fde6312dcb115fdc01aab3a6383f1c38e54f562146d46a770837e`; SUP_SIM result file SHA-256 `2f40c2df998ec5e6ab51dfa1a28924a9d86674f6d9d5ad678bb8e0d910fd5d97`.
+
+The running read-only `/neural` UI now uses new immutable private summary `neural-summary-sup-snapshot-20261123.json`, SHA-256 `fb53c61d3a52eac67183de84e6f1bb7666c3159dd18d53723fd4ae6a9c0f8356`, and displays `NO_VIABLE_NEURAL_ROUTE`. The previous summary, native wheel `0.1.0a4`, pinned model, paper ledger and rollback unit remain preserved. Service is still loopback `127.0.0.1:18766`, PAPER-only, and POST is denied.
+
+**Gate disposition:** missing capability snapshot resolved, but neither a production-compatible SUP route nor real-money authorization is complete.
+
+
+## Target-owned typed tabular training and numerical verification route (2026-11-23)
+
+After the verified SUP G5 `NO_VIABLE_NEURAL_ROUTE` result, the exact remaining gap was investigated against the current Formula P13 Director and SUP-Bit private v14 source.
+
+**Architecture finding:** Formula's P13 `FormulaMathematicalDirector` holds mathematical checking/promotion authority and exposes an *optional SUP neural specialist request*. It does not itself train a numeric 1X2 classifier. SUP's borrowed Soup routes support SFT, LoRA, QLoRA, preference training and distillation, but none has a qualified type adapter for this specific ten-feature, three-outcome MLP. SUP-Bit v14 resource fitting does not grant such a type adapter. The previous SUP_SIM conclusion remains **0/10 qualified methods**. Do not mutate a Soup route to `hardware_fit=true` just because a NumPy MLP runs quickly.
+
+**Implemented candidate route:** `wolf_lab/typed_tabular.py`, executable `wolf-tabular` (research-only). It has two explicit, scoped operations:
+
+1. `retrain-proof` rereads only the eight frozen CC0 training/validation seasons, refits the exact original deterministic NumPy `10→8→3` MLP and checks that **all model weights and the whole candidate/validation selection record are bit-for-bit equivalent** to the pre-2026/27 frozen source. It does not load the incomplete 2025/26 context or the already-examined 2026/27 file.
+2. `build` produces a typed, bounded, immutable candidate-only report of the **already-examined** 45 2026/27 predictions. `verify` independently reconstructs the prior-date features and calculates the MLP's `tanh` and `softmax` with Python's standard library, without importing NumPy, the training engine, SUP, SUP-Bit or Formula. Independent predictions must match the vectorized producer within `3e-12`; changed model bytes, incorrect dimensions, nonfinite weights, stale fixture identities, modified predictions, unexpected effect fields, forged SUP/Formula credentials and real-money claims all fail closed.
+
+The artifact binds exact frozen Wolf source `170a555991910fd3db525c2070ace88568b6f0b4`, frozen model bytes SHA-256 `2eb587952d5fb72dd25fcaa50aac9b46d6c4e6d3be33a02b502bb7e5a09a3fba`, model seal `sha256:9b0e22f38810950b5920d4ff52ff6c2dbf96691c7e414946dd0e4f9452e48ef7`, OpenFootball CC0 upstream commit, and held-out partial-season file SHA-256 `bb91f0ab3e8359df163bb9ec98549bfed85e200dd4c32f3bd606b5890d932dd2`.
+
+The *training replay* on KRATOS reproduced the complete 2,660 training + 380 validation record and exact model weights (reference model digest `151958fddb8c5715a90f5e33d39ff5430b8cd0a3eee9e38b8d710503dae94b2b`), approximately 0.99 s with process peak ~41 MiB. The *independent scalar numerical verifier* checked all 45 predictions, maximum absolute error `7.732148255001903e-13`. This validates research-model reproducibility, not predictive or financial profitability.
+
+**Deliberate authority separation:** This is a **Wolf-Coin-owned CPU tabular prototype**, not an existing SUP/Soup training method, not an independently signed Formula mathematical certificate, and not a production neural execution lease. Formula may review its provenance and candidate evidence but must independently admit any new typed method under its own source/authority rules. The already-inspected 2026/27 matches cannot become new unseen validation data merely because an alternate interpreter was used. Neither the frozen 2026/27 proper-score uncertainty nor the prior market-relative shortfall changes.
+
+A source-bound review packet and native build acceptance receipts will be preserved separately from this source note. The `/neural` read-only UI can display accepted **product-owned candidate** status but will keep `NO_VIABLE_NEURAL_ROUTE` for the SUP-owned method lane until a genuine compatible and independently qualified training interface exists.
+
+
+## Installed typed tabular adapter 0.1.0a5 — review acceptance (2026-11-23)
+
+- **Product-owned implementation HEAD**: `5219fccf13c210ac8308c1bda62bb49bbbf302a9`. The subsequent source-test correction is `ba3dc4971b92dedf96b3d3531ac6e373685c48ce`; it changes only subprocess-test `PYTHONPATH` isolation, not the built model, runtime package or mathematical formulas.
+- Offline Python wheel `wolf_coin_core-0.1.0a5-py3-none-any.whl` SHA-256 `19c1590cba7dc810a328f55482e01729d376fd4ee0eda94e09f3ed76b6c49416`, built on KRATOS and installed in a separate version-pinned native `venv` under `/home/kratos/.local/share/wolf-coin-paper/releases/5219fccf13c210ac8308c1bda62bb49bbbf302a9/venv`. Core environment has **no NumPy**, and the installed verifier imports and runs without NumPy; separate research `venv` has the optional NumPy dependency.
+- Research `wolf-tabular retrain-proof` independently reran the original fixed 2017/18–2024/25 CC0-only training+validation and reproduced both frozen model weights and selection record exactly. Training replay receipt SHA-256 `19d3a451437ac103527b782fbb6bc81b0da2716968e0181319e73440fd095ab8`. Measured job: **1.16 seconds wall** and **43,072 KiB process peak** on this KRATOS invocation.
+- Research `wolf-tabular build` produced 45 typed, *already-inspected* 2026/27 candidate predictions. Artifact SHA-256 `b23aa93cc4ae5545f9531396825f689813a15de57eefacd37f8c34057f0da18c`; candidate's internal content digest `sha256:a1717e6f0e8bd71e7e57cac484d9e5b38ce990cae8b357c1465f7229ace66748`.
+- Independently installed minimal-runtime `wolf-tabular verify` replayed those 45 logits with **stdlib math.tanh/exp and no NumPy**, max absolute probability difference **7.732148255001903e-13**; receipt SHA-256 `768e1ded6911a293386886e8079f30ee58090142146d202a79ef3f998f572ba5`. That invocation took **0.11 seconds wall**, peak **25,824 KiB**; not a generalized capacity benchmark.
+- The Formula P13 source at `05ea21de8e2d2cf9cbfc4801c6189d7d8adcdc5c` passed **9 native tests** (`sup_handoff_contract` and `director_contract`) in offline Cargo. Those tests verify **Formula's preexisting advisory/authority boundary**, not external certification of Wolf-Coin's MLP. Formula's source and production authority were unchanged.
+- A **candidate-only Formula review manifest** is preserved under `/home/kratos/projects/formula/.workspace/reviews/wolf-coin-tabular-20261123/review-intake.json`, SHA-256 `7e2060b47000707d5f4155b3cab7a5915c8037c8f44f9cbbd719c6f5740b67ad`, with a byte-identical Wolf-Coin private proof-history copy. `formula_acceptance_issued=false`, `sup_method_admitted=false`, `real_money_approved=false`. No hidden Formula upgrade or Soup source change was asserted.
+- Native PAPER-only `wolf-coin-paper-preview.service` was upgraded to source `5219fcc` / package `0.1.0a5` with the previous service unit preserved under `.workspace/proof-history/tabular-20261123/previous-paper-unit-before-tabular.service`. The user service remains enabled, `NoNewPrivileges=true`, binds only `127.0.0.1:18766`, and all seven local routes returned HTTP 200. Neural page displays **Typed CPU research route** plus the exact **NO_VIABLE_NEURAL_ROUTE** SUP stage and **NOT ADMITTED BY SUP OR FORMULA**. HTTP POST is still rejected with 405, and the original paper ledger is unchanged.
+- New immutable private Neural summary SHA-256 `87a29f84f17e81c6b311f5a9d6bb72bf664d36478c941fecdc000e52df3be367`.
+- **Corrected Cookpit test environment**: first manual micro receipt `20261123T141505Z-micro-d06b0b490a82.json` FAILED three subprocess tests because the Cookpit lane exported its own `PYTHONPATH`. The runtime package and model were not implicated. Source-only test correction `ba3dc49` binds Wolf-Coin source path in each subprocess; the direct run with Cookpit's inherited environment then passed 35/35 focused and 283/283 total.
+- **Final manual Cookpit micro PASS** on test-correction HEAD `ba3dc49`, **35/35** focused checks and proof-byte readback: `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-tabular-formula-review/evidence/20261123T141723Z-micro-df292e0193.json`.
+- **Final manual Cookpit heavy PASS** on the same HEAD, **283/283** full tests, host release, no-NumPy core and **9/9 actual Formula native advisory-boundary tests**: `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-tabular-formula-review/evidence/20261123T141728Z-heavy-df292e0193.json`. No recurring supervisor created.
+
+**Disposition:** Target-owned CPU training and typed inference/independent numerical replay are **SOURCE/HOST VERIFIED**. The broader **SUP's typed method registration and independent Formula mathematical qualification are NOT yet admitted**. The MLP does not have a statistically robust outcome advantage, lacks permitted executable market prices, and does not prove profit. There is no training lease, real funding, or provider connector.

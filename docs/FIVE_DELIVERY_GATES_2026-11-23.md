@@ -1,0 +1,71 @@
+# Wolf-Coin — five delivery gates: implementation vs acceptance
+
+**Date:** 2026-11-23, Africa/Lusaka.
+**Scope:** Continuing the previously proven 0.1.0a5 local Wolf-Coin paper research engine. Five new delivery areas are tracked here: typed model admission; authorized market evidence; independent profitability; autonomous venue execution; final production acceptance. The existing Formula/SUP snapshot gate was completed earlier, but **its source-method admission is still open**.
+
+## Gate-by-gate engineering result
+
+| Delivery gate | What source work now provides | What is still required for acceptance |
+|---|---|---|
+| Formula/SUP typed route | Existing product-owned 10→8→3 MLP replay, independent stdlib verifier, source bound to frozen CC0 model. SUP Director native result remains `NO_VIABLE_NEURAL_ROUTE`. | Independent Formula math/type qualification; a genuinely supported SUP method and owner authorization, not a relabelled Soup LLM route. |
+| Market-data intake | New `wolf_markets.quote_book` source SHA-256 contract, UTC quote vs kickoff chronology, complete 1X2 outcomes, bounded prices, cross-fixture consistency and unqualified/real-venue refusal. | Licensed Zambian-eligible sportsbook/exchange or broker; real account and API permission, quote/fill timestamps, fees and verified settlement data. A JSON self-attestation is not legal or provider proof. |
+| Profitability evaluation | New `wolf_lab.price_edge` separate prediction/outcome handling, predeclared minimum 8% modeled margin, 3% hypothetical friction and K0.50 hypothetical paper stake, cost-inclusive returns. | **Not proven.** Genuine executable prices and settled independent out-of-sample results, realistic slippage/commission and a repeatable statistically robust net edge. |
+| Autonomous execution | New `wolf_execution.synthetic_cycle` composes the existing `IntentJournal`, guarded risk preflight and `PaperVenue` into one bounded, idempotent synthetic-only run. UNKNOWN/ACCEPTED journal states block resubmission and multiple open effects. | Authorized real provider demo, exchange/order readback, settlement lifecycle, venue-native protective exits and emergency drill. No real order API is included. |
+| Release acceptance | New `wolf_execution.five_gate_report` CLI and static `/gates` view show sports and trading **independently** from read-only Tenfold. A fake local approval file cannot arm funds. | Independent source/security/financial review, actual Tenfold milestone sign-offs and owner-signed separate domain activation. No ability to fund exists in the tool. |
+
+## Source evidence and semantic limits
+
+- Existing source-bound CC0 MLP frozen at `170a555991910fd3db525c2070ace88568b6f0b4`, currently 45 previously examined 2026/27 predictions. The match-day bootstrap improvement interval included zero. Its earlier market-relative performance trailed bookmaker odds; no statistically established sports-betting advantage.
+- Historical Football-Data bookmaker CSVs remain excluded from AI training under the publisher's limited-use conditions. No unauthorized scrape was added. The existing source-checked OpenFootball CC0 results serve model research only.
+- New quote envelope accepts only `SIMULATED_ONLY` or `EXTERNAL_UNQUALIFIED`, with mandatory `capture_rights=UNVERIFIED_RESEARCH_ONLY`, `account_executable=false`, `provider_account_verified=false`. A locally claimed live status is rejected even when a payload hash matches.
+- New `synthetic_quote_template` uses **invented, identical odds values** for all 45 already-examined fixtures. Those prices are deliberately not executable and are NOT evidence of an opportunity, quote time or operator offering.
+- The trial selected 36 hypothetical stakes, a modeled K5.61 *counterfactual gain* under those synthetic odds, with 3% illustrative friction. **K5.61 is not revenue, not earned money, and not a profitability proof**; it would be misleading to compare it directly to a real operator price. Another invented quote schedule can invert it.
+- A separate synthetic paper cycle wrote one accepted *in-process* effect to a distinct research-only SQLite file; this is not a deposited, transacted or settled account. Its state is idempotent across restart.
+- Source-bounded hypothetical outputs, quote envelopes and both five-gate reports are retained privately under `/home/kratos/projects/Wolf-Coin/.workspace/proof-history/five-gates-20261123/` (never publish unlicensed raw provider data).
+- Tenfold original campaign is unchanged: sports 0/24 proven; trading 0/13 proven. The new five-gate report is not an independent release machine, and always denies deposits/live execution.
+
+## Repeatable verification
+
+- `python3 -m pytest -q` checks quote hash/duplicate JSON keys/UTC, kickoff leakage, market completeness, outcome-independent forecast selection, trading permission forgery, restart idempotency, UNKNOWN crash ambiguity, funding refusal and the local HTTP POST-405 boundary.
+- `wolf-five-gates --domain sports --tenfold-db /home/kratos/projects/Tenfold/.workspace/wolf-coin-20261123/tenfold-authority.db` is a **read-only inventory**. Repeat for `--domain trading`.
+- A research-only quote-input and synthetic paper cycle can be regenerated from the already-frozen typed model candidate using `wolf_markets.quote_book`, `wolf_lab.price_edge` and `wolf_execution.synthetic_cycle`. No online market or account is touched.
+- Actual installed wheel, service snapshot, Cookpit and GitHub commit receipts belong to the final host qualification subsection to be appended **after** native proof.
+
+**Decision:** The paper-mode technical foundations have advanced, but **0/5 real-world delivery gates are independently accepted**. No one should connect a real provider, deposit funds or advertise profitability on this evidence.
+
+
+## Updated external market candidates (2026-11-23)
+
+New official-document screen identifies **FP Markets Zambia MT5 + EA demo** as a research-only candidate, while a live account's advertised ~$100 minimum is incompatible with the current K100 proof budget. The platform requires actual operator registration and identity; neither user onboarding nor DEMO account exists. **Smarkets** offers an exchange automation API with a published £250 setup charge, and Zambia eligibility remains uncertain. **OANDA Global Markets**' account-eligibility list excludes Zambia while its broad region selector includes Zambia; therefore no division-specific eligibility is accepted. See the amended `docs/FUNDING_AND_PROVIDER_DILIGENCE_2026-11-23.md` for primary URLs and requirements. This check does not pass either sports or trading provider gates.
+
+## Installed KRATOS 0.1.0a6 and Cookpit proof
+
+- Source implementation HEAD `45b2e3345cb465082614fcf25807b6e7db3faf40`. Built an offline `wolf_coin_core-0.1.0a6-py3-none-any.whl` SHA-256 `8e1308d0b222b3948c4d9fe6b151936facf23bf83da0d94cac8763b534a0310d`. Package contains `wolf_markets.quote_book`, `wolf_lab.price_edge`, `wolf_execution.synthetic_cycle` and `wolf_execution.five_gate_report`, with entry point `wolf-five-gates`.
+- Installed native minimal Python runtime at `/home/kratos/.local/share/wolf-coin-paper/releases/45b2e3345cb465082614fcf25807b6e7db3faf40/venv`. NumPy is **absent** from the resident. Packaged `wolf-five-gates` reproduced the previously generated sports and trading gate reports exactly from Tenfold's read-only database.
+- The existing user service `wolf-coin-paper-preview.service` is enabled/active, still `NoNewPrivileges=true`, and listens only on `127.0.0.1:18766`. Routes `/sports`, `/trading`, `/lab`, `/forecast`, `/neural`, `/funding`, `/gates`, `/health` all HTTP 200; `POST /gates` HTTP 405. Health `mode=PAPER`, `live_enabled=false`, `remote_enabled=false`, `ledger=RESEARCH_ONLY`.
+- New visible read-only UI: `http://127.0.0.1:18766/gates` on KRATOS, with **Sports 0/5 accepted** and **Trading 0/5 accepted** and missing external evidence listed for each. The older paper wallet, MLP and packaged research artifacts were preserved.
+- Before the service changed, its exact former unit file was saved to `.workspace/proof-history/five-gates-20261123/previous-paper-unit-before-a6.service` for rollback; the previous `0.1.0a5` release directory also remains available.
+- Private source-hashed examples: synthetic quote input SHA `a3999b9caa8d88286331840afde5fafa90227f48b479ca5f49e1d43334bc6598`, shadow audit `d49c277c1b175d35e02aa0728e89612d0fab0a68642158f855bcc34adb7b6f5a`, and one-effect paper-cycle receipt `9e1a0ddb778cfabdebd356cfd3f4c6a9dd3a26ac8d4d10f01922eee5b5f34316`. The 'K5.61' shadow outcome is a **non-executable synthetic scenario**, not a money or statistical-profit observation.
+- **Cookpit manual micro PASS** at source `45b2e33`: **40/40** focused tests plus private evidence assertions, receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-five-delivery-gates/evidence/20261123T151419Z-micro-0f16b6b2ed6e.json`.
+- **Cookpit manual heavy PASS** at the same exact source: **323/323** source tests, native wheel SHA and service/no-money checks, and **9/9 existing Formula native advisory-boundary Rust tests**; receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-five-delivery-gates/evidence/20261123T151421Z-heavy-0f16b6b2ed6e.json`.
+- Formula's independent acceptance, new SUP route admission, provider account permission, actual profitable returns, separate owner-signed releases and Tenfold protected milestones remain **UNPROVEN**. No GPT supervisor or recurring watcher was created, no funds or credentials accessed, and protected main was not modified.
+
+**Final real-world gate count: 0/5 for sports and 0/5 for trading.** Mechanical completion cannot justify closing any of these external acceptance conditions. New external evidence and approvals are necessary.
+
+
+## Post-gate statistical uncertainty and SUP typed intake (2026-11-23)
+
+- **Gate 1 mechanical progress:** a separate SUP-owned `sup typed-review` interface now validates Wolf-Coin's original frozen CC0 model/probability receipts against their hash-bound Formula review manifest. It is **not** a Soup method, does not change G5's `NO_VIABLE_NEURAL_ROUTE`, and is **not an independently accepted Formula/SUP training route**. SUP 120/120 tests pass, including 16 new source-bound falsification/forgery tests. Its actual direct CLI returned `TYPED_CANDIDATE_INTAKE_REVIEW_ONLY`, receipt SHA-256 `09b9ec8044c73fdc2868f63fa7e9b7408adb53a066f1e810662affd42a6c8a5f`. Isolated private SUP candidate review is [SUP PR #1](https://github.com/jaydumisuni/SUP/pull/1), source `f19206ecf134374c5528e519b552c8bbd3349585`. Existing production SUP was not modified; native wheel packaging remains blocked by missing offline Hatchling build tooling.
+- **Gate 3 independent uncertainty progress:** `wolf_lab.uncertainty` adds deterministic 5,000-repetition match-day-cluster bootstrap of the same prior-examined synthetic 45-match scenario. Model was not retrained and no unseen test set was consumed. Of 45 forecasts, 36 synthetic hypothetical selections span 17 match days. Hypothetical net K5.61; 95% clustered bootstrap total-return interval **−K2.5655 to +K13.6205**—includes zero. This is not a profitable-market proof even if the interval had excluded zero, because all quote prices were **fabricated** and no externally executable market was audited. Private result SHA-256 `7788a766bfce9efa3f069f8adadd5b7075784d2eda037f88a90763176aa33025`, at `.workspace/proof-history/five-gates-20261123/synthetic-uncertainty-5000.json`.
+- The latest official provider screen found a **possible FP Markets Zambia MT5/EA demo path**, but a user/account-holder must perform actual registration, entity/jurisdiction verification and demo account validation before provider commands can be tested; no account was created. Smarkets Exchange API has a published £250 setup fee and unverified Zambia eligibility. OANDA Global Markets official account eligibility list differs from its broad country region selector, requiring direct confirmation. See amended `docs/FUNDING_AND_PROVIDER_DILIGENCE_2026-11-23.md`. No provider was licensed or bound by this research.
+- No local model/wallet/funding or code-review status can replace an independent authorized provider identity, a fresh unseen profitable strategy, a venue-native demo readback, or a signed owner release. **Real acceptance remains 0/5 sports, 0/5 trading**.
+
+
+## Offline a7 package and manual Cookpit qualification
+
+- Separate source implementation `02f3a9eaba61ff233df94d8188127a16f229dcfc` built offline wheel `wolf_coin_core-0.1.0a7-py3-none-any.whl` SHA-256 `25c7f1be66cb58d05e95f1ac7434fb2875d329e06eec9ae8725c50e7886dbeeb`.
+- Isolated native package installed into private `.workspace/proof-history/five-gates-20261123/offline-a7/venv`; **NumPy absent**, stdlib numerical/clustered-bootstrap module ran correctly and reproduced `synthetic-uncertainty-5000.json` exactly. This was a package proof, **not a production service upgrade**. Installed `wolf-coin-paper-preview.service` remains `0.1.0a6`, enabled, localhost-only, PAPER ledger and money disabled.
+- Cookpit manual micro **PASS**: 6 focused uncertainty tests plus immutable source receipt readback, `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-a7-sup-typed-review/evidence/20261123T154820Z-micro-835bb4bc289d.json`.
+- Cookpit manual heavy **PASS**: 329 Wolf-Coin tests, offline a7 wheel/venv/service boundary, and 120 SUP isolated typed-review tests, `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-a7-sup-typed-review/evidence/20261123T154821Z-heavy-835bb4bc289d.json`. No extra recurring supervisor or automation created.
+- The verified SUP typed review private receipt `09b9ec8044c73fdc2868f63fa7e9b7408adb53a066f1e810662affd42a6c8a5f` remains `TYPED_CANDIDATE_INTAKE_REVIEW_ONLY`, not an independent Formula mathematical certificate or SUP method execution right.
+- **No real-world release acceptance changed:** sports 0/5 and trading 0/5. No provider account, fresh pricing evidence, real net profits, demo orders, signed approvals, customer deposits or live bets/trades were created.
