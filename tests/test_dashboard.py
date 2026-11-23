@@ -1,3 +1,4 @@
+import pytest
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
@@ -40,3 +41,31 @@ def test_missing_paper_data_reports_unavailable_without_creating_db(tmp_path):
     db=tmp_path/'nonexistent.db'
     assert account_report(db,Domain.SPORTS,'demo')['status']=='UNAVAILABLE'
     assert not db.exists()
+
+def test_funding_status_page_and_json_are_read_only(tmp_path):
+    import json
+    db=tmp_path/'paper.db'
+    run(['--db',str(db),'--domain','sports','--account','demo','init'])
+    run(['--db',str(db),'--domain','trading','--account','demo','init'])
+    server=ThreadingHTTPServer(('127.0.0.1',0),handler(db,'demo'))
+    thread=Thread(target=server.serve_forever,daemon=True);thread.start()
+    try:
+        u=f'http://127.0.0.1:{server.server_port}'
+        with urlopen(u+'/funding',timeout=3) as res:
+            body=res.read()
+            assert b'FUNDING BLOCKED' in body
+            assert b'Current approved deposit: 0 ZMW' in body
+            assert b'NO DEPOSIT / WITHDRAWAL ACCESS' in body
+            assert b'Funding readiness' in body
+        with urlopen(u+'/api/funding-readiness',timeout=3) as res:
+            obj=json.loads(res.read())
+            assert set(obj)=={'sports','trading'}
+            for k in obj:
+                assert obj[k]['funding_permitted'] is False
+                assert obj[k]['max_customer_deposit_authorized_ZMW']=='0'
+                assert obj[k]['transfer_adapters']==0
+        with pytest.raises(HTTPError) as captured:
+            urlopen(Request(u+'/api/funding-readiness',method='POST'),timeout=3)
+        assert captured.value.code==405
+    finally:
+        server.shutdown();server.server_close();thread.join(timeout=4)

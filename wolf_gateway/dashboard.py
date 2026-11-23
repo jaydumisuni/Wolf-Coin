@@ -16,6 +16,7 @@ from wolf_core.bankroll import PaperBankroll
 from wolf_core.cli import doctor
 from wolf_core.contracts import AccountScope, ContractError, Domain, identifier
 from wolf_core.ledger import EventLedger
+from wolf_funding.cli import describe as funding_status
 
 
 STYLE = """
@@ -57,7 +58,8 @@ def page(domain: Domain, report: dict, database: Path) -> bytes:
 <body><main><header><div><p>WOLF-COIN · RESEARCH CONSOLE</p><h1>{name} paper account</h1>
 <span class="tag">NO LIVE EXECUTION</span></div><span class="tag">Manual / virtual funds</span></header>
 <nav><a class="{'selected' if domain is Domain.SPORTS else ''}" href="/sports">Sports</a>
-<a class="{'selected' if domain is Domain.TRADING else ''}" href="/trading">Trading</a></nav>
+<a class="{'selected' if domain is Domain.TRADING else ''}" href="/trading">Trading</a>
+<a href="/funding">Funding readiness</a></nav>
 <section class="grid"><div class="card"><p>Virtual balance</p><div class="value">{value('balance')}</div><small>Not real ZMW, deposits or winnings</small></div>
 <div class="card"><p>Virtual available</p><div class="value">{value('available')}</div><small>Committed exposure is excluded</small></div></section>
 <div class="card"><p>Account state</p><div class="value">{value('status')}</div><p>Reserved: {value('reserved')} · Ledger sequence: {value('seq')}</p></div>
@@ -65,6 +67,37 @@ def page(domain: Domain, report: dict, database: Path) -> bytes:
 <p class="subtle">Ledger: <code>{escape(str(database))}</code></p></div>
 <footer>Wolf-Coin first light · refreshes every 30 seconds · no external requests</footer>
 </main></body></html>''').encode('utf-8')
+
+
+
+def funding_page() -> bytes:
+    """Strictly informational; never creates a funding rail or approval."""
+    sports=funding_status(Domain.SPORTS)
+    trading=funding_status(Domain.TRADING)
+    def item(data):
+        name=escape(data["domain"].title())
+        return (f'<div class="card"><h2>{name} pilot</h2>'
+                f'<p>Illustrative budget: {escape(data["pilot_budget_ZMW"])} ZMW</p>'
+                f'<p>Current approved deposit: {escape(data["max_customer_deposit_authorized_ZMW"])} ZMW</p>'
+                f'<p>Maximum modelled action risk: {escape(data["notional_risk_per_action_cap_ZMW"])} ZMW</p>'
+                f'<p><strong>FUNDING BLOCKED</strong> — no verified provider or independent release</p></div>')
+    return (f'''<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Wolf-Coin · Funding Readiness</title><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="30"><style>{STYLE}</style></head>
+<body><main><header><div><p>WOLF-COIN · FUNDING GATE</p><h1>Funding readiness</h1>
+<span class="tag">NO DEPOSIT / WITHDRAWAL ACCESS</span></div>
+<span class="tag">Independent release required</span></header>
+<nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
+<a class="selected" href="/funding">Funding readiness</a></nav>
+<section class="grid">{item(sports)}{item(trading)}</section>
+<div class="card"><h2>Current blockers</h2>
+<p>No selected and permitted automated sportsbook; no verified broker/demo account;
+no KYC-linked balance readback; no verified funding rail, fees or FX evidence;
+no sustained positive-EV/recovery qualification; no approved real-money release.</p>
+<p>Mechanical source tests do not grant access to customer funds. Any live execution
+is disabled independently of this page.</p></div>
+<footer>Local-only status · No payment, order, deposit, credential or external request endpoints</footer>
+</main></body></html>''').encode("utf-8")
 
 
 def handler(db: Path, account_id: str):
@@ -86,6 +119,13 @@ def handler(db: Path, account_id: str):
                 return self._send(200,data,'application/json; charset=utf-8')
             if path == '/':
                 self.send_response(302);self.send_header('Location','/sports');self.end_headers();return
+            if path == '/funding':
+                return self._send(200,funding_page(),'text/html; charset=utf-8')
+            if path == '/api/funding-readiness':
+                return self._send(200,json.dumps({
+                    "sports":funding_status(Domain.SPORTS),
+                    "trading":funding_status(Domain.TRADING),
+                },sort_keys=True).encode(),'application/json; charset=utf-8')
             if path not in ('/sports','/trading'):
                 return self._send(404,b'not found','text/plain; charset=utf-8')
             domain=Domain(path[1:])

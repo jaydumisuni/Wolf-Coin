@@ -22,6 +22,13 @@
 - Source tests: **92 passed** on KRATOS Python 3.14.4, including a physical Linux kill/restart at an in-flight simulation point. No live adapter or real provider account was touched.
 - Read `docs/GUARDED_EXECUTION_FOUNDATION_2026-11-23.md` for boundaries and proof obligations. Tenfold P0 remains READY, not PROVEN. The pilot readiness evaluator reports 0 proven trading/sports live gates. No real-money release is authorized.
 
+## Funding admission and licensed research work (2026-11-23)
+
+- Added offline funding/FX reconciliation, scoped provider permission/risk checks, read-only funding gate CLI and a new read-only `/funding` paper dashboard route. No real-money transfer actions or credentials. Source suite: **187 passing** on KRATOS before release packaging review.
+- CC0 OpenFootball holdout: 380 train fixtures (2024–25), 380 holdout fixtures (2025–26); baseline Brier 0.65674461 vs uniform 0.66666667, **not positive-EV or actionable bookmaker proof**.
+- ATHENA reachable, but no running MT5 terminal or installed MT5 Python module. No sportsbook account/API or broker onboarding verified. Both pilot funding paths remain BLOCKED.
+- See `docs/FUNDING_AND_PROVIDER_DILIGENCE_2026-11-23.md`. Keep the running paper preview unchanged and never fund solely because tests pass.
+
 ## Earlier 2026-11-23 engineering chronology (historical; superseded wherever contradicted by the latest status)
 
 
