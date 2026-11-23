@@ -1,5 +1,17 @@
 # Wolf-Coin — CURRENT
 
+## Current installed gate-evidence release — 2026-11-23
+
+**KRATOS Wolf-Coin `0.1.0a6` is running PAPER-only, with a new read-only Five gates page `http://127.0.0.1:18766/gates`. All five real-world release gates remain unaccepted.**
+
+- New source `45b2e3345cb465082614fcf25807b6e7db3faf40` adds strict pinned offline 1X2 quote source/UTC/kickoff checks, prior-result-separated fee-aware shadow audit, and idempotent synthetic-only scheduling based on the existing durable paper journal. No broker/sportsbook client, external API or funding transfer was added.
+- The source-bound 45-match **invented odds** rehearsal generated 36 hypothetical selections and **K5.61 counterfactual modeled gain**. That amount is NOT real or validated profit, and the model has no proven bookmaker edge.
+- New domain-separated five-gate `wolf-five-gates` CLI reads Tenfold without mutating authority. Sports **0/5**, trading **0/5** accepted. Tenfold campaign sports 0/24 proven; trading 0/13. SUP still `NO_VIABLE_NEURAL_ROUTE`; Formula typed method candidate not independently signed.
+- Wheel SHA, original user-service rollback, paper ledger preservation, negative HTTP tests and exact source receipts: `docs/FIVE_DELIVERY_GATES_2026-11-23.md`. Cookpit manual micro **40/40 PASS**, heavy **323/323 PASS** + **9/9 existing Formula native tests**. Native service enabled and loopback `127.0.0.1:18766` only, `POST /gates` 405.
+- **Still required:** independently qualified Formula/SUP method; executable licensed time-bound data; demonstrated profitable unseen strategies after real costs; authorized broker/bookmaker demo, settlement/halts; owner-signed per-domain production review and Tenfold approvals. No money pilot admission.
+
+---
+
 ## Active verified release / typed research frontier (2026-11-23)
 
 **PAPER-only Wolf-Coin `0.1.0a5` is installed and enabled on KRATOS, with typed tabular CPU research candidate verification; no positive-EV proof or funding authority.**

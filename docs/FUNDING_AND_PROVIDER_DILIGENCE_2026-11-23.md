@@ -33,6 +33,14 @@ Official sources:
 
 No account-access tests were made against these operators, and their eligibility may change.
 
+## Rechecked official provider eligibility on 2026-11-23
+
+- **OANDA Global Markets is not a presently evidenced Zambian onboarding route.** Its official permitted-country list at https://help.oanda.com/bvi/en/faqs/eligible-ogm-countries-bvi.htm names Chile, Colombia, Hong Kong, Indonesia, Macao, Malaysia, Mexico, Philippines, Taiwan, Thailand, UAE and Vietnam, **not Zambia**. The Global Markets MT5 product therefore stays **INELIGIBLE / DO NOT ONBOARD via this division on present evidence**, despite its general demo offering. Another OANDA division would need independently verified Zambia eligibility and account/API terms; this note does not assert one exists.
+- **GSB Zambia is not an admitted automated source**: its official terms at https://help.gsb.co.zm/terms-and-conditions/ clause 17.2.20 prohibit automated copying/extraction of site/service odds, results or other data, and other terms restrict bots/AI. No scraping, automation or workarounds were attempted.
+- **Betfair Exchange API is distinct from its Sportsbook**: https://support.developer.betfair.com/hc/en-us/articles/115003886731-Can-I-place-Sportsbook-bets-via-the-API confirms Exchange API cannot submit Sportsbook bets. Zambia-specific access, account KYC and market/betting eligibility remain independently unproven.
+- **ATHENA actual read-only software inventory on 2026-11-23**: no active `terminal64.exe` or `metaeditor64.exe` process, no installed MT5 binary at common Program Files paths, no MetaQuotes Terminal app-data folder and no `MetaTrader5` Python module in the default Python launch. No demo account, order or external contact was created.
+- Provider licensing, permission, actual account readback, customer cost, quoted odds and live/demo settlement remain external proof obligations. Do **not** count this recheck as provider onboarding, market access, or release acceptance.
+
 ## Zambia funding and cost treatment
 
 Betting Levy Act, 2025 (Act 27 of 2025) specifies a **5% betting levy paid by the betting company** on the covered deposit/withdrawal activity. This does not itself establish a 5% deduction from the player's credited funds; actual provider, payment and wallet receipts determine customer costs.

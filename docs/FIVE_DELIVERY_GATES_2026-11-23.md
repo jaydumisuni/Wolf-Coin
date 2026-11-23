@@ -32,3 +32,18 @@
 - Actual installed wheel, service snapshot, Cookpit and GitHub commit receipts belong to the final host qualification subsection to be appended **after** native proof.
 
 **Decision:** The paper-mode technical foundations have advanced, but **0/5 real-world delivery gates are independently accepted**. No one should connect a real provider, deposit funds or advertise profitability on this evidence.
+
+
+## Installed KRATOS 0.1.0a6 and Cookpit proof
+
+- Source implementation HEAD `45b2e3345cb465082614fcf25807b6e7db3faf40`. Built an offline `wolf_coin_core-0.1.0a6-py3-none-any.whl` SHA-256 `8e1308d0b222b3948c4d9fe6b151936facf23bf83da0d94cac8763b534a0310d`. Package contains `wolf_markets.quote_book`, `wolf_lab.price_edge`, `wolf_execution.synthetic_cycle` and `wolf_execution.five_gate_report`, with entry point `wolf-five-gates`.
+- Installed native minimal Python runtime at `/home/kratos/.local/share/wolf-coin-paper/releases/45b2e3345cb465082614fcf25807b6e7db3faf40/venv`. NumPy is **absent** from the resident. Packaged `wolf-five-gates` reproduced the previously generated sports and trading gate reports exactly from Tenfold's read-only database.
+- The existing user service `wolf-coin-paper-preview.service` is enabled/active, still `NoNewPrivileges=true`, and listens only on `127.0.0.1:18766`. Routes `/sports`, `/trading`, `/lab`, `/forecast`, `/neural`, `/funding`, `/gates`, `/health` all HTTP 200; `POST /gates` HTTP 405. Health `mode=PAPER`, `live_enabled=false`, `remote_enabled=false`, `ledger=RESEARCH_ONLY`.
+- New visible read-only UI: `http://127.0.0.1:18766/gates` on KRATOS, with **Sports 0/5 accepted** and **Trading 0/5 accepted** and missing external evidence listed for each. The older paper wallet, MLP and packaged research artifacts were preserved.
+- Before the service changed, its exact former unit file was saved to `.workspace/proof-history/five-gates-20261123/previous-paper-unit-before-a6.service` for rollback; the previous `0.1.0a5` release directory also remains available.
+- Private source-hashed examples: synthetic quote input SHA `a3999b9caa8d88286331840afde5fafa90227f48b479ca5f49e1d43334bc6598`, shadow audit `d49c277c1b175d35e02aa0728e89612d0fab0a68642158f855bcc34adb7b6f5a`, and one-effect paper-cycle receipt `9e1a0ddb778cfabdebd356cfd3f4c6a9dd3a26ac8d4d10f01922eee5b5f34316`. The 'K5.61' shadow outcome is a **non-executable synthetic scenario**, not a money or statistical-profit observation.
+- **Cookpit manual micro PASS** at source `45b2e33`: **40/40** focused tests plus private evidence assertions, receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-five-delivery-gates/evidence/20261123T151419Z-micro-0f16b6b2ed6e.json`.
+- **Cookpit manual heavy PASS** at the same exact source: **323/323** source tests, native wheel SHA and service/no-money checks, and **9/9 existing Formula native advisory-boundary Rust tests**; receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-five-delivery-gates/evidence/20261123T151421Z-heavy-0f16b6b2ed6e.json`.
+- Formula's independent acceptance, new SUP route admission, provider account permission, actual profitable returns, separate owner-signed releases and Tenfold protected milestones remain **UNPROVEN**. No GPT supervisor or recurring watcher was created, no funds or credentials accessed, and protected main was not modified.
+
+**Final real-world gate count: 0/5 for sports and 0/5 for trading.** Mechanical completion cannot justify closing any of these external acceptance conditions. New external evidence and approvals are necessary.
