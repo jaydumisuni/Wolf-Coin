@@ -14,9 +14,10 @@ wolf = "wolf_core.cli:main"
 wolf-paper = "wolf_core.paper_operator:run"
 wolf-dashboard = "wolf_gateway.dashboard:main"
 wolf-resident = "wolf_gateway.resident:main"
+wolf-readiness = "wolf_execution.readiness:main"
 
 [tool.setuptools.packages.find]
-include = ["wolf_core*", "wolf_sports*", "wolf_guard*", "wolf_gateway*"]
+include = ["wolf_core*", "wolf_sports*", "wolf_guard*", "wolf_gateway*", "wolf_execution*", "wolf_markets*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

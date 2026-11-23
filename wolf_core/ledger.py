@@ -114,7 +114,8 @@ class EventLedger:
         return items
 
     def append(self, scope: AccountScope, *, expected_seq: int, event_id: str,
-               kind: str, payload: dict[str, Any], occurred_at: str | None = None) -> Event:
+               kind: str, payload: dict[str, Any], occurred_at: str | None = None,
+               must_be_new: bool = False) -> Event:
         if isinstance(expected_seq, bool) or not isinstance(expected_seq, int) or expected_seq < 0:
             raise ContractError("expected_seq must be a nonnegative integer")
         event_id = identifier(event_id)
@@ -130,6 +131,8 @@ class EventLedger:
                                occurred_at, previous, event_digest FROM events
                                WHERE stream=? AND event_id=?""", (scope.stream, event_id)).fetchone()
                 if existing is not None:
+                    if must_be_new:
+                        raise LedgerConflict("event identity already committed; refusing repeat effect")
                     event = self._event(existing)
                     if event.kind != kind or existing[4] != payload_text or (occurred_at is not None and event.occurred_at != timestamp):
                         raise LedgerConflict("event identity reused for conflicting payload")

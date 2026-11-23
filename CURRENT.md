@@ -16,6 +16,12 @@
 
 ---
 
+## Latest construction work — paper execution and real-money admission review
+
+- A new isolated feature worktree implements a stricter paper-only execution journal, risk/account preflight, read-only Tenfold pilot gate report and mock-tested MT5 demo inspection. The existing installed paper console is unchanged.
+- Source tests: **92 passed** on KRATOS Python 3.14.4, including a physical Linux kill/restart at an in-flight simulation point. No live adapter or real provider account was touched.
+- Read `docs/GUARDED_EXECUTION_FOUNDATION_2026-11-23.md` for boundaries and proof obligations. Tenfold P0 remains READY, not PROVEN. The pilot readiness evaluator reports 0 proven trading/sports live gates. No real-money release is authorized.
+
 ## Earlier 2026-11-23 engineering chronology (historical; superseded wherever contradicted by the latest status)
 
 
