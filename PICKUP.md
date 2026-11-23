@@ -1,5 +1,16 @@
 # Wolf-Coin — zero-context pickup
 
+**Currentness:** Patron registration is fixed. Verify `CURRENT.md` first, then `docs/KRATOS_PAPER_HOST_PROOF_2026-11-23.md`. Source worktree and paper preview are installed on KRATOS, not merely proposed. Keep protected main, source provenance, manually verified Cookpit evidence and paper-only execution bounds.
+
+Recovery order: Patrol `route/check Wolf-Coin` and installed Patrol fix `257f78dbf75c20576d6fa7d9d30aa111372fc2ed`; exact Wolf-Coin branch HEAD `f2fe764cfd69676b5d521d3d823afb6d86133d07`; local installed release + user service on `127.0.0.1:18766`; original P0–P12 and WX candidate roadmaps; Tenfold durable 24-node P0 READY (0 proven); manually verified Cookpit host receipts. Then implement the first unproved gate.
+
+**No user command should be needed for future owner-requested KRATOS project registration:** normal `patrol init-project` now selects the authorized Oracle root-helper when running under hardened Oracle. Never weaken the security settings or invent a new root-management API.
+
+---
+
+## Earlier pickup history (historical; may contain superseded registration claims)
+
+
 Read in order:
 
 1. CURRENT.md — truthful current state, limitations and blocker.
@@ -13,7 +24,7 @@ Rules: protect main; read before reasoning; implement on isolated source branch;
 
 The proposed end state is one resident KRATOS Wolf-Coin service with separate sports and trading accounts and dashboards, both earned through independent release gates. It is not yet deployed.
 
-## New recovery anchor: first-light code candidate
+### New recovery anchor: first-light code candidate
 
 Read `docs/FIRST_LIGHT_PROOF_2026-11-23.md` and `docs/FIRST_LIGHT_CANDIDATE.md` before resuming implementation. Draft PR #10 now includes a standard-library paper-only source package and 19 tests, all passing in an isolated Python 3.13.5 workspace; core source HEAD was `60d02ca23dfe74324ebc89051ef862900d3b6140` before documentation-only updates.
 

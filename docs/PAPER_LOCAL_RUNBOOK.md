@@ -1,5 +1,7 @@
 # Wolf-Coin: local research/paper pilot runbook
 
+**Current installed state (2026-11-23):** Patrol is registered. The packaged paper-only preview is running as systemd user unit `wolf-coin-paper-preview.service` at `http://127.0.0.1:18766/sports` and `/trading` (port 8765 belongs to another service). No owner command is needed to initialize Patrol. See `docs/KRATOS_PAPER_HOST_PROOF_2026-11-23.md`. The older setup procedure below is retained as historical/recovery reference; do not rerun initialization over the already-registered project.
+
 **Qualification:** first-light candidate only. No financial API, dealer connection, automation, trained prediction model or live bankroll transfer. Source has been locally verified in an isolated Python environment; KRATOS Patrol registration and native installation remain outstanding.
 
 ## Patrol registration (run in an authorized KRATOS interactive terminal)

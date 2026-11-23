@@ -1,5 +1,7 @@
 # Wolf-Coin — Tenfold + Cookpit construction law
 
+**Latest 2026-11-23:** The earlier registration blocker below is HISTORICAL. Patrol registered Wolf-Coin and its active main now uses the authorized Oracle helper, Tenfold P0 is READY (not PROVEN), and manual Cookpit KRATOS paper micro/heavy both PASS. See docs/KRATOS_PAPER_HOST_PROOF_2026-11-23.md. Future owner-requested registrations do not require manual terminal commands.
+
 **Status:** PREPARATION / NOT ACTIVE. No GPT supervisor required or assigned.
 **Workforce:** qualified Tenfold Gen1 for bounded engineering tasks; Cookpit manual micro/heavy verification and evidence collection. Do not register a sixth GPT shift or enable automatic project timers by inserting a profile.
 
