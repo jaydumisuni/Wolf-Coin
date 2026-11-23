@@ -57,7 +57,8 @@ def verify_paper_state(database: Path) -> dict:
 def serve(database: Path, account: str, port: int,
           *, lab_reports: tuple[Path, Path] | None = None,
           forecast_report: Path | None = None,
-          neural_report: Path | None = None) -> int:
+          neural_report: Path | None = None,
+          gate_reports: tuple[Path, Path] | None = None) -> int:
     identifier(account)
     if not 1024 <= port <= 65535:
         raise ResidentBlocked("port out of allowed loopback range")
@@ -65,7 +66,8 @@ def serve(database: Path, account: str, port: int,
         verify_paper_state(path)
         with ThreadingHTTPServer(("127.0.0.1", port), handler(path, account, lab_reports=lab_reports,
                                                          forecast_report=forecast_report,
-                                                         neural_report=neural_report)) as server:
+                                                         neural_report=neural_report,
+                                                         gate_reports=gate_reports)) as server:
             server.daemon_threads = True
             print(json.dumps({
                 "status": "PAPER_RESEARCH_ONLY",
@@ -90,6 +92,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--lab-walkforward", type=Path, help="local three-window report JSON")
     p.add_argument("--forecast-report", type=Path, help="read-only CPU model score comparison")
     p.add_argument("--neural-summary", type=Path, help="static CC0 neural evidence summary")
+    p.add_argument("--gates-sports", type=Path, help="source-bound read-only sports readiness report")
+    p.add_argument("--gates-trading", type=Path, help="source-bound read-only trading readiness report")
     p.add_argument("--check", action="store_true", help="verify source ledger without starting server")
     args = p.parse_args(argv)
     try:
@@ -100,9 +104,11 @@ def main(argv: list[str] | None = None) -> int:
         if (args.lab_first is None) != (args.lab_walkforward is None):
             raise ResidentBlocked("both local lab evidence files are required")
         lab=(args.lab_first,args.lab_walkforward) if args.lab_first is not None else None
+        gates=(args.gates_sports,args.gates_trading) if args.gates_sports and args.gates_trading else None
         return serve(args.db, args.account, args.port, lab_reports=lab,
                      forecast_report=args.forecast_report,
-                     neural_report=args.neural_summary)
+                     neural_report=args.neural_summary,
+                     gate_reports=gates)
     except (ResidentBlocked, ContractError, OSError, ValueError) as exc:
         print(json.dumps({"status": "BLOCKED", "reason": str(exc), "live_enabled": False}), file=__import__("sys").stderr)
         return 2

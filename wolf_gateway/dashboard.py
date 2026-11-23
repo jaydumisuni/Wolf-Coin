@@ -60,7 +60,7 @@ def page(domain: Domain, report: dict, database: Path) -> bytes:
 <nav><a class="{'selected' if domain is Domain.SPORTS else ''}" href="/sports">Sports</a>
 <a class="{'selected' if domain is Domain.TRADING else ''}" href="/trading">Trading</a>
 <a href="/lab">Strategy Lab</a><a href="/forecast">Forecast CPU</a><a href="/neural">Neural</a>
-<a href="/funding">Funding readiness</a></nav>
+<a href="/funding">Funding readiness</a><a href="/gates">Five gates</a></nav>
 <section class="grid"><div class="card"><p>Virtual balance</p><div class="value">{value('balance')}</div><small>Not real ZMW, deposits or winnings</small></div>
 <div class="card"><p>Virtual available</p><div class="value">{value('available')}</div><small>Committed exposure is excluded</small></div></section>
 <div class="card"><p>Account state</p><div class="value">{value('status')}</div><p>Reserved: {value('reserved')} · Ledger sequence: {value('seq')}</p></div>
@@ -89,7 +89,7 @@ def funding_page() -> bytes:
 <span class="tag">NO DEPOSIT / WITHDRAWAL ACCESS</span></div>
 <span class="tag">Independent release required</span></header>
 <nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
-<a href="/forecast">Forecast CPU</a><a href="/neural">Neural</a><a class="selected" href="/funding">Funding readiness</a></nav>
+<a href="/forecast">Forecast CPU</a><a href="/neural">Neural</a><a class="selected" href="/funding">Funding readiness</a><a href="/gates">Five gates</a></nav>
 <section class="grid">{item(sports)}{item(trading)}</section>
 <div class="card"><h2>Current blockers</h2>
 <p>No selected and permitted automated sportsbook; no verified broker/demo account;
@@ -156,7 +156,7 @@ def lab_page(reports: tuple[Path, Path] | None) -> bytes:
 <span class="tag">PRIVATE HISTORICAL RESEARCH · NO LIVE FUNDS</span></div></header>
 <nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
 <a class="selected" href="/lab">Strategy Lab</a><a href="/forecast">Forecast CPU</a><a href="/neural">Neural</a>
-<a href="/funding">Funding readiness</a></nav>
+<a href="/funding">Funding readiness</a><a href="/gates">Five gates</a></nav>
 <section class="grid">{first}{second}</section>
 <div class="card"><h2>Engineering verdict</h2>
 <p>A successful test suite proves deterministic software behavior, not a profitable strategy.
@@ -214,7 +214,7 @@ def forecast_page(report_path: Path | None) -> bytes:
 <span class="tag">UNQUALIFIED RESEARCH · NO MONEY EXECUTION</span></div></header>
 <nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
 <a href="/lab">Strategy Lab</a><a class="selected" href="/forecast">Forecast CPU</a><a href="/neural">Neural</a>
-<a href="/funding">Funding readiness</a></nav>{panel}
+<a href="/funding">Funding readiness</a><a href="/gates">Five gates</a></nav>{panel}
 <div class="card"><h2>Independent qualification</h2>
 <p>The SUP Director requires a source-qualified learning package. Its
 current status is AWAIT_SOURCE_QUALIFICATION. SUP-Bit's resource planner
@@ -292,7 +292,7 @@ def neural_page(report_path: Path | None) -> bytes:
 <span class="tag">RESEARCH ONLY · NO SUP TRAINING LEASE · NO FUNDS</span></div></header>
 <nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
 <a href="/lab">Strategy Lab</a><a href="/forecast">Forecast CPU</a>
-<a class="selected" href="/neural">Neural</a><a href="/funding">Funding readiness</a></nav>
+<a class="selected" href="/neural">Neural</a><a href="/funding">Funding readiness</a><a href="/gates">Five gates</a></nav>
 {content}
 <div class="card"><h2>Engineering boundary</h2>
 <p>Public-domain CC0 results only for neural training. The restricted historical
@@ -304,9 +304,81 @@ SUP-Bit has NOT trained this MLP. No bookmaker edge or future profit is proven.<
 
 
 
+
+def five_gate_page(sources: tuple[Path, Path] | None) -> bytes:
+    """Display two sealed local read-only NO-LIVE qualification reports."""
+    def e(value):
+        return escape(str(value),quote=True)
+    reports=[]
+    if sources is not None and len(sources)==2:
+        for file, expected_domain in zip(sources,("sports","trading")):
+            try:
+                path=file.expanduser().resolve(strict=True)
+                if not path.is_file() or not 0 < path.stat().st_size < 50_000:
+                    continue
+                item=json.loads(path.read_text(encoding="utf-8"))
+                if (not isinstance(item,dict) or
+                    item.get("schema")!="wolf.five-delivery-gates.v1" or
+                    item.get("domain")!=expected_domain or
+                    item.get("status")!="NOT_FUNDING_READY" or
+                    item.get("report_only") is not True or
+                    item.get("real_money_permitted") is not False or
+                    item.get("deposit_allowed") is not False or
+                    item.get("completed_real_money_gates")!=0 or
+                    item.get("total_delivery_gates")!=5 or
+                    not isinstance(item.get("gates"),list) or
+                    len(item["gates"])!=5 or
+                    any(not isinstance(g,dict) or
+                        g.get("status")!="BLOCKED_INDEPENDENT_ACCEPTANCE"
+                        for g in item["gates"])):
+                    continue
+                reports.append(item)
+            except (OSError,UnicodeError,ValueError,TypeError):
+                continue
+    sections=[]
+    if len(reports)!=2:
+        sections=['<div class="card"><p>Verified five-gate evidence unavailable. No live approval exists.</p></div>']
+    else:
+        for report in reports:
+            lines=[]
+            for entry in report["gates"]:
+                if not isinstance(entry.get("unmet_requirements"),list):
+                    continue
+                needs="; ".join(e(x) for x in entry["unmet_requirements"])
+                lines.append(
+                    f'<tr><td>{e(entry.get("gate"))}</td>'
+                    f'<td>BLOCKED</td><td>{needs}</td></tr>'
+                )
+            sections.append(
+                f'<div class="card"><h2>{e(report["domain"].title())}: '
+                f'{e(report["completed_real_money_gates"])} / 5 accepted</h2>'
+                f'<table><thead><tr><th>Gate</th><th>Status</th><th>Still required</th></tr></thead>'
+                f'<tbody>{"".join(lines)}</tbody></table></div>'
+            )
+    return (f"""<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="60">
+<title>Wolf-Coin · Five Gate Readiness</title><style>{STYLE}</style></head>
+<body><main><header><div><p>WOLF-COIN · INDEPENDENT RELEASE GATES</p>
+<h1>Five delivery gates</h1>
+<span class="tag">PAPER ONLY · NO MONEY APPROVED</span></div></header>
+<nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
+<a href="/lab">Strategy Lab</a><a href="/forecast">Forecast CPU</a>
+<a href="/neural">Neural</a><a href="/funding">Funding readiness</a>
+<a class="selected" href="/gates">Five gates</a></nav>
+{"".join(sections)}
+<div class="card"><p>Local machine tests and hypothetical returns do not
+establish a licensed account, an executable market price, a financial edge or
+an independent signed release. This is a read-only gate inventory.</p></div>
+<footer>No account credentials · No deposits · No provider effect interface</footer>
+</main></body></html>""").encode("utf-8")
+
+
+
 def handler(db: Path, account_id: str, *, lab_reports: tuple[Path, Path] | None = None,
             forecast_report: Path | None = None,
-            neural_report: Path | None = None):
+            neural_report: Path | None = None,
+            gate_reports: tuple[Path, Path] | None = None):
     class DashboardHandler(BaseHTTPRequestHandler):
         def _send(self, code: int, data: bytes, content_type: str) -> None:
             self.send_response(code)
@@ -331,6 +403,8 @@ def handler(db: Path, account_id: str, *, lab_reports: tuple[Path, Path] | None 
                 return self._send(200,forecast_page(forecast_report),'text/html; charset=utf-8')
             if path == '/neural':
                 return self._send(200,neural_page(neural_report),'text/html; charset=utf-8')
+            if path == '/gates':
+                return self._send(200,five_gate_page(gate_reports),'text/html; charset=utf-8')
             if path == '/funding':
                 return self._send(200,funding_page(),'text/html; charset=utf-8')
             if path == '/api/funding-readiness':
