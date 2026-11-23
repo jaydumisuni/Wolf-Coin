@@ -36,9 +36,9 @@ def _checked_source(source:Path)->None:
             v=db.execute("SELECT value FROM app_meta WHERE key='schema'").fetchone()
         except sqlite3.DatabaseError as exc:
             raise BackupRefused("missing Wolf application schema") from exc
-        if v is None or v[0]!="1":
+        if v is None or v[0] not in ("1","2"):
             raise BackupRefused("unsupported Wolf application backup schema")
-    ApplicationStore(source).verify_audit()
+        ApplicationStore.verify_audit_connection(db)
 
 
 def _new_target(target:Path)->None:
@@ -64,6 +64,12 @@ def _consistent_copy(source:Path,target:Path)->None:
         raise
 
 
+def _read_only_audit_count(path:Path)->int:
+    """Validate backup without silently migrating/mutating archival input."""
+    with sqlite3.connect(path.as_uri()+"?mode=ro",uri=True) as db:
+        return ApplicationStore.verify_audit_connection(db)
+
+
 def backup(db_path:Path,output:Path)->dict:
     source=Path(db_path)
     destination=Path(output)
@@ -79,12 +85,11 @@ def backup(db_path:Path,output:Path)->dict:
         "operation":"BACKUP",
         "file_sha256":sha256(destination.read_bytes()).hexdigest(),
         "size_bytes":destination.stat().st_size,
-        "records_checked":ApplicationStore(destination).verify_audit(),
+        "records_checked":_read_only_audit_count(destination),
         "credential_material_present":False,
         "encrypted_by_backend":False,
         "requires_native_host_encryption":True,
         "external_signatures":False,
-        "live_enabled":False,
     }
 
 
@@ -117,7 +122,6 @@ def restore(backup_file:Path,new_db:Path)->dict:
         "registered_accounts_preserved":True,
         "old_browser_session_credentials_restored":False,
         "native_host_must_restore_browser_profiles_separately":True,
-        "live_enabled":False,
     }
 
 
@@ -135,7 +139,7 @@ def main(argv=None)->int:
         return 0
     except (BackupRefused,ContractError,sqlite3.DatabaseError,OSError,ValueError) as exc:
         print(json.dumps({"status":"BLOCKED","error":type(exc).__name__,
-                          "live_enabled":False}),file=sys.stderr)
+                          "operation":"BACKUP_OR_RESTORE"}),file=sys.stderr)
         return 2
 
 

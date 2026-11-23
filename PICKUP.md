@@ -1,5 +1,11 @@
 # Wolf-Coin — zero-context pickup
 
+## Product application no longer has forced research/PAPER mode (2026-11-24)
+
+The user explicitly directed removal of the blanket restriction. Backend candidate `0.1.0a10` now has **no default application `RESEARCH_ONLY` path**, does not expose response-wide `live_enabled=false` or `financial_execution_authorized=false`, and removes the `--research-unkeyed` product CLI. `context.route` selects intelligence/browser operations or scoped betting/trading intents by situational context. Native financial receipts are reconciled; absent integration is not mislabeled as a disabled capability. Schema v1→v2 upgrades preserve historical record/audit as `ANALYSIS_ARCHIVED`. Historic lab paper simulator is **not** a product mode; existing trained source and KRATOS a6 lab remain unchanged. See `CURRENT.md` and `docs/WOLF_APPLICATION_BACKEND_HANDOFF_2026-11-23.md`.
+
+---
+
 ## Context-aware backend correction — 2026-11-24
 
 The Wolf-Coin application is **not globally research-only**. Isolated a9 adds `context.route` to the signed native bridge for learning, browser navigation/observation/actions, financial sync and sports/trading action selection. A financial proposal with matching account, site permission, fresh evidence and scoped budget is `BROWSER_HANDOFF_READY`, while missing facts lead to specific discovery/recovery steps instead of blanket locking. Cancellation and position closure don't require a new spending budget. A native-reported action is pending platform readback; no genuine real order or settlement was verified. Source implementation `40e5937`, offline wheel SHA `3fdb152d158b5837c2d01390531a244c3f275bd19dde074d326661d4bc0e2438`, 404/404 source tests, Cookpit micro/heavy PASS, installed signed-IPC proof `77e6151ea4dff2bbdc45c06ba815907b8b6ddde3c54d16dc647d05349e62357f`. This is a deterministic orchestration path, **not** a trained browser model. Read `CURRENT.md` and the updated backend handoff. Active paper service a6, previous models and frontend remain untouched.

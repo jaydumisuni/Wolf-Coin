@@ -236,7 +236,7 @@ def test_old_observation_retained_without_overwriting_current(app):
     assert read(store)["data"]["observation_count"]==3
 
 
-def test_research_decision_never_issues_browser_actions_or_live_orders(app):
+def test_financial_decision_is_native_workflow_not_forced_analysis_mode(app):
     store,_=app
     register(store)
     activate(store)
@@ -244,13 +244,17 @@ def test_research_decision_never_issues_browser_actions_or_live_orders(app):
     result=send(store,"d1","decision.propose",{
         "domain":"sports","account_id":"user1","decision_id":"candidate1",
         "observation_id":"obs1","instrument":"fixture_one",
-        "action_kind":"RESEARCH_BET","proposed_amount":"0.50"})
+        "action_kind":"PLACE_BET","proposed_amount":"0.50",
+        "browser_capabilities":["PLACE_BET"],
+        "platform_permissions":["TRANSACT"],"money_budget":"2.00",
+        "target_id":"offer_1"})
     assert result["status"]=="OK"
-    assert result["data"]["may_submit_order"] is False
-    assert result["data"]["live_execution_authorized"] is False
+    assert result["data"]["status"]=="BROWSER_HANDOFF_READY"
+    assert result["data"]["native_workflow_ready"] is True
+    assert result["data"]["context_selection"]["native_browser_handoff"]["kind"]=="PLACE_BET"
     bad=send(store,"d2","decision.receipt",{
         "domain":"sports","account_id":"user1","decision_id":"candidate1",
-        "outcome":"SETTLED","result_ref":"live_order_1"})
+        "outcome":"SETTLED","result_ref":"unverified_result"})
     assert bad["status"]=="REJECTED"
     accepted=send(store,"d3","decision.receipt",{
         "domain":"sports","account_id":"user1","decision_id":"candidate1",
@@ -262,6 +266,7 @@ def test_research_decision_never_issues_browser_actions_or_live_orders(app):
     assert replay["status"]=="REJECTED"
     decisions=send(store,"dl","decisions.list",{"domain":"sports","account_id":"user1"})
     assert decisions["data"]["decisions"][0]["status"]=="UNKNOWN"
+    assert decisions["data"]["execution_handoff"]=="NATIVE_BROWSER"
 
 
 def test_corrupt_audit_chain_is_detected(app):
@@ -278,9 +283,14 @@ def test_bounded_line_ipc_subprocess_and_no_listener(tmp_path):
     db=tmp_path/"child.sqlite3"
     base={"schema":REQUEST_SCHEMA,"request_id":"one",
           "operation":"bridge.capabilities","payload":{}}
-    p=subprocess.run([sys.executable,"-m","wolf_app.bridge","--db",str(db),"--research-unkeyed"],
-        input=json.dumps(base)+"\n"+json.dumps({**base,"request_id":"two",
-                      "operation":"accounts.list"})+"\n",
+    from wolf_app.bridge import _initialize_native_key
+    key=tmp_path/"native.key"
+    _initialize_native_key(key)
+    p=subprocess.run([sys.executable,"-m","wolf_app.bridge",
+                      "--db",str(db),"--key-file",str(key)],
+        input=signed_request(base,key.read_bytes())+"\n"+
+              signed_request({**base,"request_id":"two","operation":"accounts.list"},
+                             key.read_bytes())+"\n",
         capture_output=True,text=True,timeout=10,
         cwd=Path(__file__).resolve().parents[1],
         env={**os.environ,"PYTHONPATH":str(Path(__file__).resolve().parents[1])})
@@ -306,7 +316,9 @@ def test_separate_domain_registration_and_no_fake_live_capabilities(app):
     register(store)
     register(store,domain="trading",account="user1",request="other")
     caps=send(store,"cap","bridge.capabilities",{})["data"]
-    assert caps["live_order_submission"] is False
+    assert caps["financial_workflow"]=="CONTEXTUAL_NATIVE_BROWSER_HANDOFF"
+    assert caps["financial_intent_kinds"]==["PLACE_BET","CANCEL_BET","PLACE_TRADE","CLOSE_POSITION"]
+    assert "live_order_submission" not in caps
     assert caps["all_observations_external_unverified"] is True
     assert len(send(store,"list","accounts.list",{})["data"]["accounts"])==2
 
@@ -356,7 +368,7 @@ def test_sync_plan_queue_claim_observation_receipt_and_restart(app):
         "session_ref":"local_tab_a"})
     assert claimed["status"]=="OK"
     assert claimed["data"]["browser_command"]["kind"]=="OBSERVE_ACCOUNT"
-    assert claimed["data"]["money_action"] is False
+    assert claimed["data"]["operation_class"]=="OBSERVATION"
     after=ApplicationStore(db)
     cannot_claim_again=send(after,"c2","sync.claim",{
         "domain":"sports","account_id":"user1","job_id":"sync1",
@@ -696,8 +708,12 @@ def test_conflicted_account_cannot_propose_even_research_action(app):
     proposed=send(store,"d1","decision.propose",{
         "domain":"sports","account_id":"user1","decision_id":"bet_proposal",
         "observation_id":"net1","instrument":"game_1",
-        "action_kind":"RESEARCH_BET","proposed_amount":"0.50"})
-    assert proposed["status"]=="REJECTED"
+        "action_kind":"PLACE_BET","proposed_amount":"0.50",
+        "browser_capabilities":["PLACE_BET"],"platform_permissions":["TRANSACT"],
+        "money_budget":"5.00","target_id":"offer"})
+    assert proposed["status"]=="OK"
+    assert proposed["data"]["status"]=="CONTEXT_STEP_REQUIRED"
+    assert proposed["data"]["selected_next_step"]=="RECONCILE_CONFLICTED_FINANCIAL_STATE"
 
 
 def test_rejected_untrusted_request_id_is_not_reflected(app):

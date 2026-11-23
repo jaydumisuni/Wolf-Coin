@@ -38,7 +38,7 @@ def test_intelligence_research_works_without_browser_login_or_financial_gate():
         assert result["state"]=="READY"
         assert result["next_step"]=="INTELLIGENCE_EVALUATE"
         assert result["native_browser_handoff"]["kind"]=="INTELLIGENCE_EVALUATE"
-        assert result["global_feature_lock"] is False
+        assert "global_feature_lock" not in result
 
 
 @pytest.mark.parametrize("goal,tool",[
@@ -63,7 +63,7 @@ def test_navigation_can_begin_without_financial_or_site_transaction_permission()
     assert route["state"]=="READY"
     assert route["native_browser_handoff"]["kind"]=="NAVIGATE"
     assert route["financial_action"] is False
-    assert route["global_feature_lock"] is False
+    assert "global_feature_lock" not in route
 
 
 def test_missing_browser_affordance_is_discovery_not_permanent_disabling():
@@ -71,7 +71,7 @@ def test_missing_browser_affordance_is_discovery_not_permanent_disabling():
         capabilities=["INSPECT"],permissions=["OBSERVE","INTERACT"],target="button_1")
     assert result["state"]=="DISCOVER"
     assert result["next_step"]=="INSPECT_BROWSER_CAPABILITIES"
-    assert not result["global_feature_lock"]
+    assert "global_feature_lock" not in result
 
 
 def test_account_login_recovery_and_sync_observe_are_contextual():
@@ -105,7 +105,7 @@ def test_financial_capabilities_can_be_routed_when_context_supports_them(goal,do
     else:
         assert "requested_amount" not in result["native_browser_handoff"]
     assert result["financial_action"] is True
-    assert result["global_feature_lock"] is False
+    assert "global_feature_lock" not in result
     assert result["order_or_bet_submitted"] is False
     assert result["requires_native_host_result"] is True
 
@@ -254,7 +254,7 @@ def test_financial_unknown_site_support_or_permission_suggests_next_step():
                     requested_amount="1.0",money_budget="5.0")
     assert x["state"]=="DISCOVER"
     assert x["next_step"]=="INSPECT_PLATFORM_TRANSACTION_CAPABILITY"
-    assert not x["global_feature_lock"]
+    assert "global_feature_lock" not in x
 
 
 def test_unknown_financial_evidence_freshness_requests_discovery_not_action():
@@ -264,7 +264,7 @@ def test_unknown_financial_evidence_freshness_requests_discovery_not_action():
         target="offer_one",requested_amount="1.00",money_budget="3.00")
     assert result["next_step"]=="VERIFY_ACCOUNT_EVIDENCE_STATE"
     assert result["native_browser_handoff"] is None
-    assert result["global_feature_lock"] is False
+    assert "global_feature_lock" not in result
 
 
 def test_money_result_cannot_self_claim_final_settlement(tmp_path):
