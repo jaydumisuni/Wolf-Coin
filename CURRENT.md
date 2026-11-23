@@ -45,3 +45,11 @@ Recover current main and feature HEAD, original P0–P12 authority, WX candidate
 - Isolated Python 3.13 test run on exactly the complete candidate: **25/25 passed**. New CLI, server and regression files were copied to the draft feature branch and every changed code/test file's Git blob hash was checked against the locally tested bytes.
 - `docs/PAPER_LOCAL_RUNBOOK.md` describes native (no Docker) setup **after** authorized Patrol registration; its file identity was checked against the reviewed source. This is not a claim that KRATOS has been installed or that a real demonstration has run on that host.
 - Actual required Patrol root is still missing. User-facing state: **research/paper source candidate available; KRATOS installed use and unattended real-money use NOT READY**. Tenfold campaign P0 remains BLOCKED until the intended privileged initialization succeeds, and no GPT supervisor or timer is assigned.
+
+## 2026-11-23 resident and Patrol execution diagnosis
+
+- Root cause of failed native registration from Oracle: user systemd oracle-node.service explicitly has NoNewPrivileges=true. Its terminal.exec subprocesses inherit NoNewPrivs: 1; Patrol's supported project_admin.create_project_root invokes sudo -n /usr/bin/install -d for the root-owned /home/kratos/projects directory. Therefore a normal authorized host terminal is needed; do not disable or bypass the existing Oracle security setting.
+- New public-safe native-terminal bootstrap: scripts/kratos_patrol_paper_bootstrap.sh. It uses Patrol's own init-project, verifies ownership, obtains this review branch, validates fixed source Git object hashes, runs tests, and seeds only virtual paper balances. It has NOT been run on KRATOS.
+- Paper-only Linux resident candidate: wolf_gateway/resident.py + tests/test_resident.py. It holds one instance lock per ledger, refuses corrupt/uninitialized data, serves only read-only loopback pages, and releases the kernel-held lock on forced process termination.
+- 31/31 tests passed in the chat workspace, Python 3.13; three changed file Git blob SHA identities verified against this GitHub branch. This is not deployed KRATOS proof, a profitable model, sports provider permission, a live trading connector or production admission.
+- Tenfold P0 still BLOCKED on KRATOS; no new GPT supervisor or schedule; no accounts connected, no real-money actions.
