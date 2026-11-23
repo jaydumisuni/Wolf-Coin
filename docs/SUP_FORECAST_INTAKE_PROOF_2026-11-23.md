@@ -49,3 +49,19 @@ The candidate is ready for source-qualification **review**, not neural realizati
 5. Evaluate a genuinely supported tabular/temporal neural method, *then* benchmark optional SUP-Bit compression and CPU footprint. No release based solely on training loss.
 
 **No financial effects, network betting automation, account credentials or real funds used.** The running paper console remains a separate safe runtime.
+
+
+## Native KRATOS release and manual Cookpit review
+
+- Final source commit for UI and package: `7b56d694cade3ee70524a00a495a570d0b3f8faf`.
+- Frozen standalone Python wheel `wolf_coin_core-0.1.0a3-py3-none-any.whl` SHA-256 `6e368eaf913de6846d0f1e189bf6835476661c78e71bf2e01bbbdfd188dc08d5`. Offline build and install passed.
+- Core user-service release installed in `/home/kratos/.local/share/wolf-coin-paper/releases/7b56d694cade3ee70524a00a495a570d0b3f8faf/venv`; no NumPy dependency added to the core paper resident. The optional `research` extra is separate from the read-only service.
+- Packaged `wolf-lab-cpu` executed in a separate research-only venv using already installed host NumPy, and produced **exactly matching** JSON feature corpus, score report and SUP Director request compared with the frozen source run.
+- Source-bound SUP Director result remains `AWAIT_SOURCE_QUALIFICATION`, not a trained neural model. The independent unqualified-data check is maintained.
+- Read-only UI now includes `http://127.0.0.1:18766/forecast`, visible in Brave on the KRATOS desktop. Sports, Trading, Strategy Lab, Forecast CPU, Funding and Health all return HTTP 200. POST is denied with HTTP 405; health advertises `PAPER`, `live_enabled=false`, `remote_enabled=false`; service listens only on `127.0.0.1:18766`.
+- Service startup remains pinned to exact source commit. Existing virtual ledger was not reset. Previous release and service definition were retained for rollback under `.workspace/proof-history/sup-cpu-replay-20261123/previous-paper-service.unit`.
+- Cookpit manual **micro PASS**: 14 focused tests, exact source/input hashes, SUP real stage, negative predictive advantage; receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-sup-forecast-cpu/evidence/20261123T123356Z-micro-fd39602851c6.json`.
+- Cookpit manual **heavy PASS**: 227/227 full tests, exact wheel hash, installed release, HTTP and no-live controls, SUP-Bit read-only resource proof; receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-sup-forecast-cpu/evidence/20261123T123358Z-heavy-fd39602851c6.json`.
+- These are product source/runtime acceptance checks, **not** independent data licensing qualification, profitable-edge evidence, SUP training approval, SUP-Bit production admission or real-money release.
+
+**Next frontier:** independent source/timestamp/use-rights review before SUP neural realization, followed by genuinely supported temporal/tabular model, qualified CPU training lease, and a new untouched future period. Do not use 2025/26 as unseen data or initiate bets until those conditions and independent real-money risk/provider gates are fulfilled.

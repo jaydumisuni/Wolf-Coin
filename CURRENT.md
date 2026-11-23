@@ -16,6 +16,15 @@
 
 ---
 
+## Current installed forecast research tool — 2026-11-23
+
+- Wolf-Coin **0.1.0a3** installed on KRATOS at source `7b56d694cade3ee70524a00a495a570d0b3f8faf`. Read-only Forecast CPU page at `http://127.0.0.1:18766/forecast`, alongside original Sports, Trading and Strategy Lab.
+- Actual SUP Director G5 returned **AWAIT_SOURCE_QUALIFICATION** for the hashed 1,520-row source candidate; no training executed or authority granted.
+- Real validation: bookmaker Brier **0.578663803** versus best CPU candidate **0.580325109**, so **no model admitted or profit proved**.
+- SUP-Bit v14 delivered read-only KRATOS resource-fit estimate only; original 0.39-second CPU job measured peak ~41,148 KiB. No football neural model trained or compression performed.
+- Exact installed CPU research CLI reproduced corpus/reports; Cookpit manual micro and heavy **PASS** (227 tests) at installed source. No GPT supervisor or real-money execution.
+- Evidence/rollback details: `docs/SUP_FORECAST_INTAKE_PROOF_2026-11-23.md`. Remain blocked on independent source timing/rights qualification, then actual neural method and fresh untouched test.
+
 ## Latest SUP forecasting evidence — 2026-11-23
 
 - Real SUP G5 Director `sup director` received Wolf-Coin's hashed football learning candidate; stage `AWAIT_SOURCE_QUALIFICATION`, not training. Exact source-bound corpus has 1,520 matches; private train/validation/previously-examined diagnostic groups.

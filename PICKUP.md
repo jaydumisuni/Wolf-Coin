@@ -1,5 +1,9 @@
 # Wolf-Coin — zero-context pickup
 
+## Latest host state: Wolf-Coin 0.1.0a3
+
+KRATOS active resident source `7b56d694cade3ee70524a00a495a570d0b3f8faf`, `wolf-coin-paper-preview.service`, Forecast CPU page `http://127.0.0.1:18766/forecast`. Native wheel SHA in `docs/SUP_FORECAST_INTAKE_PROOF_2026-11-23.md`. Cookpit manual micro/heavy PASS on exact installed source, 227 tests. SUP G5 source-qualification still WAIT; CPU candidate failed independent score baseline; no real funding or neural training. Previous service unit preserved for rollback.
+
 ## SUP/SUP-Bit forecasting intake
 
 Real SUP G5 `sup director` is now bound to a Wolf-Coin 1,520-match private learning candidate from the isolated KRATOS construction worktree. Result: `AWAIT_SOURCE_QUALIFICATION` (not training); best CPU forecaster fails bookmaker-probability validation. SUP-Bit v14 has supplied **read-only resource-fit** evidence only, not neural sports training. Recover `CURRENT.md`, `docs/SUP_FORECAST_INTAKE_PROOF_2026-11-23.md` and local private receipts before future neural work; preserve no-profit/no-money truth. No SUP production merge or supervisor was added.
