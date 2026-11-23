@@ -4,6 +4,7 @@
 
 - Wolf-Coin **must select what capability to use, when and on which site/account**; it is not a research-only trading bot. The a8 `RESEARCH_ONLY`-only decision path was overly narrow, not an approved product restriction. Isolated a9 candidate implements signed IPC `context.route` for learning, research, browser interaction, financial sync, trading/betting and position exits.
 - The router chooses `READY`, `DISCOVER` or `RECOVER` based on actual task, account/domain, authenticated session, freshness/conflicts, site affordance and scoped permissions. **No global capability lock was added.** Context-ready financial `decision.propose` persists `BROWSER_HANDOFF_READY`; a native submission receipt remains awaiting platform reconciliation.
+- Source implementation `40e5937` and offline wheel a9 SHA-256 `3fdb152d158b5837c2d01390531a244c3f275bd19dde074d326661d4bc0e2438` pass **404/404 tests**; Cookpit micro/heavy PASS, with an installed signed-IPC proof SHA `77e6151ea4dff2bbdc45c06ba815907b8b6ddde3c54d16dc647d05349e62357f`. No new lock or money/website execution was introduced.
 - This is deterministic action selection/handoff, not a trained general browser model, a connected Chromium/WebView host, a real order or proof of profitability. Frontend/browser/installer implementation remains with its owner; paper model and active service unchanged. See `docs/WOLF_APPLICATION_BACKEND_HANDOFF_2026-11-23.md` and `contracts/wolf-app-bridge-v1.schema.json`.
 
 ---
