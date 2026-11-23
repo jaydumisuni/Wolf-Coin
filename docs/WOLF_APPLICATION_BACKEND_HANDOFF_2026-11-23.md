@@ -127,3 +127,13 @@ User-approved design remains authoritative: Wolf-Coin should know **what, when, 
 - Real browser automation and actual financial actions will be verified after integration of the separately built native browser, as the user specified.
 
 This a10 section is the current contract; earlier a8/a9 notes below document historical engineering, not operative product restrictions.
+
+
+## Verified a10 mode removal — 2026-11-24
+
+- Implementation commit `b29288fe14ea30d74012a7ebb0bedc80ba8c71e6`. The isolated `0.1.0a10` native wheel `wolf_coin_core-0.1.0a10-py3-none-any.whl` SHA-256 `a2974856bf5c325183acb8e447d0405c49b8bef6c03db04abb923711ebf6f9cf` was built and installed on KRATOS without network dependencies.
+- Actual installed native signed-IPC rehearsal verified **response v2 without global false mode flags**, learning/navigation, account context recovery, `PLACE_BET` intent `BROWSER_HANDOFF_READY`, synthetic native result `AWAITING_PLATFORM_RECONCILIATION`, duplicate result refusal, and restored account session revalidation. Obsolete `RESEARCH_BET` was refused as an application decision, not silently converted to a paper-only mode.
+- Accepted private evidence `/home/kratos/projects/Wolf-Coin/.workspace/proof-history/no-global-app-mode-20261124/native-app-mode-removal.json` SHA-256 `202cc5c3d1b8941ac5df09a33b958ecfc583eb8cc769940c20d782b36338117b`. The test fixture and key are private, separate from the user's frontend.
+- Source suite **409/409 PASS**, including legacy v1→v2 schema conversion, cached old status archival, signed native transport, old schema backup without unintended mutation, and contextual browser/financial routing. Cookpit micro **PASS** (**75 focused tests**) receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-remove-forced-app-mode/evidence/20261123T231441Z-micro-74bf8e8ec9d7.json`; Cookpit heavy **PASS** (**409 tests**, installed wheel, legacy a6 lab unchanged) receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-remove-forced-app-mode/evidence/20261123T231443Z-heavy-74bf8e8ec9d7.json`. Earlier Cookpit source-path negative receipts were retained and corrected. No recurring new supervisor.
+- An old historical PAPER-only laboratory executable may still exist in the original a6 release and as source fixture; it is **not a Wolf-Coin application operating mode**, and is not used in `wolf_app` selection. Existing training evidence/strategy weights, account test data and the independently built frontend are preserved.
+- Real browser operation and financial settlement remain untested pending the user's requested post-integration live test. This is a technical boundary, **not** a hidden global feature lock.

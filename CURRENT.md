@@ -5,6 +5,7 @@
 - **The old application default `RESEARCH_ONLY` restriction was not user-approved and is removed** in the isolated `0.1.0a10` backend. Financial actions remain context-selectable: `PLACE_BET`, `CANCEL_BET`, `PLACE_TRADE` and `CLOSE_POSITION`. Intelligence research/learning is available as a separate task, not a restrictive app operating mode.
 - The unconditional `live_enabled=false`/`financial_execution_authorized=false` response keys were removed; the response protocol is now `wolf.app.bridge.v2`, request still `wolf.app.request.v1`. The `--research-unkeyed` product CLI flag is removed. Native browser workflow selection and actual platform outcome receipts remain distinct: only the host/browser can execute and verify an actual order.
 - Existing v1 app DBs migrate to schema 2, archiving old status labels as `ANALYSIS_ARCHIVED` with audit preservation, including cached idempotent outputs. Historical paper simulator and trained research source are retained as development evidence, **not a product mode**. KRATOS paper lab service and user frontend remain untouched.
+- Source implementation `b29288f`, a10 offline wheel SHA-256 `a2974856bf5c325183acb8e447d0405c49b8bef6c03db04abb923711ebf6f9cf`, **409/409 PASS**, Cookpit micro/heavy PASS, installed signed IPC proof SHA-256 `202cc5c3d1b8941ac5df09a33b958ecfc583eb8cc769940c20d782b36338117b`. No real website or money action has been performed.
 - See `docs/WOLF_APPLICATION_BACKEND_HANDOFF_2026-11-23.md` for current a10 interface; older a8/a9 notes are historical, not current restrictions.
 
 ---
