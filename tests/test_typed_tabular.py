@@ -9,6 +9,7 @@ from __future__ import annotations
 from copy import deepcopy
 from hashlib import sha256
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -139,6 +140,7 @@ def test_pure_stdlib_replay_with_all_site_packages_disabled(real_proof,tmp_path)
          "--frozen",str(frozen),"--data-root",str(data),
          "--candidate",str(candidate),"--output",str(result)],
         cwd=Path(__file__).resolve().parents[1],
+        env={**os.environ,"PYTHONPATH":str(Path(__file__).resolve().parents[1])},
         text=True,capture_output=True,check=False,timeout=20,
     )
     assert completed.returncode==0,completed.stderr
@@ -201,6 +203,7 @@ def test_training_replay_cli_in_research_mode(real_proof,tmp_path):
          "--frozen",str(frozen),"--data-root",str(data),
          "--output",str(result)],
         cwd=Path(__file__).resolve().parents[1],
+        env={**os.environ,"PYTHONPATH":str(Path(__file__).resolve().parents[1])},
         text=True,capture_output=True,check=False,timeout=20)
     assert job.returncode==0,job.stderr
     report=json.loads(result.read_text())
@@ -220,6 +223,7 @@ def test_guarded_outputs_refuse_overwriting_existing_proof(real_proof,tmp_path):
          "--frozen",str(frozen),"--data-root",str(data),
          "--candidate",str(candidate),"--output",str(result)],
         cwd=Path(__file__).resolve().parents[1],
+        env={**os.environ,"PYTHONPATH":str(Path(__file__).resolve().parents[1])},
         text=True,capture_output=True,check=False,timeout=20,
     )
     assert completed.returncode==2 and result.read_text()=="preexisting"
