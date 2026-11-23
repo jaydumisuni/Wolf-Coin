@@ -37,3 +37,11 @@ Recover current main and feature HEAD, original P0–P12 authority, WX candidate
 - Cookpit **manual** source micro PASS and heavy PASS; remote head and eight critical code/test file identities were independently read back.
 - See `docs/FIRST_LIGHT_PROOF_2026-11-23.md` for exact commands, source digest bindings, limitations and retained KRATOS receipts.
 - No installed KRATOS runtime, real provider adapter, accepted P0/P1/WX milestone, source-root registration, GPT supervisor or live-capital authority has been established. Tenfold's P0 remains BLOCKED by Patrol's required privileged root creation.
+
+## Manual paper operator and loopback dashboard (2026-11-23 follow-up)
+
+- Extended the first-light candidate with `wolf-paper` for **virtual** sports/trading balances, identity-fenced virtual deposits/withdrawals, status/freeze, and manually entered read-only 1X2 odds analysis. There is no live stake, broker action, funding or auto-execution endpoint.
+- Added `wolf-dashboard` bound to `127.0.0.1` only, serving read-only `/sports` and `/trading` pages and GET `/health`; POST is rejected. It is a manual viewer, not a background decision worker.
+- Isolated Python 3.13 test run on exactly the complete candidate: **25/25 passed**. New CLI, server and regression files were copied to the draft feature branch and every changed code/test file's Git blob hash was checked against the locally tested bytes.
+- `docs/PAPER_LOCAL_RUNBOOK.md` describes native (no Docker) setup **after** authorized Patrol registration; its file identity was checked against the reviewed source. This is not a claim that KRATOS has been installed or that a real demonstration has run on that host.
+- Actual required Patrol root is still missing. User-facing state: **research/paper source candidate available; KRATOS installed use and unattended real-money use NOT READY**. Tenfold campaign P0 remains BLOCKED until the intended privileged initialization succeeds, and no GPT supervisor or timer is assigned.
