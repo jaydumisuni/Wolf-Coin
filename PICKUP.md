@@ -1,5 +1,9 @@
 # Wolf-Coin — zero-context pickup
 
+## Current KRATOS release 0.1.0a4
+
+Source `f5e7acac87db6e30d7bd4fa928eb7036cf5c1680` installed and running, systemd user unit `wolf-coin-paper-preview.service`. Open `http://127.0.0.1:18766/neural` on KRATOS. All seven local routes passed. MLP code and data were frozen at `170a555` before the 2026/27 holdout and were NOT retuned. Only 45 match outcomes in the new source, model Brier 0.611911853, class prior 0.657353561, confidence interval includes zero. SUP is `AWAIT_CAPABILITY_SNAPSHOT`, no money or training authority. Cookpit 251/251 PASS at installed head. Recover `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md` for exact evidence/rollback.
+
 ## Latest CC0 neural research (2026-11-23)
 
 Frozen neural source HEAD `170a555` used OpenFootball CC0-only results. The 2026/27 snapshot has just 45 scored matches through September 20, and the 2025/26 source is missing 27 scored fixtures. MLP holdout Brier 0.611911853 vs class-prior 0.657353561, with bootstrap interval crossing zero; no financial edge. A second source exactly matched 760 historical final scores. SUP G5 Director advances to AWAIT_CAPABILITY_SNAPSHOT from CC0 machine research receipt (no signed independent review or execution authority). Read `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md` and immutable private receipts. Do not treat 2026/27 as untouched again.

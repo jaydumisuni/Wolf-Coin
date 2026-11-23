@@ -33,3 +33,18 @@
 The source adds a read-only `/neural` evidence view to the existing loopback-only paper dashboard. No model weights are loaded into the service, and there are no model-triggered orders, payments, cashouts or third-party requests. The core user service has no new NumPy dependency; NumPy is optional for separate offline research.
 
 **No financial profitability gate is proven; no real-money or automated betting admission.** Further work needs current SUP capability snapshots, fresh independently verified match outcomes/quotes, larger untouched scoring windows, source/venue authorization and independent release acceptance.
+
+
+## Native KRATOS release — 0.1.0a4
+
+- Exact tested implementation HEAD: `f5e7acac87db6e30d7bd4fa928eb7036cf5c1680`. The previous frozen source/head `170a555` and external 2026/27 evidence are unchanged.
+- Offline, standalone wheel `wolf_coin_core-0.1.0a4-py3-none-any.whl` SHA-256 `f03186cc39fc5ecedb431e7e27ab81c078aa8a09508cf92dcc01daef1b707249`. Installed native paper console at `/home/kratos/.local/share/wolf-coin-paper/releases/f5e7acac87db6e30d7bd4fa928eb7036cf5c1680/venv` without pulling NumPy into the resident service.
+- The separately installed offline research runner replayed exactly the initial source-bound holdout output. The model weights were not refitted for this re-run.
+- `wolf-coin-paper-preview.service` remains user-level, enabled, `NoNewPrivileges=true`, bound exclusively to `127.0.0.1:18766`. Routes `/sports`, `/trading`, `/lab`, `/forecast`, `/neural`, `/funding`, `/health` returned HTTP 200. The new `/neural` page shows the partial 45-match evidence, wide confidence interval and SUP stage. `POST /neural` returns HTTP 405 and no financial action route exists.
+- The previous installed package, original paper-ledger data and prior service file are preserved; latest rollback service receipt is `/home/kratos/projects/Wolf-Coin/.workspace/proof-history/cc0-neural-20261123/previous-paper-unit.service`.
+- The Neural page was opened in Brave on KRATOS's existing XFCE desktop session.
+- **Cookpit manual micro PASS**, 24 focused source and boundary tests, frozen model/source digest, independent 760-result check, actual SUP stage; receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-cc0-neural-score-lab/evidence/20261123T131310Z-micro-0219b6f12556.json`.
+- **Cookpit manual heavy PASS**, **251/251 tests**, exact wheel digest, pinned native service and localhost-only no-money controls; receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-cc0-neural-score-lab/evidence/20261123T131315Z-heavy-0219b6f12556.json`.
+- No GPT supervisor created, no Tenfold money/training milestone promoted, no SUP-Bit neural inference asserted, and no sportsbook/broker permissions or accounts touched.
+
+**Final decision:** This is a verified source-bound **offline neural score research tool** and safe read-only UI, **not** a positive-EV financial strategy or a funding-ready release. The source data 2026/27 is stale/partial, and the match-day bootstrap interval crosses zero.

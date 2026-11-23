@@ -16,6 +16,14 @@
 
 ---
 
+## Latest installed CC0 neural proof (2026-11-23)
+
+- Wolf-Coin **0.1.0a4** native research console now active on KRATOS at `http://127.0.0.1:18766/neural`, pinned to `f5e7acac87db6e30d7bd4fa928eb7036cf5c1680`; the earlier resident release and unit remain available for rollback.
+- Source-bound **CC0-only NumPy MLP**, frozen *before* 2026/27 outcome retrieval at `170a555`. It scored Brier `0.611911853` vs class-prior `0.657353561` on just **45 scored matches**. 95% match-day bootstrap Brier advantage CI crosses zero, so **no statistically robust edge or profit proof**.
+- SUP G5 Director is `AWAIT_CAPABILITY_SNAPSHOT` with exact machine-verified CC0 source receipt; no separately signed approval, SUP training lease, SUP-Bit neural proof or release authority.
+- Separate installed research package replayed exact frozen results; **251/251 tests**, Cookpit manual micro/heavy **PASS** against exact installed source; all seven loopback routes healthy, financial POST refused and ledger unchanged.
+- See `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md` and immutable private receipts. Do **not** fund, arm live providers, or train on the historical bookmaker CSV.
+
 ## New CC0 neural source research — 2026-11-23
 
 - After proving the publisher's limited-use rule, neural training now uses **only OpenFootball CC0 match results** from pinned upstream commit `e6744429`; no Football-Data bookmaker prices entered MLP training.
