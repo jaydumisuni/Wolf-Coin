@@ -1,5 +1,9 @@
 # Wolf-Coin — zero-context pickup
 
+## SUP missing capability snapshot resolved — now Formula escalation
+
+Frozen-source SUP_SIM input completed from existing project commits. Native SUP Director now returns `NO_VIABLE_NEURAL_ROUTE` rather than `AWAIT_CAPABILITY_SNAPSHOT` (0/10 viable Soup methods). Full Formula / Wolf-Coin Director must qualify a tabular training route; no SUP execution, signed acceptance or money authority. Active owner HEADs have drifted beyond frozen SUP pins. See `scripts/sup_capability_snapshot.py`, `tests/test_sup_snapshot.py` and `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md`. Loopback PAPER Neural UI reflects new stage; `0.1.0a4` installed engine is untouched.
+
 ## Current KRATOS release 0.1.0a4
 
 Source `f5e7acac87db6e30d7bd4fa928eb7036cf5c1680` installed and running, systemd user unit `wolf-coin-paper-preview.service`. Open `http://127.0.0.1:18766/neural` on KRATOS. All seven local routes passed. MLP code and data were frozen at `170a555` before the 2026/27 holdout and were NOT retuned. Only 45 match outcomes in the new source, model Brier 0.611911853, class prior 0.657353561, confidence interval includes zero. SUP is `AWAIT_CAPABILITY_SNAPSHOT`, no money or training authority. Cookpit 251/251 PASS at installed head. Recover `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md` for exact evidence/rollback.

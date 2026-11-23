@@ -48,3 +48,26 @@ The source adds a read-only `/neural` evidence view to the existing loopback-onl
 - No GPT supervisor created, no Tenfold money/training milestone promoted, no SUP-Bit neural inference asserted, and no sportsbook/broker permissions or accounts touched.
 
 **Final decision:** This is a verified source-bound **offline neural score research tool** and safe read-only UI, **not** a positive-EV financial strategy or a funding-ready release. The source data 2026/27 is stale/partial, and the match-day bootstrap interval crosses zero.
+
+
+## SUP capability-snapshot closure (2026-11-23)
+
+**Completed the missing SUP_SIM input**, through the existing SUP G5 Director rather than an independent simulator. This is **frozen-pin contract verification, not independently signed production authority**.
+
+The read-only audit in `scripts/sup_capability_snapshot.py` verified Git commit objects for the exact pinned Cookpit `0d778f2f7591ecf65001b78cc829f38bc7a1468d`, Formula `f4edde73eaace58d6f416fae43d2b5cbb6caec6c`, Sergeant `126eeea5a70a0723a1bfb65b2a5dbeb6a84cf2e0`, TTG-Simulation reviewed source `b142b3dbfef428e43311fcc6b6b37189a82a0449` and evidence commit `3078fbc4ff2ee7a8a7286cefba73d59488dfc11c`. The canonical SUP simulation generation `sha256:3e7d230de3e698c17073add1909066d3220f4c39ab90f335e8767799f98db921` was recovered from the SUP binding. The owner-fork Soup commit `088c4272a6b1102908d85afe2b03e53860d56be8` was verified through GitHub. No donor authority transfer or command execution was enabled.
+
+**All active local repository HEADs differ from the frozen SUP pins.** Pinned Git objects are available, but an available frozen generation does **not** prove the latest owner software is currently approved, or that an independent human signed release acceptance.
+
+Soup's LLM-oriented SFT/LoRA/preference/distillation training methods have **no proved tabular 1X2 adapter**. The earlier SUP-Bit observation only measured fit for a small NumPy CPU workload; that fit cannot be assigned to Soup's unrelated methods. The snapshot conservatively marked all eight borrowed training-method fits as unknown. The native SUP_SIM returned **0 of 10 eligible candidates**: eight hardware/task fit unproved, two donor-unsupported.
+
+- Previous Director: `AWAIT_CAPABILITY_SNAPSHOT`.
+- New Director: **`NO_VIABLE_NEURAL_ROUTE`**, digest `sha256:1f135655dc3be8552dfcc2b3a181821643d7bcc3799cc410f1c7468953482bd2`. Native SUP_SIM digest `sha256:da677fc33963078ae8cfda89ac6247543082fdcb65a01e374231d9f8643d7f5c`.
+- Correct new owner: **Full Formula / Wolf-Coin Director** for qualified tabular training-route development, not execution promotion.
+- Native negative controls refused stale Cookpit generation, enabled Soup execution, and mismatched learning source.
+- No SUP training, Tenfold lease, funding, live betting or independent signed acceptance was asserted.
+
+The immutable private evidence is under `/home/kratos/projects/Wolf-Coin/.workspace/research/sup-sup-bit-forecast-20261123/cc0-mlp-170a555/verified-capability-snapshot-20261123/`. Capability completion receipt SHA-256 `e83c4298c48a07ff85d41814dc57e72ae3bdef2f5c45c169b26ae885e2486fe4`; saved SUP Director result file SHA-256 `1daec246673fde6312dcb115fdc01aab3a6383f1c38e54f562146d46a770837e`; SUP_SIM result file SHA-256 `2f40c2df998ec5e6ab51dfa1a28924a9d86674f6d9d5ad678bb8e0d910fd5d97`.
+
+The running read-only `/neural` UI now uses new immutable private summary `neural-summary-sup-snapshot-20261123.json`, SHA-256 `fb53c61d3a52eac67183de84e6f1bb7666c3159dd18d53723fd4ae6a9c0f8356`, and displays `NO_VIABLE_NEURAL_ROUTE`. The previous summary, native wheel `0.1.0a4`, pinned model, paper ledger and rollback unit remain preserved. Service is still loopback `127.0.0.1:18766`, PAPER-only, and POST is denied.
+
+**Gate disposition:** missing capability snapshot resolved, but neither a production-compatible SUP route nor real-money authorization is complete.

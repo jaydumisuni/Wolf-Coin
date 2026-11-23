@@ -16,6 +16,14 @@
 
 ---
 
+## SUP capability snapshot completed — 2026-11-23
+
+- Existing SUP G5 Director processed frozen Cookpit, Formula, Simulation, Sergeant and Soup capability evidence for Wolf-Coin. The missing `SUP_SIM` input is complete.
+- Director advanced from `AWAIT_CAPABILITY_SNAPSHOT` to **`NO_VIABLE_NEURAL_ROUTE`**. Of 10 considered methods, eight have no verified hardware/task fit and two are donor-unsupported. Next: Full Formula/target-product Director to engineer a compatible tabular route; NO SUP training or financial deployment authority.
+- Active checked-out owner HEADs differ from frozen SUP pins. This is contract-pin currentness only, not independent production signatures.
+- Repeatable checker `scripts/sup_capability_snapshot.py` and tests `tests/test_sup_snapshot.py`, evidence in `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md`.
+- KRATOS PAPER-only `/neural` view shows new status from an immutable private JSON summary. Existing `0.1.0a4` wheel and ledger unchanged; prior user service unit preserved.
+
 ## Latest installed CC0 neural proof (2026-11-23)
 
 - Wolf-Coin **0.1.0a4** native research console now active on KRATOS at `http://127.0.0.1:18766/neural`, pinned to `f5e7acac87db6e30d7bd4fa928eb7036cf5c1680`; the earlier resident release and unit remain available for rollback.
