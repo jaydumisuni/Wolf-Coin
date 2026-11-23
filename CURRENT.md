@@ -1,5 +1,13 @@
 # Wolf-Coin — CURRENT
 
+## Context-aware capability routing correction — 2026-11-24
+
+- Wolf-Coin **must select what capability to use, when and on which site/account**; it is not a research-only trading bot. The a8 `RESEARCH_ONLY`-only decision path was overly narrow, not an approved product restriction. Isolated a9 candidate implements signed IPC `context.route` for learning, research, browser interaction, financial sync, trading/betting and position exits.
+- The router chooses `READY`, `DISCOVER` or `RECOVER` based on actual task, account/domain, authenticated session, freshness/conflicts, site affordance and scoped permissions. **No global capability lock was added.** Context-ready financial `decision.propose` persists `BROWSER_HANDOFF_READY`; a native submission receipt remains awaiting platform reconciliation.
+- This is deterministic action selection/handoff, not a trained general browser model, a connected Chromium/WebView host, a real order or proof of profitability. Frontend/browser/installer implementation remains with its owner; paper model and active service unchanged. See `docs/WOLF_APPLICATION_BACKEND_HANDOFF_2026-11-23.md` and `contracts/wolf-app-bridge-v1.schema.json`.
+
+---
+
 ## New isolated application-backend integration candidate (2026-11-23)
 
 - A separate versioned backend `0.1.0a8` now provides source-owned `wolf_app`, **no browser, UI or app-packaging replacement**. It implements native host signed JSON-line IPC, account registration/removal, session state and startup revalidation, evidence-hashed financial snapshots and transactions, cross-source conflict detection, currency-separated financial overview, paged history, audit chain, explicit read-only sync planning and durable browser observation jobs with UNKNOWN reconciliation. Decision proposals are RESEARCH_ONLY; no orders, funds or API dependencies.
