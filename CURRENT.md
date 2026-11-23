@@ -16,6 +16,13 @@
 
 ---
 
+## Current installed strategy lab (2026-11-23)
+
+- **Wolf-Coin 0.1.0a2 now runs on KRATOS**, installed from source `74ecbd8`, with read-only Strategy Lab at `http://127.0.0.1:18766/lab`, alongside Sports and Trading. The source is pinned in the native user-service configuration and the prior release/unit are preserved for rollback.
+- The first real-data 2024/25 replay lost **K21.39 virtual** on 102 historical selections. The frozen three-window validation rejected all candidates; the separate 2025/26 final season issued **zero bets**, so K100 virtual remained K100. **Neither run proves making money.**
+- The exact installed CLI reproduced both reports. 213 KRATOS tests passed; Cookpit manual micro/heavy **PASS** at exact source `74ecbd8`. Tenfold has not promoted a money release. No live adapters or funding enabled.
+- Full file SHA, provenance, native UI and failure evidence: `docs/HISTORICAL_REPLAY_PROOF_2026-11-23.md`. Next work is genuinely improved forecasting, independent out-of-sample profitability and licensed provider/demo access—not making the risk threshold looser to force bets.
+
 ## Latest research lab evidence (2026-11-23)
 
 - Two real Premier League seasons with recorded historical opening odds produced a first ELO strategy failure: **102 hypothetical bets; K100 virtual balance fell to K78.61** (net **-K21.39**). Prediction accuracy also trailed the bookmaker market baseline.

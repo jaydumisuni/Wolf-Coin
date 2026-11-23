@@ -1,5 +1,10 @@
 # Wolf-Coin — zero-context pickup
 
+## Latest 2026-11-23 tool release
+
+Wolf-Coin paper research Lab is installed on KRATOS with a read-only `/lab` page at `http://127.0.0.1:18766/lab`, version `0.1.0a2` from source `74ecbd8`. Read `CURRENT.md` and `docs/HISTORICAL_REPLAY_PROOF_2026-11-23.md` before resuming. The 2024/25 historical strategy **lost K21.39 virtual**; new 2025/26 independent final report **abstained entirely**, K0 gain/loss. The lab works as a research tool, but positive-expected-value qualification and real provider live admission remain UNPROVEN. Cookpit manual host verification PASS 213 tests; no GPT supervisor or funding. Keep the frozen failures and source datasets private; do not tune on final data then call it new holdout.
+
+
 **Currentness:** Patron registration is fixed. Verify `CURRENT.md` first, then `docs/KRATOS_PAPER_HOST_PROOF_2026-11-23.md`. Source worktree and paper preview are installed on KRATOS, not merely proposed. Keep protected main, source provenance, manually verified Cookpit evidence and paper-only execution bounds.
 
 Recovery order: Patrol `route/check Wolf-Coin` and installed Patrol fix `257f78dbf75c20576d6fa7d9d30aa111372fc2ed`; exact Wolf-Coin branch HEAD `f2fe764cfd69676b5d521d3d823afb6d86133d07`; local installed release + user service on `127.0.0.1:18766`; original P0–P12 and WX candidate roadmaps; Tenfold durable 24-node P0 READY (0 proven); manually verified Cookpit host receipts. Then implement the first unproved gate.

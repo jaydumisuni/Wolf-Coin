@@ -53,3 +53,18 @@ The source and fixed three-window selection law were frozen at commit `738f81922
 The read-only, loopback-only `/lab` dashboard displays the two candidate results. It reads only the two explicit report files configured at service startup and does not expose historical source CSVs, credentials or execution endpoints. The navigation includes Sports / Trading / Strategy Lab / Funding readiness. No optimization against the final season is permitted for this frozen model generation.
 
 The laboratory's future purpose is to evaluate genuinely different data features and model families using new training/validation partitions and a **new untouched evaluation period**. Neither favorable code tests nor historic odds by themselves qualify automated betting.
+
+
+## Installed native lab release, KRATOS — 2026-11-23
+
+- **Implementation source HEAD:** `74ecbd8b217f10a7c731c1d237dc1ea6fa427b92`.
+- **Package:** `wolf-coin-core 0.1.0a2`, built as an offline wheel. SHA-256 `3847156dd6294fb4d7b7a4051261999cfdab9d086a35e2af9c0336f80f0f631d`. Its installed CLI reproduced the original raw historical report JSON bytes/equivalent object with identical metrics.
+- **Pinned runtime:** `/home/kratos/.local/share/wolf-coin-paper/releases/74ecbd8b217f10a7c731c1d237dc1ea6fa427b92/venv`.
+- **KRATOS service:** enabled `wolf-coin-paper-preview.service`, systemd user mode, `NoNewPrivileges=true`, loopback `127.0.0.1:18766`. The old installed wheel and exact former unit were preserved under proof history for rollback. The bankroll and virtual account event history were not wiped or replaced.
+- **Views verified with HTTP 200:** `/sports`, `/trading`, `/lab`, `/funding`, `/health`. `POST /lab` returns **405**. The lab is read-only; only two operator-supplied source-bound local JSON report files are read.
+- **Real Brave UI:** Wolf-Coin Strategy Lab opened on KRATOS's existing XFCE desktop session.
+- **Manual Cookpit micro PASS:** source HEAD `74ecbd8`, 26 focused research/dashboard tests, exact historical result fail/abstain claims. Receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-real-historical-lab/evidence/20261123T120156Z-micro-d0cc2f830e04.json`.
+- **Manual Cookpit heavy PASS:** same source HEAD, **213/213 tests**, exact offline wheel SHA, installed service/health/URL checks, loopback and strict research-only state. Receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-real-historical-lab/evidence/20261123T120157Z-heavy-d0cc2f830e04.json`.
+- No GPT supervisor or recurring worker was created. Tenfold remains responsible for bounded construction evidence; model training did not acquire live authority. No sportsbook/broker funds or credentials were touched.
+
+**Final outcome for this strategy generation: TOOL IS OPERATIONAL AS A HISTORICAL/PAPER RESEARCH LAB; POSITIVE EXPECTED VALUE IS NOT PROVEN; REAL-MONEY PILOT NOT APPROVED.**
