@@ -13,6 +13,7 @@ dependencies = []
 wolf = "wolf_core.cli:main"
 wolf-paper = "wolf_core.paper_operator:run"
 wolf-dashboard = "wolf_gateway.dashboard:main"
+wolf-resident = "wolf_gateway.resident:main"
 
 [tool.setuptools.packages.find]
 include = ["wolf_core*", "wolf_sports*", "wolf_guard*", "wolf_gateway*"]
