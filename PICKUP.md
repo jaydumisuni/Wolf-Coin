@@ -8,6 +8,10 @@ Recovery order: Patrol `route/check Wolf-Coin` and installed Patrol fix `257f78d
 
 ---
 
+## 2026-11-23 installed funding paper preview
+
+Read `docs/KRATOS_FUNDING_PAPER_UPGRADE_2026-11-23.md` before changing any installed release. `wolf-coin-paper-preview.service` is pinned to `b01d269`, with working rollback retained. Local views at `http://127.0.0.1:18766/sports`, `/trading`, and `/funding`. Funding readiness reports K0 permitted and 0 real-money adapters. No source test or model evaluation is authority to fund; real venues and independent release gates remain unproven.
+
 ## Earlier pickup history (historical; may contain superseded registration claims)
 
 

@@ -29,6 +29,14 @@
 - ATHENA reachable, but no running MT5 terminal or installed MT5 Python module. No sportsbook account/API or broker onboarding verified. Both pilot funding paths remain BLOCKED.
 - See `docs/FUNDING_AND_PROVIDER_DILIGENCE_2026-11-23.md`. Keep the running paper preview unchanged and never fund solely because tests pass.
 
+## Paper funding-preview upgrade — installed (2026-11-23)
+
+- New versioned paper release `wolf-coin-core 0.1.0a1` pinned to source `b01d2691f023366fcfc64bfa819beeac72746161`, wheel SHA-256 `f8b360c7266b974692bd33cbab33480642cc3da57758e39d2f4ae7b99f8c5340`.
+- Existing KRATOS user service replaced with verified release; rollback unit and previous wheel retained, unchanged virtual balances. GET `/sports`, `/trading`, `/funding`, `/api/funding-readiness` all HTTP 200; POST fails HTTP 405, loopback-only.
+- Brave opened the three local views. `wolf-funding-readiness` reports **K0 approved deposits**, no provider connection, no transfer adapter, and independently unearned live release for either domain.
+- Tests: **187/187 pass** on KRATOS. No live funds, auto topups, new GPT supervisors or privileged executable links.
+- Detailed proof: `docs/KRATOS_FUNDING_PAPER_UPGRADE_2026-11-23.md`. Requalify actual provider/operator identity, data rights, settlement/reconciliation, minimum size and strategy before any real-money pilot. Tenfold still zero PROVEN live-release gates.
+
 ## Earlier 2026-11-23 engineering chronology (historical; superseded wherever contradicted by the latest status)
 
 
