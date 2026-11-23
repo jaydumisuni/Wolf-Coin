@@ -16,6 +16,13 @@
 
 ---
 
+## Latest SUP forecasting evidence — 2026-11-23
+
+- Real SUP G5 Director `sup director` received Wolf-Coin's hashed football learning candidate; stage `AWAIT_SOURCE_QUALIFICATION`, not training. Exact source-bound corpus has 1,520 matches; private train/validation/previously-examined diagnostic groups.
+- CPU market-offset model was trained reproducibly on 760 historical fixtures, but best 2024/25 validation Brier `0.580325109` was **worse** than market `0.578663803`. **No model admitted, no profit proven**.
+- SUP-Bit v14 read-only resource planner found a declared small CPU workload to `FIT`; it has **not** trained or validated a football neural model. No private SUP-Bit source was copied into public Wolf-Coin.
+- `wolf-lab-cpu` and the read-only Forecast CPU browser view are source-implemented. See `docs/SUP_FORECAST_INTAKE_PROOF_2026-11-23.md` for dataset hashes, Director disposition, actual CPU run, resource proof and required independent review.
+
 ## Current installed strategy lab (2026-11-23)
 
 - **Wolf-Coin 0.1.0a2 now runs on KRATOS**, installed from source `74ecbd8`, with read-only Strategy Lab at `http://127.0.0.1:18766/lab`, alongside Sports and Trading. The source is pinned in the native user-service configuration and the prior release/unit are preserved for rollback.

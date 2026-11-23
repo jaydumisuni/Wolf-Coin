@@ -59,7 +59,7 @@ def page(domain: Domain, report: dict, database: Path) -> bytes:
 <span class="tag">NO LIVE EXECUTION</span></div><span class="tag">Manual / virtual funds</span></header>
 <nav><a class="{'selected' if domain is Domain.SPORTS else ''}" href="/sports">Sports</a>
 <a class="{'selected' if domain is Domain.TRADING else ''}" href="/trading">Trading</a>
-<a href="/lab">Strategy Lab</a>
+<a href="/lab">Strategy Lab</a><a href="/forecast">Forecast CPU</a>
 <a href="/funding">Funding readiness</a></nav>
 <section class="grid"><div class="card"><p>Virtual balance</p><div class="value">{value('balance')}</div><small>Not real ZMW, deposits or winnings</small></div>
 <div class="card"><p>Virtual available</p><div class="value">{value('available')}</div><small>Committed exposure is excluded</small></div></section>
@@ -89,7 +89,7 @@ def funding_page() -> bytes:
 <span class="tag">NO DEPOSIT / WITHDRAWAL ACCESS</span></div>
 <span class="tag">Independent release required</span></header>
 <nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
-<a class="selected" href="/funding">Funding readiness</a></nav>
+<a href="/forecast">Forecast CPU</a><a class="selected" href="/funding">Funding readiness</a></nav>
 <section class="grid">{item(sports)}{item(trading)}</section>
 <div class="card"><h2>Current blockers</h2>
 <p>No selected and permitted automated sportsbook; no verified broker/demo account;
@@ -155,7 +155,7 @@ def lab_page(reports: tuple[Path, Path] | None) -> bytes:
 <body><main><header><div><p>WOLF-COIN · EVIDENCE LAB</p><h1>Strategy results</h1>
 <span class="tag">PRIVATE HISTORICAL RESEARCH · NO LIVE FUNDS</span></div></header>
 <nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
-<a class="selected" href="/lab">Strategy Lab</a><a href="/lab">Strategy Lab</a>
+<a class="selected" href="/lab">Strategy Lab</a><a href="/forecast">Forecast CPU</a>
 <a href="/funding">Funding readiness</a></nav>
 <section class="grid">{first}{second}</section>
 <div class="card"><h2>Engineering verdict</h2>
@@ -167,7 +167,67 @@ all candidate models. No automatic learning, deposits, account authentication or
 </main></body></html>""").encode('utf-8')
 
 
-def handler(db: Path, account_id: str, *, lab_reports: tuple[Path, Path] | None = None):
+
+def forecast_page(report_path: Path | None) -> bytes:
+    """Local static view of one pinned CPU comparison, no model runtime."""
+    data = None
+    if report_path is not None:
+        try:
+            path = report_path.expanduser().resolve(strict=True)
+            if path.is_file() and 0 < path.stat().st_size <= 30_000:
+                source = json.loads(path.read_text(encoding="utf-8"))
+                if isinstance(source, dict) and source.get("schema") == "wolf.lagged-features-market-cpu.v1":
+                    data = source
+        except (OSError,UnicodeError,TypeError,ValueError):
+            pass
+    def e(value):
+        return escape(str(value),quote=True)
+    if data is None:
+        panel='<div class="card"><p>Source-bound CPU comparison unavailable.</p></div>'
+    else:
+        market=data.get("market_validation_scores",{})
+        candidates=data.get("candidate_validation_scores",[])
+        if not isinstance(candidates,list):
+            candidates=[]
+        candidates=[x for x in candidates if isinstance(x,dict)
+                    and isinstance(x.get("brier"),(int,float))]
+        chosen=min(candidates,key=lambda x:x["brier"]) if candidates else {}
+        decision=data.get("decision","RESEARCH_NOT_QUALIFIED")
+        panel=(f'<div class="card"><h2>Market-relative CPU forecast</h2>'
+               f'<p>Prior-date team form and recorded bookmaker odds only.</p>'
+               f'<p>{e(data.get("training_rows"))} training · {e(data.get("validation_rows"))} validation '
+               f'· {e(data.get("exposed_diagnostic_rows"))} exposed diagnostic fixtures</p>'
+               f'<section class="grid">'
+               f'<div><small>Bookmaker market Brier</small><div class="value">{e(market.get("brier"))}</div></div>'
+               f'<div><small>Best CPU candidate Brier</small><div class="value">{e(chosen.get("brier"))}</div></div>'
+               f'</section><p>Market log-loss {e(market.get("log_loss"))}; '
+               f'candidate {e(chosen.get("log_loss"))}</p>'
+               f'<p><strong>Decision: {e(decision)}</strong></p>'
+               f'<p>Source truth qualified: {e(data.get("source_truth_qualified"))}; '
+               f'new untouched period included: {e(data.get("final_unexamined_period_included"))}</p>'
+               f'<small>Derived feature SHA-256: {e(data.get("feature_sha256"))}</small>'
+               f'</div>')
+    return (f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Wolf-Coin · CPU Research</title><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="60"><style>{STYLE}</style></head>
+<body><main><header><div><p>WOLF-COIN · SUP RESEARCH</p><h1>CPU forecasting comparison</h1>
+<span class="tag">UNQUALIFIED RESEARCH · NO MONEY EXECUTION</span></div></header>
+<nav><a href="/sports">Sports</a><a href="/trading">Trading</a>
+<a href="/lab">Strategy Lab</a><a class="selected" href="/forecast">Forecast CPU</a>
+<a href="/funding">Funding readiness</a></nav>{panel}
+<div class="card"><h2>Independent qualification</h2>
+<p>The SUP Director requires a source-qualified learning package. Its
+current status is AWAIT_SOURCE_QUALIFICATION. SUP-Bit's resource planner
+measured host fit for a declared small CPU workload, not neural training quality.</p>
+<p>No model has demonstrated a positive financial edge. The exposed
+2025/26 season cannot be treated as a new untouched holdout.</p></div>
+<footer>Read-only local evidence; no external provider, trainer or funding access</footer>
+</main></body></html>""").encode("utf-8")
+
+
+
+def handler(db: Path, account_id: str, *, lab_reports: tuple[Path, Path] | None = None,
+            forecast_report: Path | None = None):
     class DashboardHandler(BaseHTTPRequestHandler):
         def _send(self, code: int, data: bytes, content_type: str) -> None:
             self.send_response(code)
@@ -188,6 +248,8 @@ def handler(db: Path, account_id: str, *, lab_reports: tuple[Path, Path] | None 
                 self.send_response(302);self.send_header('Location','/sports');self.end_headers();return
             if path == '/lab':
                 return self._send(200,lab_page(lab_reports),'text/html; charset=utf-8')
+            if path == '/forecast':
+                return self._send(200,forecast_page(forecast_report),'text/html; charset=utf-8')
             if path == '/funding':
                 return self._send(200,funding_page(),'text/html; charset=utf-8')
             if path == '/api/funding-readiness':

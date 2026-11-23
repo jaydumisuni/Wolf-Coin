@@ -138,6 +138,8 @@ def main(argv=None) -> int:
         destinations=[args.report_json,args.features_json,args.sup_intake_json]
         if len({x.resolve() for x in destinations})!=len(destinations):
             raise ReplayRefused("outputs must be different, new private files")
+        if any(x.is_symlink() or x.exists() for x in destinations):
+            raise ReplayRefused("all research output targets must be new, never overwritten")
         report,features,package,request=evaluate_four(
             [getattr(args,f"season_{i}") for i in range(1,5)],
             [getattr(args,f"sha_{i}") for i in range(1,5)],
