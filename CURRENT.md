@@ -16,6 +16,13 @@
 
 ---
 
+## Typed tabular CPU research candidate for Formula review — 2026-11-23
+
+- The exact Formula P13 and SUP/Soup borrowings were inspected; none supplied an existing qualified tabular 1X2 trainer. **No change** to SUP's `NO_VIABLE_NEURAL_ROUTE` or Formula mathematical authority.
+- New Wolf-Coin-owned `wolf-tabular` research CLI has `retrain-proof`, `build`, and independent `verify` operations. Full 2,660-fixture CC0 training and 380-fixture validation regenerate exactly the frozen MLP weights/selection. An independent **stdlib-only** numerical verifier checks the 45 already-examined predictions within `3e-12`.
+- The adapter is tightly bound to pre-2026/27 frozen model/source hashes, excludes non-CC0 learning sources, uses no live sportsbook account and contains aggressive corruption and forged-authority refusal tests. It is **candidate-only** for Formula/SUP review and does not create a qualifying Soup method or prove financial return.
+- Technical detail and qualification limits: `docs/CC0_NEURAL_POSTFREEZE_PROOF_2026-11-23.md`. The currently installed safe paper service remains unaffected by the research adapter.
+
 ## SUP capability snapshot completed — 2026-11-23
 
 - Existing SUP G5 Director processed frozen Cookpit, Formula, Simulation, Sergeant and Soup capability evidence for Wolf-Coin. The missing `SUP_SIM` input is complete.

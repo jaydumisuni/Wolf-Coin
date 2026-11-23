@@ -85,3 +85,38 @@ def test_http_neural_is_read_only_and_coexists_with_paper_views(tmp_path):
         assert error.value.code==405
     finally:
         server.shutdown();server.server_close();t.join(timeout=4)
+
+
+def test_typed_cpu_candidate_does_not_claim_sup_or_formula_admission(tmp_path):
+    value=fixture()
+    value.update({
+        "typed_route_training":"PRODUCT_OWNED_CPU_TRAINING_REPRODUCED",
+        "typed_route_verifier":"NUMERICAL_REPLAY_PASS_CANDIDATE_ONLY",
+        "typed_route_prediction_rows":45,
+        "typed_route_max_absolute_error":7.732148255001903e-13,
+        "typed_route_sup_admitted":False,
+        "typed_route_formula_certificate":False,
+    })
+    p=tmp_path/"review.json"
+    p.write_text(json.dumps(value))
+    text=neural_page(p).decode()
+    assert "Typed CPU research route" in text
+    assert "NOT ADMITTED BY SUP OR FORMULA" in text
+    assert "WOLF-COIN-OWNED CANDIDATE" in text
+    assert "NO FUNDS" in text
+
+
+def test_forged_typed_cpu_promotion_is_not_displayed_as_qualified(tmp_path):
+    value=fixture()
+    value.update({
+        "typed_route_training":"PRODUCT_OWNED_CPU_TRAINING_REPRODUCED",
+        "typed_route_verifier":"NUMERICAL_REPLAY_PASS_CANDIDATE_ONLY",
+        "typed_route_prediction_rows":45,
+        "typed_route_sup_admitted":True,
+        "typed_route_formula_certificate":True,
+    })
+    p=tmp_path/"fake.json"
+    p.write_text(json.dumps(value))
+    text=neural_page(p).decode()
+    assert "Typed CPU research route" not in text
+    assert "NO FUNDS" in text

@@ -248,6 +248,21 @@ def neural_page(report_path: Path | None) -> bytes:
         lohi=data.get("holdout_brier_gain_interval",[])
         if not isinstance(lohi,list) or len(lohi)!=2:
             lohi=["?", "?"]
+        # Optional additional source-bound research proof. These are advisory
+        # statuses only and never authorize a model, venue or capital action.
+        route=''
+        if (data.get("typed_route_training")=="PRODUCT_OWNED_CPU_TRAINING_REPRODUCED"
+            and data.get("typed_route_verifier")=="NUMERICAL_REPLAY_PASS_CANDIDATE_ONLY"
+            and data.get("typed_route_sup_admitted") is False
+            and data.get("typed_route_formula_certificate") is False):
+            route=(f'<div class="card"><h2>Typed CPU research route</h2>'
+                   f'<p>Frozen 2,660-match training and 380-match validation '
+                   f'<strong>reproduced exactly</strong>.</p>'
+                   f'<p>{e(data.get("typed_route_prediction_rows"))} predictions independently '
+                   f'checked without the training runtime.</p>'
+                   f'<p>Maximum absolute probability difference: '
+                   f'{e(data.get("typed_route_max_absolute_error"))}</p>'
+                   f'<span class="tag">WOLF-COIN-OWNED CANDIDATE · NOT ADMITTED BY SUP OR FORMULA</span></div>')
         content=(f'<section class="grid">'
                  f'<div class="card"><p>Training matches</p><div class="value">{e(data.get("training_rows"))}</div></div>'
                  f'<div class="card"><p>Validation matches</p><div class="value">{e(data.get("validation_rows"))}</div></div>'
@@ -267,7 +282,8 @@ def neural_page(report_path: Path | None) -> bytes:
                  f'<p>Director: <strong>{e(data.get("sup_director_stage"))}</strong></p>'
                  f'<p>{e(data.get("historical_score_crosscheck_count"))} externally cross-checked scores; '
                  f'{e(data.get("historical_score_crosscheck_conflicts"))} discrepancies.</p>'
-                 f'<small>Frozen model {e(data.get("model_frozen_digest"))}</small></div>')
+                 f'<small>Frozen model {e(data.get("model_frozen_digest"))}</small></div>'
+                 +route)
     return (f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Wolf-Coin · CC0 Neural Lab</title><meta http-equiv="refresh" content="60">

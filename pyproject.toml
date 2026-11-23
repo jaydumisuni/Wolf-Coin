@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wolf-coin-core"
-version = "0.1.0a4"
+version = "0.1.0a5"
 description = "Wolf-Coin deterministic research and paper-only first light"
 requires-python = ">=3.11"
 dependencies = []
@@ -23,6 +23,7 @@ wolf-lab = "wolf_lab.cli:main"
 wolf-lab-walkforward = "wolf_lab.walkforward_cli:main"
 wolf-lab-cpu = "wolf_lab.forecast_cli:main"
 wolf-cc0 = "wolf_lab.cc0_pipeline:main"
+wolf-tabular = "wolf_lab.typed_tabular:main"
 
 [tool.setuptools.packages.find]
 include = ["wolf_core*", "wolf_sports*", "wolf_guard*", "wolf_gateway*", "wolf_execution*", "wolf_markets*", "wolf_funding*", "wolf_lab*"]

@@ -71,3 +71,23 @@ The immutable private evidence is under `/home/kratos/projects/Wolf-Coin/.worksp
 The running read-only `/neural` UI now uses new immutable private summary `neural-summary-sup-snapshot-20261123.json`, SHA-256 `fb53c61d3a52eac67183de84e6f1bb7666c3159dd18d53723fd4ae6a9c0f8356`, and displays `NO_VIABLE_NEURAL_ROUTE`. The previous summary, native wheel `0.1.0a4`, pinned model, paper ledger and rollback unit remain preserved. Service is still loopback `127.0.0.1:18766`, PAPER-only, and POST is denied.
 
 **Gate disposition:** missing capability snapshot resolved, but neither a production-compatible SUP route nor real-money authorization is complete.
+
+
+## Target-owned typed tabular training and numerical verification route (2026-11-23)
+
+After the verified SUP G5 `NO_VIABLE_NEURAL_ROUTE` result, the exact remaining gap was investigated against the current Formula P13 Director and SUP-Bit private v14 source.
+
+**Architecture finding:** Formula's P13 `FormulaMathematicalDirector` holds mathematical checking/promotion authority and exposes an *optional SUP neural specialist request*. It does not itself train a numeric 1X2 classifier. SUP's borrowed Soup routes support SFT, LoRA, QLoRA, preference training and distillation, but none has a qualified type adapter for this specific ten-feature, three-outcome MLP. SUP-Bit v14 resource fitting does not grant such a type adapter. The previous SUP_SIM conclusion remains **0/10 qualified methods**. Do not mutate a Soup route to `hardware_fit=true` just because a NumPy MLP runs quickly.
+
+**Implemented candidate route:** `wolf_lab/typed_tabular.py`, executable `wolf-tabular` (research-only). It has two explicit, scoped operations:
+
+1. `retrain-proof` rereads only the eight frozen CC0 training/validation seasons, refits the exact original deterministic NumPy `10→8→3` MLP and checks that **all model weights and the whole candidate/validation selection record are bit-for-bit equivalent** to the pre-2026/27 frozen source. It does not load the incomplete 2025/26 context or the already-examined 2026/27 file.
+2. `build` produces a typed, bounded, immutable candidate-only report of the **already-examined** 45 2026/27 predictions. `verify` independently reconstructs the prior-date features and calculates the MLP's `tanh` and `softmax` with Python's standard library, without importing NumPy, the training engine, SUP, SUP-Bit or Formula. Independent predictions must match the vectorized producer within `3e-12`; changed model bytes, incorrect dimensions, nonfinite weights, stale fixture identities, modified predictions, unexpected effect fields, forged SUP/Formula credentials and real-money claims all fail closed.
+
+The artifact binds exact frozen Wolf source `170a555991910fd3db525c2070ace88568b6f0b4`, frozen model bytes SHA-256 `2eb587952d5fb72dd25fcaa50aac9b46d6c4e6d3be33a02b502bb7e5a09a3fba`, model seal `sha256:9b0e22f38810950b5920d4ff52ff6c2dbf96691c7e414946dd0e4f9452e48ef7`, OpenFootball CC0 upstream commit, and held-out partial-season file SHA-256 `bb91f0ab3e8359df163bb9ec98549bfed85e200dd4c32f3bd606b5890d932dd2`.
+
+The *training replay* on KRATOS reproduced the complete 2,660 training + 380 validation record and exact model weights (reference model digest `151958fddb8c5715a90f5e33d39ff5430b8cd0a3eee9e38b8d710503dae94b2b`), approximately 0.99 s with process peak ~41 MiB. The *independent scalar numerical verifier* checked all 45 predictions, maximum absolute error `7.732148255001903e-13`. This validates research-model reproducibility, not predictive or financial profitability.
+
+**Deliberate authority separation:** This is a **Wolf-Coin-owned CPU tabular prototype**, not an existing SUP/Soup training method, not an independently signed Formula mathematical certificate, and not a production neural execution lease. Formula may review its provenance and candidate evidence but must independently admit any new typed method under its own source/authority rules. The already-inspected 2026/27 matches cannot become new unseen validation data merely because an alternate interpreter was used. Neither the frozen 2026/27 proper-score uncertainty nor the prior market-relative shortfall changes.
+
+A source-bound review packet and native build acceptance receipts will be preserved separately from this source note. The `/neural` read-only UI can display accepted **product-owned candidate** status but will keep `NO_VIABLE_NEURAL_ROUTE` for the SUP-owned method lane until a genuine compatible and independently qualified training interface exists.
