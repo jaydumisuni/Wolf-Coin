@@ -47,3 +47,9 @@ def test_operator_refuses_bad_inputs_and_uninitialized(tmp_path, capsys):
     assert run(pre + ['freeze', '--status', 'HALT', '--event-id', 'halt']) == 0
     assert run(pre + ['freeze', '--status', 'FROZEN', '--event-id', 'downgrade']) == 2
     assert run(pre + ['odds', '--home', '1', '--draw', '2', '--away', '3']) == 2
+
+def test_corrupt_paper_database_fails_with_bounded_error(tmp_path, capsys):
+    path=tmp_path/'garbled.db'
+    path.write_bytes(b'not a sqlite database')
+    assert run(['--db',str(path),'status']) == 2
+    assert json.loads(capsys.readouterr().err)['status']=='BLOCKED'
