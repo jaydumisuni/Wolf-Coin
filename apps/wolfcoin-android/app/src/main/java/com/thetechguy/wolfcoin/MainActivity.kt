@@ -38,9 +38,13 @@ import java.security.MessageDigest
 import java.time.Instant
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
+import com.chaquo.python.Python
+import com.chaquo.python.PyObject
+import com.chaquo.python.android.AndroidPlatform
 
 /**
- * Wolf-Coin v0.8 native Android browser bridge. UI and credentials never share a WebView.
+ * Wolf-Coin v0.9 native Android browser and signed application backend. UI and credentials never share a WebView.
  * All browser observations are candidates, not verified broker/bookmaker balances.
  */
 class MainActivity : Activity() {
@@ -58,6 +62,37 @@ class MainActivity : Activity() {
     private val network = ConcurrentHashMap<String, MutableList<JSONObject>>()
     private var activeId: String? = null
     private var pendingWebPermission: PermissionRequest? = null
+    private val backendWorker=Executors.newSingleThreadExecutor()
+    private var nativePythonBackend:PyObject?=null
+
+    private fun signedBackend():PyObject {
+        val current=nativePythonBackend
+        if(current!=null)return current
+        val created=Python.getInstance().getModule("wolf_native_api")
+            .callAttr("WolfNativeApp",filesDir.absolutePath)
+        nativePythonBackend=created
+        return created
+    }
+    private fun backendCall(id:String,operation:String,payload:JSONObject,
+                            reply:JavaScriptReplyProxy,isStatus:Boolean=false){
+        backendWorker.execute{
+            try{
+                val result=JSONObject(signedBackend().callAttr("request",operation,payload.toString()).toString())
+                val data=result.optJSONObject("data")?:JSONObject()
+                runOnUiThread{
+                    if(result.optString("status")=="OK"){
+                        if(isStatus)respond(reply,id,JSONObject()
+                            .put("available",true).put("schema","wolf.app.bridge.v2")
+                            .put("host","android-embedded-python"))
+                        else respond(reply,id,data)
+                    }else respond(reply,id,null,data.optString("error","Native backend rejected request"))
+                }
+            }catch(e:Exception){
+                runOnUiThread{respond(reply,id,null,"Native backend: "+(e.message?:"runtime failure"))}
+            }
+        }
+    }
+
     private var area = intArrayOf(0, 0, 0, 0)
     private val snapshotScript by lazy { assets.open("wolf_snapshot.js").bufferedReader().use { it.readText() } }
     private val assetLoader by lazy {
@@ -68,6 +103,7 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if(!Python.isStarted())Python.start(AndroidPlatform(this))
         if ((applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
             WebView.setWebContentsDebuggingEnabled(true) // local emulator/ADB proof only
         }
@@ -299,6 +335,9 @@ class MainActivity : Activity() {
     }
     private fun dispatch(id: String, method: String, args: JSONObject, reply: JavaScriptReplyProxy) {
         when (method) {
+            "backendStatus" -> backendCall(id,"bridge.capabilities",JSONObject(),reply,true)
+            "backendRequest" -> backendCall(id,args.getString("operation"),
+                args.optJSONObject("payload")?:JSONObject(),reply)
             "status" -> respond(reply,id,JSONObject().put("schema",CONTRACT).put("host","android")
                 .put("browserOpen",activeId!=null).put("accountId",activeId)
                 .put("multiProfile",WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE))
@@ -459,6 +498,7 @@ class MainActivity : Activity() {
         super.onStop()
     }
     override fun onDestroy() {
+        backendWorker.shutdown()
         popupOwners.keys.toList().forEach { closePopup(it) }
         sessions.values.forEach { if(it.parent==root)root.removeView(it);it.destroy() }
         sessions.clear();ui.destroy();super.onDestroy()

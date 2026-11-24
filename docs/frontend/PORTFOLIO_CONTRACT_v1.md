@@ -55,3 +55,13 @@ The frontend sends normalized comparison candidates to the signed backend
 through a user-editable amount and optional budget entry when no amount is
 provided. The backend returns the context-driven next step and receipt state.
 Merely creating a proposal does not establish a website transaction result.
+
+## Android v0.9 native Sync All
+
+Both Linux desktop and Android now have the signed backend connected to the
+cross-platform portfolio. The Android emulator logged into two distinct
+controlled website origins and retained independent account profiles,
+account observations and SQLite histories; Sync All returned OBSERVED for
+both. Owner-match suggestions were produced from separately observed
+authenticated identity labels. Contextual decision output and synthetic
+NOT_EXECUTED receipt were independently verified on Android.

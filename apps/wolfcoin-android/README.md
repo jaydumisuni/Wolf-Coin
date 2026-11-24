@@ -1,33 +1,49 @@
-# Wolf-Coin Android v0.8.0 — WebView native application
+# Wolf-Coin Android v0.9.0-dev — embedded native application backend
 
-Wolf-Coin Android packages the nine-screen D-XQT frontend and an AndroidX
-WebKit-based Wolf Browser. Each account has its own persistent named WebView
-profile with isolated cookies and storage. Standard website controls are
-supported within the selected account's authenticated browsing session.
-The browser does not install product-category button restrictions.
+The Android APK includes the nine-screen D-XQT frontend, native AndroidX
+WebKit Wolf Browser with independently named account profiles, and the
+existing Wolf-Coin 0.1.0a10 Python 3.11/SQLite backend. It does not need a
+backend web server, Docker container or sportsbook API for offline testing.
 
-Tested on KRATOS's real Android 15 x86_64 emulator: APK installation and
-SHA-256 readback, real Activity/WebView launch, D-XQT startup, all nine
-screens, two independently authenticated accounts, account-holder matching,
-portfolio comparison, app restart and cookie/profile isolation. Profile
-cookies are flushed after page navigation and when the app stops.
+The Kotlin host initializes Chaquopy 17.2.0 and uses an Android-private key
+to authenticate the same wolf.app.request.v1 / wolf.app.bridge.v2 protocol
+implemented by the native desktop application. The trusted appassets UI
+receives the account-scoped wolfBackend interface; external website WebViews
+do not receive the signed backend interface or host key.
 
-Build from the native Android Gradle project; its generated wolfcoin.html
-and the owner-held D-XQT binary are kept out of the public source branch.
-This APK is debug-signed, not production distribution-signed.
+## Reproducible owner-controlled build
 
-The 0.1.0a10 signed Python/SQLite native backend is integrated into
-Windows/Linux Electron, not yet embedded into this Android APK. Android
-production backend parity, third-party platform compatibility and physical
-Android-device acceptance remain separate tasks.
+First stage the authoritative private backend source:
 
+  python3 apps/wolfcoin-android/stage-native-backend.py --source /path/to/a10
 
-Website camera/microphone/media permission requests use a normal website
-permission dialog and Android runtime permission prompts. They are not
-silently rejected by a hardcoded category rule. A physically connected
-phone is still required to qualify actual capture-device permission behavior.
+The eight copied modules under app/src/main/python/wolf_app and wolf_core
+are Git-ignored, not part of the public frontend branch. Then assemble the
+private D-XQT runtime using apps/wolfcoin-ui/assemble.py with --dxqt-js and
+--android parameters. The generated wolfcoin.html is also Git-ignored.
 
+Build prerequisites: JDK17, Android SDK35, Gradle8.7, AGP8.5.2,
+Chaquopy17.2.0, WebKit1.13.0 and Python3.11 on the builder. Set
+WOLF_BUILD_PYTHON to choose the Python3.11 executable. Build with
+gradle --no-daemon :app:assembleDebug. APK native ABIs include x86_64 and
+arm64-v8a. This is debug signing, not a production-distribution signature.
 
-On v0.8 the native browser also supports website-created popup/child WebViews
-using the opening account's named profile; the controlled OAuth-style login
-fixture passed popup, parent-session reuse and independent account isolation.
+## KRATOS Android 15 emulator acceptance, November 24 2026
+
+- Exact source APK installed with package SHA-256 matching on-device readback.
+- Real Android WebView nine-screen UI and D-XQT runtime initialized.
+- Embedded native signed Python backend replied to bridge capabilities.
+- Browser captured K750 financial fixture observation, signed backend stored
+  it in SQLite, and native Overview/Finance/Activity displayed real records.
+- Backend contextual decision yielded BROWSER_HANDOFF_READY and the synthetic
+  NOT_EXECUTED receipt, without a real website financial effect.
+- After process restart, native account and history persisted as
+  PAUSED/STALE_LAST_KNOWN, the authenticated profile cookie was restored and
+  a fresh observation revalidated the account ACTIVE.
+- Two distinct locally authenticated fixture websites synchronized separately
+  using wolfBackend.syncAll and accumulated independent SQLite histories.
+  Owner-matching suggestions remained evidential, not automatic legal claims.
+
+External venue login/OAuth, physical device compatibility, owner-approved
+pixel parity and production signing remain separate acceptance requirements.
+No actual financial transaction was performed.

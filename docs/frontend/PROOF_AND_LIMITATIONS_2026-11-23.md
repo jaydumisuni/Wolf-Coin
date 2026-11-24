@@ -114,3 +114,31 @@ phone remains unqualified.
   sources. Windows runtime qualification, Linux system-installed sandbox,
   Android embedded backend parity, actual external authenticated providers,
   and mockup pixel-match approval remain open.
+
+## Android source-built v0.9 native backend acceptance, 2026-11-24
+
+The exact native Android source project built the Chaquopy Python3.11
+application backend, Kotlin WebKit host, nine-screen D-XQT UI and signed
+wolf.app.bridge.v2 host connection. Native Android 15 x86_64 emulator proof:
+- Direct installed APK SHA-256 matched the exact source-built APK.
+- Trusted WebView host returned a genuine embedded Python backend and
+  22 supported bridge operations; D-XQT and all nine tabs ready.
+- Browser-originated K750 fixture observation stored in Android SQLite,
+  native financial history and audit readbacks passed, and Overview,
+  Finance and Activity screens showed actual backend records.
+- Synthetic decision yielded BROWSER_HANDOFF_READY and test receipt
+  NOT_EXECUTED. No real financial transaction was performed.
+- On process restart, account persisted, state began PAUSED/STALE_LAST_KNOWN,
+  browser cookie restored, new observation revalidated ACTIVE and history
+  accumulated.
+- Two independently authenticated fixture website origins each created
+  native backend financial histories; Android Sync All returned two
+  OBSERVED results, and owner-match suggestions were available.
+
+APK versionCode11, versionName0.9.0-dev, minSdk26 and targetSdk35.
+SHA-256:
+37e71b7c3012ef9a0db5a0400d46b5254ab0b365f2d734b06d746a544c8612c9
+
+Remaining: Windows launch on ATHENA, Debian installed sandbox, physical
+Android acceptance, exact owner-approved visual mockup parity, production
+signing and real authenticated third-party venue end-to-end acceptance.

@@ -4,3 +4,7 @@
 /local.properties
 *.apk
 /app/src/main/assets/wolfcoin.html
+
+# Owner-held Python application source staged from the independent backend.
+app/src/main/python/wolf_app/
+app/src/main/python/wolf_core/

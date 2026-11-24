@@ -44,11 +44,25 @@ def build() -> None:
         args.desktop.parent.mkdir(parents=True,exist_ok=True)
         args.desktop.write_text(desktop_html,encoding="utf-8")
     if args.android:
-        bridge=here.parent/"wolfcoin-android"/"wolf_android_bridge.js"
+        android_dir=here.parent/"wolfcoin-android"
+        bridge=android_dir/"wolf_android_bridge.js"
         js=bridge.read_text(encoding="utf-8")
+        extension=android_dir/"wolf_android_backend_extension.js"
+        if extension.exists():
+            backend_ext=extension.read_text(encoding="utf-8")
+            if not js.rstrip().endswith("})();"):
+                raise ValueError("Android host bridge scope changed")
+            # Keep the native signed backend adapter inside the trusted
+            # Android WolfHost scope, where invoke() is defined.
+            js=js.rstrip()[:-5]+"\n"+backend_ext+"\n})();\n"
         if "</script" in js.lower():
             raise ValueError("Android host bridge contains an HTML script terminator")
         android=html.replace("<head>","<head>\n<script>\n"+js+"\n</script>\n",1)
+        if extension.exists():
+            backend_ui=(here.parent/"wolfcoin-desktop"/"backend_ui.js").read_text(encoding="utf-8")
+            if "</script" in backend_ui.lower():
+                raise ValueError("Android backend UI script contains a terminator")
+            android=android.replace("</body>","<script>\n"+backend_ui+"\n</script>\n</body>",1)
         args.android.parent.mkdir(parents=True,exist_ok=True)
         args.android.write_text(android,encoding="utf-8")
     print("Wolf-Coin frontend assembled:",len(html),"bytes; private runtime",not args.preview)

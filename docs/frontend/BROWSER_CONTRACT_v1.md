@@ -50,3 +50,20 @@ Android child windows use the same named WebView profile as their opening
 account, retaining session isolation and the account's website cookies.
 This was verified with a controlled popup login and parent readback. Third-
 party OAuth provider compatibility is not yet confirmed.
+
+## Android v0.9 signed backend integration, 2026-11-24
+
+Android now includes the same owner-held 0.1.0a10 Python backend implemented
+by desktop. Kotlin's trusted appassets bridge forwards backendStatus and
+backendRequest into Android-private Chaquopy Python/SQLite and signs native
+bridge requests. Independent website WebViews do not receive application
+backend privileges. Source staging is explicit in
+apps/wolfcoin-android/stage-native-backend.py. The public frontend branch
+does not include staged backend modules, private D-XQT bytes, generated HTML,
+private host keys, or SQLite databases.
+
+An actual source-built APK on the Android 15 emulator passed backend
+capabilities, signed account financial observation, decision and receipt,
+process restart with session revalidation, real backend finance UI and
+two-account Sync All. This proves local device integration against fixtures,
+not third-party provider acceptance.

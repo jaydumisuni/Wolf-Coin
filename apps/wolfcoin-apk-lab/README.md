@@ -17,3 +17,18 @@ Android debug fixture: The debug build alone allows Android emulator host loopba
 Additional proof: android-portfolio-e2e.mjs covers two separately authenticated emulator WebView sessions, owner-match suggestion, owner-confirmed grouping, quote comparison and backend candidate; android-restart-proof.mjs checks restart persistence and isolation from a new unregistered account profile. These are controlled local websites and not real betting/broker platform acceptance.
 
 Do not replace or overwrite the owner's Prime OS or Ptah repositories. Portability is through Android SDK/ADB runtime; Ptah supplies an evidence design to adopt later when device controller integration is ready.
+
+## v0.9 embedded Python backend tests
+
+The Android APK now contains the frozen owner-controlled a10 Python backend
+inside Chaquopy. The signed app backend is used by the trusted Android host.
+Reproducible test files in this directory:
+- android-native-backend-e2e.mjs: browser account registration, financial
+  observation, signed backend history and synthetic decision/receipt
+- android-native-backend-restart.mjs: persisted SQLite and cookie state after
+  force-stop/restart and native session revalidation
+- android-native-ui-data.mjs: actual backend Overview/Finance/Activity data
+- android-native-multi-account.e2e.mjs: two distinct authenticated websites,
+  independent backend histories and cross-platform Sync All
+
+Windows APK lab has a setup script but Windows execution remains unverified.
