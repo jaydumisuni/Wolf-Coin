@@ -1,0 +1,48 @@
+{
+  "name": "wolfcoin-desktop-host",
+  "version": "0.7.2-dev",
+  "private": true,
+  "description": "Wolf-Coin UI host: Windows/Linux Chromium, persistent per-account browser profiles",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "package:windows": "electron-builder --win nsis",
+    "package:linux": "electron-builder --linux AppImage deb",
+    "check": "node --check main.cjs && node --check preload.cjs",
+    "test:fixture": "node test_fixture.cjs"
+  },
+  "devDependencies": {
+    "electron": "37.2.6",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.thetechguy.wolfcoin",
+    "productName": "Wolf-Coin",
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "app.html",
+      "package.json",
+      "README.md",
+      "wolf_snapshot.js"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Finance"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

@@ -1,0 +1,38 @@
+# Wolf-Coin Frontend v0.6 — KRATOS Proof and Boundaries
+
+2026-11-23, development candidate. No MT5, sportsbook API, live account, funding or financial transaction was used.
+
+Observed passes on KRATOS:
+- Electron 37.2.6, isolated Chromium fixture sessions.
+- Fixture login, logout, screenshot, DOM inventory and read-only network metadata.
+- Heuristic ZMW 750 balance, 100 pending and +60 P/L from controlled fixture, marked candidate_only.
+- Persistent cookie restored after full Electron restart; explicit session clear forced login. Session-only cookies must not be artificially extended.
+- Real UI/CDP Add Platform -> login -> Inspect & Sync -> Log Out retained registered account and last-known balance.
+- Linux .deb built (SHA256 25097ce141bd52c0245d1acfc31594aaec15ae4ee6dc53e54f1d6ba26f5877f5).
+- Windows x64 portable ZIP built (SHA256 816849323cf8eaedd9e7513b704d0bdae2a03d2d557b1d576346c688ddfbadb1).
+- Android debug APK compiled with SDK35, JDK21, Gradle8.7, AGP8.5.2, WebKit1.13.0 (SHA256 483b8093b4a1e3861f64d22e0ff4274156e9c6d4aa4e8da9fc7489a908dd16df).
+
+Not proven: physical Android login/profile tests, Windows runtime tests while ATHENA offline, installed Linux setuid sandbox acceptance, exact pixel-level owner-approved nine-tab match, provider OAuth compatibility, background monitoring, financial reconciliation, backend ingestion and live accounts.
+
+The browser controller exposes account-scoped website controls. The separately developed backend governs its own decisions and reconciliation. Testing used controlled fixtures.
+
+## Follow-up verification: Browser Tools / native empty-state
+
+- Native boot initialized with zero registered demo accounts and zero claimed live financial values.
+- Full real UI fixture path passed again on KRATOS with embedded D-XQT ready.
+- Account-specific Browser Tools now call their actual host functions: read-only page snapshot, DOM inventory, request metadata, native screenshot and bounded guided scroll action.
+- Browser panel is temporarily concealed during UI modals while the underlying authenticated page and account session remain alive.
+- Rebuilds use an owner-held private D-XQT payload via apps/wolfcoin-ui/assemble.py. Never commit the generated app.html, Android wolfcoin.html or private runtime to the public source branch.
+- Android modal overlay behavior was adjusted to keep the underlying WebView layout/viewport intact. Android physical runtime remains a separate acceptance gate.
+
+## Final expanded native UI check
+A repeatable Node/CDP fixture test (apps/wolfcoin-desktop/tests/native_ui_e2e.mjs) passed on KRATOS with no startup demo accounts, all nine visible tab render paths, Add Platform, native login, Inspect & Sync, page snapshot, DOM controls, request metadata, screenshot, guided scroll, and Log Out retaining last-known values. Source and binary package consistency were also checked across Linux .deb, Windows ZIP and Android APK. No claim of Android hardware or Windows runtime acceptance follows from these tests.
+
+
+## Native package acceptance checkpoint (2026-11-24)
+
+The actual finalized Linux .deb, after Debian extraction, passed the same native_ui_e2e.mjs flow as the source build: native start with zero fake accounts, 9/9 tabs, platform addition, authenticated fixture navigation, DOM snapshot and candidate ZMW reconciliation, network metadata, screenshot, guided scroll, logout retention. This confirms exact package bytes, not only development source. It ran in an isolated test X server with the development --no-sandbox flag because an extracted rather than system-installed package cannot have an effective root-owned sandbox helper. The .deb itself contains the root-owned setuid helper and world-readable app contents, but installed sandbox acceptance remains open.
+
+All three distributables were checked for exact embedded frontend-byte equivalence to their assembled source: Linux .deb and Windows ZIP use the desktop HTML, Android APK uses the Android-specific HTML with its same-origin host bridge.
+
+Release remains an owner-only draft integration candidate. It is not a production or real-money acceptance, nor evidence of Windows/Android runtime tests.

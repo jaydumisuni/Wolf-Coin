@@ -1,0 +1,359 @@
+package com.thetechguy.wolfcoin
+
+import android.app.Activity
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.net.Uri
+import android.os.Bundle
+import android.util.Base64
+import android.view.View
+import android.view.ViewGroup
+import android.webkit.CookieManager
+import android.webkit.PermissionRequest
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.FrameLayout
+import androidx.webkit.JavaScriptReplyProxy
+import androidx.webkit.ProfileStore
+import androidx.webkit.WebMessageCompat
+import androidx.webkit.WebViewAssetLoader
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
+import org.json.JSONArray
+import org.json.JSONObject
+import org.json.JSONTokener
+import java.io.ByteArrayOutputStream
+import java.net.URI
+import java.security.MessageDigest
+import java.time.Instant
+import java.util.Collections
+import java.util.concurrent.ConcurrentHashMap
+
+/**
+ * Wolf-Coin v0.6 native Android browser bridge. UI and credentials never share a WebView.
+ * All browser observations are candidates, not verified broker/bookmaker balances.
+ */
+class MainActivity : Activity() {
+    companion object {
+        const val ORIGIN = "https://appassets.androidplatform.net"
+        const val CONTRACT = "wolf.browser.v1"
+        const val UI_URL = "$ORIGIN/assets/wolfcoin.html"
+    }
+    private lateinit var root: FrameLayout
+    private lateinit var ui: WebView
+    private val sessions = HashMap<String, WebView>()
+    private val requested = HashMap<String, String>()
+    private val network = ConcurrentHashMap<String, MutableList<JSONObject>>()
+    private var activeId: String? = null
+    private var area = intArrayOf(0, 0, 0, 0)
+    private val snapshotScript by lazy { assets.open("wolf_snapshot.js").bufferedReader().use { it.readText() } }
+    private val assetLoader by lazy {
+        WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
+            .build()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if ((applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            WebView.setWebContentsDebuggingEnabled(true) // local emulator/ADB proof only
+        }
+        window.statusBarColor = Color.rgb(5, 12, 24)
+        window.navigationBarColor = Color.rgb(5, 12, 24)
+        root = FrameLayout(this)
+        ui = WebView(this)
+        ui.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            allowFileAccess = false
+            allowContentAccess = false
+            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            cacheMode = WebSettings.LOAD_DEFAULT
+        }
+        ui.webChromeClient = WebChromeClient()
+        ui.webViewClient = object : WebViewClient() {
+            override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
+                return request?.url?.let { assetLoader.shouldInterceptRequest(it) }
+            }
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                val link = request?.url ?: return true
+                if (link.toString().startsWith(ORIGIN + "/assets/")) return false
+                return true // untrusted sites never replace the privileged frontend
+            }
+        }
+        if (!WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
+            // Refuse an insecure fallback that would expose a JavaScript interface to external sites.
+            root.addView(ui, FrameLayout.LayoutParams(-1, -1))
+            setContentView(root)
+            ui.loadDataWithBaseURL(ORIGIN,
+                "<h3 style='color:white;background:#080f1f;padding:24px'>Wolf-Coin needs an updated Android System WebView supporting isolated messaging.</h3>",
+                "text/html", "utf-8", null)
+            return
+        }
+        WebViewCompat.addWebMessageListener(ui, "WolfHost", setOf(ORIGIN),
+            WebViewCompat.WebMessageListener { view: WebView, msg: WebMessageCompat,
+                                                  source: Uri, mainFrame: Boolean, reply: JavaScriptReplyProxy ->
+                if (view !== ui || !mainFrame || source.toString() != ORIGIN) return@WebMessageListener
+                val request = try { JSONObject(msg.data ?: "") } catch (_: Exception) { return@WebMessageListener }
+                val id = request.optString("id").take(64)
+                if (id.isEmpty()) return@WebMessageListener
+                try {
+                    dispatch(id, request.getString("method"), request.optJSONObject("args") ?: JSONObject(), reply)
+                } catch (e: Exception) { respond(reply, id, null, e.message ?: "Browser host error") }
+            })
+        root.addView(ui, FrameLayout.LayoutParams(-1, -1))
+        setContentView(root)
+        if (savedInstanceState == null) ui.loadUrl(UI_URL)
+        else if (ui.restoreState(savedInstanceState) == null) ui.loadUrl(UI_URL)
+    }
+
+    private fun respond(reply: JavaScriptReplyProxy, id: String, result: Any?, error: String? = null) {
+        val packet = JSONObject().put("id", id).put("ok", error == null)
+        if (error == null) packet.put("result", result ?: JSONObject())
+        else packet.put("error", error)
+        reply.postMessage(packet.toString())
+    }
+
+    private fun accountId(id: String): String {
+        require(id.matches(Regex("[A-Za-z0-9_:-]{1,128}"))) { "Invalid account ID" }
+        return id
+    }
+    private fun profileName(id: String): String {
+        val digest = MessageDigest.getInstance("SHA-256").digest(accountId(id).toByteArray())
+        return "wolf-" + digest.take(16).joinToString("") { "%02x".format(it) }
+    }
+    private fun safeUrl(value: String): String {
+        val link = URI(value)
+        require(link.userInfo == null && link.host != null) { "Invalid website URL" }
+        require(link.scheme.equals("https", true) || link.scheme.equals("http", true)) {
+            "Only HTTP(S) websites are supported"
+        }
+        return link.toString()
+    }
+    private fun activeBrowser(id: String): WebView {
+        require(activeId == accountId(id)) { "Account/browser session mismatch" }
+        return sessions[id] ?: error("No active browser")
+    }
+    private fun currentBrowser(id: String): WebView {
+        sessions[id]?.let { return it }
+        check(WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+            "This Android System WebView cannot isolate account profiles. Please update WebView."
+        }
+        val browser = WebView(this)
+        // Must be set before any settings evaluation/navigation on this instance.
+        WebViewCompat.setProfile(browser, profileName(id))
+        browser.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            allowFileAccess = false
+            allowContentAccess = false
+            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            setSupportMultipleWindows(false)
+            javaScriptCanOpenWindowsAutomatically = false
+        }
+        browser.webChromeClient = object : WebChromeClient() {
+            override fun onPermissionRequest(request: PermissionRequest) { request.deny() }
+        }
+        browser.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                return try { safeUrl(request?.url?.toString() ?: ""); false } catch (_: Exception) { true }
+            }
+            override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
+                val req = request ?: return null
+                try {
+                    val link = URI(req.url.toString())
+                    if (!link.path.contains(Regex("(?i)(?:token|password|secret|session|otp|auth)"))) {
+                        val entry = JSONObject().put("at", Instant.now().toString())
+                            .put("method", req.method).put("url", link.scheme + "://" + link.authority + link.path.split("/").joinToString("/") { segment -> if(segment.length>28) ":opaque" else segment }.take(160))
+                            .put("resourceType", if (req.isForMainFrame) "document" else "subresource")
+                        val list = network.computeIfAbsent(id) { Collections.synchronizedList(mutableListOf()) }
+                        synchronized(list) { list.add(entry); while (list.size > 120) list.removeAt(0) }
+                    }
+                } catch (_: Exception) {}
+                return null
+            }
+            override fun onPageFinished(view: WebView?, url: String?) {
+                if (activeId == id) sendPageState(id, url ?: "", view?.title ?: "")
+            }
+        }
+        sessions[id] = browser
+        return browser
+    }
+    private fun sendPageState(id: String, url: String, title: String) {
+        val data = JSONObject().put("schema", CONTRACT).put("accountId", id)
+            .put("url", url).put("title", title).put("observedAt", Instant.now().toString())
+        ui.evaluateJavascript("window.__wolfAndroidPageState && window.__wolfAndroidPageState(${data})", null)
+    }
+    private fun bounds(rect: JSONObject) {
+        val scale = resources.displayMetrics.density
+        val x = (rect.optDouble("x", 0.0) * scale).toInt().coerceAtLeast(0)
+        val y = (rect.optDouble("y", 0.0) * scale).toInt().coerceAtLeast(0)
+        val w = (rect.optDouble("width", 0.0) * scale).toInt().coerceAtLeast(0)
+        val h = (rect.optDouble("height", 0.0) * scale).toInt().coerceAtLeast(0)
+        // Hide the browser's visual overlay while a frontend modal is open,
+        // without collapsing the website viewport or destroying its profile.
+        if (w == 0 || h == 0) {
+            activeId?.let { sessions[it]?.visibility = View.INVISIBLE }
+            return
+        }
+        area = intArrayOf(x, y, w, h)
+        activeId?.let { sessions[it]?.let { browser -> attachBounds(browser) } }
+    }
+    private fun attachBounds(browser: WebView) {
+        val params = FrameLayout.LayoutParams(area[2], area[3]);params.leftMargin=area[0];params.topMargin=area[1]
+        browser.layoutParams = params
+        browser.visibility = View.VISIBLE
+    }
+    private fun hide() {
+        activeId?.let { id -> sessions[id]?.let { if (it.parent == root) root.removeView(it) } }
+        activeId = null
+    }
+    private fun dispatch(id: String, method: String, args: JSONObject, reply: JavaScriptReplyProxy) {
+        when (method) {
+            "status" -> respond(reply,id,JSONObject().put("schema",CONTRACT).put("host","android")
+                .put("browserOpen",activeId!=null).put("accountId",activeId)
+                .put("multiProfile",WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE))
+                .put("mode","browser_controls_available"))
+            "browserBounds" -> { bounds(args);respond(reply,id,JSONObject().put("ok",true)) }
+            "hideBrowser" -> { hide();respond(reply,id,JSONObject().put("ok",true)) }
+            "showBrowser" -> {
+                val account = accountId(args.getString("accountId"));val address = safeUrl(args.getString("url"))
+                val browser=currentBrowser(account)
+                if (activeId != account) hide()
+                activeId=account
+                if (browser.parent != root) root.addView(browser)
+                attachBounds(browser)
+                if (requested[account] != address || browser.url == null) {
+                    requested[account]=address;browser.loadUrl(address)
+                }
+                respond(reply,id,JSONObject().put("ok",true).put("accountId",account).put("url",address)
+                    .put("profile","isolated persistent WebView profile"))
+            }
+            "back" -> { activeId?.let{if(sessions[it]?.canGoBack()==true)sessions[it]?.goBack()};respond(reply,id,JSONObject().put("ok",true)) }
+            "forward" -> {activeId?.let{if(sessions[it]?.canGoForward()==true)sessions[it]?.goForward()};respond(reply,id,JSONObject().put("ok",true))}
+            "reload" -> {activeId?.let{sessions[it]?.reload()};respond(reply,id,JSONObject().put("ok",true))}
+            "snapshot" -> {
+                val account=accountId(args.getString("accountId"));val browser=activeBrowser(account)
+                browser.evaluateJavascript(snapshotScript) { response ->
+                    try {
+                        val parsed=JSONTokener(response).nextValue()
+                        val data=if(parsed is JSONObject)parsed else JSONObject(parsed.toString())
+                        data.put("accountId",account).put("contract",CONTRACT)
+                        data.put("source",JSONObject().put("type",CONTRACT).put("accountId",account)
+                            .put("url",data.optString("url")).put("observedAt",data.optString("observedAt"))
+                            .put("verification","candidate_only").put("evidenceOrigin","visible_dom"))
+                        respond(reply,id,data)
+                    } catch(e:Exception) {respond(reply,id,null,"Snapshot parse failed: "+e.message)}
+                }
+            }
+            "inspectDOM" -> {
+                val account=accountId(args.getString("accountId"));val browser=activeBrowser(account)
+                val script="""(() => {const nodes=[];for(const el of document.querySelectorAll('a,button,input,select,textarea,[role=button]')){
+                  if(nodes.length>=250)break;if(!el.getClientRects().length)continue;const type=(el.type||'').toLowerCase();
+                  if(/password|hidden|file/.test(type)||/pass|token|secret|otp|card/i.test(el.name||''))continue;
+                  nodes.push({tag:el.tagName.toLowerCase(),type,text:(el.innerText||el.getAttribute('aria-label')||'').slice(0,130)});
+                  }return {url:location.href,title:document.title,nodes};})()"""
+                browser.evaluateJavascript(script){ response ->
+                    try {respond(reply,id,JSONObject(response).put("accountId",account).put("schema",CONTRACT))}
+                    catch(e:Exception){respond(reply,id,null,"DOM parse failed: "+e.message)}
+                }
+            }
+            "inspectNetwork" -> {
+                val account=accountId(args.getString("accountId"));activeBrowser(account)
+                val list=network[account];val records=JSONArray()
+                if(list!=null)synchronized(list){list.takeLast(50).forEach{records.put(it)}}
+                respond(reply,id,JSONObject().put("schema",CONTRACT).put("accountId",account).put("records",records)
+                    .put("metadataOnly",true).put("observedAt",Instant.now().toString()))
+            }
+            "screenshot" -> {
+                val account=accountId(args.getString("accountId"));val browser=activeBrowser(account)
+                val w=browser.width.coerceAtLeast(1);val h=browser.height.coerceAtLeast(1)
+                require(w*h <= 4_000_000) {"Screenshot dimensions exceed limit"}
+                val bitmap=Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888)
+                browser.draw(Canvas(bitmap));val bytes=ByteArrayOutputStream();bitmap.compress(Bitmap.CompressFormat.PNG,85,bytes);bitmap.recycle()
+                val encoded=Base64.encodeToString(bytes.toByteArray(),Base64.NO_WRAP)
+                respond(reply,id,JSONObject().put("schema",CONTRACT).put("accountId",account)
+                    .put("observedAt",Instant.now().toString()).put("mimeType","image/png")
+                    .put("dataUrl","data:image/png;base64,"+encoded))
+            }
+            "action" -> {
+                val account=accountId(args.getString("accountId"));val browser=activeBrowser(account)
+                val type=args.getString("type")
+                if(type=="navigate") {
+                    val address=safeUrl(args.getString("url"));browser.loadUrl(address)
+                    respond(reply,id,JSONObject().put("ok",true).put("accountId",account).put("type",type))
+                } else if(type=="scroll") {
+                    val dy=args.optInt("pixels").coerceIn(-1500,1500)
+                    browser.scrollBy(0,(dy*resources.displayMetrics.density).toInt())
+                    respond(reply,id,JSONObject().put("ok",true).put("type",type))
+                } else if(type=="click" || type=="fill") {
+                    val selector=args.getString("selector")
+                    require(selector.length in 1..512) {"Invalid selector"}
+                    val value=args.optString("text")
+                    require(type!="fill" || value.length<=4096) {"Input too long"}
+                    val script="""(() => {const el=document.querySelector(${JSONObject.quote(selector)});
+                      if(!el||!el.getClientRects().length)return {ok:false,reason:'not_visible'};
+                      if(${JSONObject.quote(type)}==='click'){
+                        const href=el.closest('a[href]')?.getAttribute('href')||'';
+                        if(/^javascript:|^data:|^file:/i.test(href))return {ok:false,reason:'unsafe_navigation'};
+                      }
+                      if(${JSONObject.quote(type)}==='fill'){
+                        if(!['INPUT','TEXTAREA','SELECT'].includes(el.tagName)||el.type==='file')return {ok:false,reason:el.type==='file'?'file_picker_required':'unsupported_input'};
+                        const proto=el.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:el.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;
+                        const setter=Object.getOwnPropertyDescriptor(proto,'value')?.set;
+                        if(!setter)return {ok:false,reason:'input_unavailable'};
+                        setter.call(el,${JSONObject.quote(value)});el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));
+                      }else el.click();return {ok:true};})()"""
+                    browser.evaluateJavascript(script) { response ->
+                        try {val result=JSONObject(response);result.put("schema",CONTRACT).put("accountId",account)
+                            .put("id",java.util.UUID.randomUUID().toString()).put("observedAt",Instant.now().toString());respond(reply,id,result)}
+                        catch(e:Exception) {respond(reply,id,null,"Action failed: "+e.message)}
+                    }
+                } else error("Unsupported browser operation")
+            }
+            "clearSession" -> {
+                val account=accountId(args.getString("accountId"))
+                val web=sessions.remove(account);if(activeId==account)hide();requested.remove(account)
+                val profile=if(WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE))
+                    (web?.let{WebViewCompat.getProfile(it)} ?: ProfileStore.getInstance().getOrCreateProfile(profileName(account)))
+                    else null
+                if (web!=null){if(web.parent==root)root.removeView(web);web.stopLoading();web.destroy()}
+                if(profile==null)throw IllegalStateException("Isolated WebView profile unavailable")
+                profile.cookieManager.removeAllCookies {
+                    try {
+                        profile.webStorage.deleteAllData();profile.cookieManager.flush()
+                        network.remove(account)
+                        respond(reply,id,JSONObject().put("ok",true).put("accountId",account)
+                            .put("localSessionCleared",true).put("serverRevocationNotGuaranteed",true))
+                    }catch(e:Exception){respond(reply,id,null,"Cookie cleanup failed: "+e.message)}
+                }
+            }
+            "openExternal" -> {
+                val url=safeUrl(args.getString("url"))
+                startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(url)))
+                respond(reply,id,JSONObject().put("ok",true))
+            }
+            else -> error("Unsupported native method")
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) { ui.saveState(outState);super.onSaveInstanceState(outState) }
+    @Deprecated("Browser navigation uses built-in back handling for this development host")
+    override fun onBackPressed() {
+        val current=activeId?.let{sessions[it]}
+        if(current?.canGoBack()==true)current.goBack()
+        else if(activeId!=null)hide()
+        else if(ui.canGoBack())ui.goBack()
+        else super.onBackPressed()
+    }
+    override fun onDestroy() {
+        sessions.values.forEach { if(it.parent==root)root.removeView(it);it.destroy() }
+        sessions.clear();ui.destroy();super.onDestroy()
+    }
+}
