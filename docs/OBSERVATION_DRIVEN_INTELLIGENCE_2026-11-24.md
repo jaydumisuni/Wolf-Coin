@@ -1,0 +1,34 @@
+# Wolf-Coin — General website observation reasoning (2026-11-24)
+
+**Backend extension**: owner-defined capability is to organize data from any new website without requiring a manual website-specific adapter or a preselected task. The frontend/browser remains independently owned.
+
+## Existing math and new evidence organization
+
+The existing Wolf-Coin source contains quantitative forecasting, probabilities, bookmaker no-vig comparison, proper scores, fee-aware expected value, and simulation/journal components. The missing component was universal observation interpretation, not a fresh model or another PAPER-only constraint.
+
+Native frontend `wolf.browser.v1` observation → `wolf-browser-normalize` (one generic local translator) → signed `wolf-app-bridge` `observation.discover` → `wolf.app.observation-reasoning.v1`.
+
+The normalized observation document `wolf.browser.evidence.v1` includes source hostname, timestamp, session observation, optional account identity, evidence hash, arbitrary label/value pairs, accessible controls and quoted market offers. It does not transmit website credentials, session cookies, raw DOM, screenshot bytes or query-string credentials. The evidence hash is a digest of the **normalized local evidence**, not independent proof of server truth.
+
+The mathematical reasoner uses token-vector cosine similarity and inverse document frequency computed from the current observed page to organize general financial concepts. It returns typed facts with similarity scores, source labels, numeric decimals/currency, relationships, site controls, market offers and conflicts. Unknown concepts remain `UNCLASSIFIED` and are not treated as unsupported sites. Numeric 750 and 750.00 agree; materially different values conflict.
+
+The next task is selected from the data **without the caller supplying a goal**: restore login, wait for connectivity, refresh stale observations, associate a verified account, reconcile financial discrepancies, discover a market/selection, evaluate it with models, synchronize finances, inspect site controls, or organize newly encountered evidence.
+
+For back-bet decimal odds, the market-implied probability is `1 / quote`. This is not a prediction or proven edge. Market quotes are prepared for the established strategy/model mathematics; `forecast_probability` remains null and `edge_verified` false until an actual model forecast is available. Trading prices are never treated as bet odds. No new global financial lock is introduced.
+
+## Frontend handoff
+
+The existing v0.6 native Chromium host emits `wolf.browser.v1` snapshots, DOM inventory and opportunity candidates. The backend provides `wolf-browser-normalize` as a host-side stdin/stdout utility (no provider API and no network listener), converting native observations into the existing signed IPC evidence schema. The Electron source, private D-XQT payload, nine-screen design, mobile code and browser packaging are not modified by this extension.
+
+The current frontend's DOM opportunity extractor still uses a tagged-element path for some quotes; arbitrary image-only or unlabeled pages may require additional structural, visual or learned-language interpretation. The new generic reasoning module supports unknown labels as data but **does not prove general autonomous website operation or profits**.
+
+## Verification scope
+
+Synthetic unknown-site observations prove task discovery, label/value classification, visible text normalization, signed bridge compatibility, numerical conflict detection, market identity discovery, and sensitive-field exclusion. Actual browser effect, money movement and native desktop/Android packaging remain the independent frontend and future joint acceptance work.
+
+
+## Native Chromium fixture consistency correction
+
+The actual owner's Electron host fixture emits a `wolf.browser.v1` dashboard snapshot and a `wolf.browser.v1` DOM inventory, but the fixture's `domSnapshot` was taken on the **login page before navigation**. Observed Chrome state therefore differed across the two captures even though the browser session and account were real. The universal translator now compares the DOM and snapshot page URL and capture timestamps (within 30 seconds); if they differ it **excludes the stale controls** and annotates `dom_controls_match_current_page=false`. Actual financial page facts are preserved. It also prevents dimensionless odds from inheriting account currency and preserves unknown currency on ambiguous `$`-prefixed amounts. The frontend was not modified.
+
+The first real fixture capture is stored privately at `/home/kratos/projects/Wolf-Coin/.workspace/proof-history/site-neutral-20261124/frontend_fixture_instrumented_copy/captured-browser-observation.json` and is a **local controlled fixture**, not a sportsbook. The only modification to the host test harness was a private, isolated duplicate of `main.cjs` used to print the browser observation; the owner-maintained host source is unchanged. The capture is used as a source for installed-package replay, not committed to source control.

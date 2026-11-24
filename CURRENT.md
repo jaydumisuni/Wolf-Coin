@@ -1,5 +1,14 @@
 # Wolf-Coin — CURRENT
 
+## Native browser evidence → site-neutral reasoning candidate (2026-11-24)
+
+- New isolated backend `0.1.0a11` consumes the existing frontend's `wolf.browser.v1` via **one generic `wolf-browser-normalize` translator** and signed native IPC `observation.discover`. It applies current-page token-vector/IDF semantic similarity and numerical normalization, preserves new and unrecognized site facts, selects the next task without a preselected goal, and exposes market-implied probabilities when supported. **No site allowlist, bookmaker API, global application mode lock, or frontend modification.**
+- A native Chromium/Electron v0.6/0.7-dev fixture on KRATOS passed login, balance/pending/P&L capture (ZMW 750/100/60), isolated account sessions, restart/login persistence and logout. Actual native snapshot and DOM were captured separately in private proof. That capture revealed the DOM inventory came from an older login page; backend now rejects stale-page controls rather than attaching them to the authenticated dashboard. Odds remain dimensionless; ambiguous currency symbols are not relabeled as account funds.
+- Synthetic tests validated real browser contract normalization, unknown text values, account recovery, conflicts, no false edge/profit claims and fresh evidence task selection. The browser host and strategy/forecast model wiring remain independently owned/qualified; the reasoner is deterministic semantic math, **not an already trained general website agent**. See `docs/OBSERVATION_DRIVEN_INTELLIGENCE_2026-11-24.md`.
+- **Frozen source, wheel hash, installed native-IPC proof and Cookpit acceptance** will be appended after packaging without altering the previously active a6 lab or user frontend.
+
+---
+
 ## Owner-directed removal of app PAPER/research fallback (2026-11-24)
 
 - **The old application default `RESEARCH_ONLY` restriction was not user-approved and is removed** in the isolated `0.1.0a10` backend. Financial actions remain context-selectable: `PLACE_BET`, `CANCEL_BET`, `PLACE_TRADE` and `CLOSE_POSITION`. Intelligence research/learning is available as a separate task, not a restrictive app operating mode.

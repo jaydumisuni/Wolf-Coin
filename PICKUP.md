@@ -1,5 +1,11 @@
 # Wolf-Coin — zero-context pickup
 
+## Latest: backend site-neutral observation reasoning (2026-11-24)
+
+The owner wants Wolf-Coin to use its existing math to **organize any accessible new website as data**, discover what to do next, and avoid one adapter per site. Isolated a11 adds `wolf_app.frontend_ingress`, `wolf_app.evidence_reasoner`, signed read `observation.discover` and CLI `wolf-browser-normalize` for actual `wolf.browser.v1` frontend snapshots. Novel fields remain available, market odds are dimensionless, and a DOM inventory from an outdated URL is excluded. The built-in reasoning selects a next task, **not a confirmed profitable wager or trained universal agent**. No application RESEARCH_ONLY mode is restored; legacy trained research evidence and frontend files are untouched. See `CURRENT.md` and `docs/OBSERVATION_DRIVEN_INTELLIGENCE_2026-11-24.md` for proof and boundaries.
+
+---
+
 ## Product application no longer has forced research/PAPER mode (2026-11-24)
 
 The user explicitly directed removal of the blanket restriction. Backend candidate `0.1.0a10` now has **no default application `RESEARCH_ONLY` path**, does not expose response-wide `live_enabled=false` or `financial_execution_authorized=false`, and removes the `--research-unkeyed` product CLI. `context.route` selects intelligence/browser operations or scoped betting/trading intents by situational context. Native financial receipts are reconciled; absent integration is not mislabeled as a disabled capability. Schema v1→v2 upgrades preserve historical record/audit as `ANALYSIS_ARCHIVED`. Historic lab paper simulator is **not** a product mode; existing trained source and KRATOS a6 lab remain unchanged. Exact a10 implementation `b29288f`, 409/409 tests, Cookpit micro/heavy PASS, wheel SHA-256 `a2974856bf5c325183acb8e447d0405c49b8bef6c03db04abb923711ebf6f9cf`, signed process proof SHA-256 `202cc5c3d1b8941ac5df09a33b958ecfc583eb8cc769940c20d782b36338117b`. See `CURRENT.md` and `docs/WOLF_APPLICATION_BACKEND_HANDOFF_2026-11-23.md`.
