@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wolf-coin-core"
-version = "0.1.0a10"
+version = "0.1.0a11"
 description = "Wolf-Coin context-aware browser and financial application backend"
 requires-python = ">=3.11"
 dependencies = []
@@ -27,6 +27,7 @@ wolf-tabular = "wolf_lab.typed_tabular:main"
 wolf-five-gates = "wolf_execution.five_gate_report:main"
 wolf-app-bridge = "wolf_app.bridge:main"
 wolf-app-backup = "wolf_app.backup:main"
+wolf-browser-normalize = "wolf_app.frontend_ingress:main"
 
 [tool.setuptools.packages.find]
 include = ["wolf_core*", "wolf_sports*", "wolf_guard*", "wolf_gateway*", "wolf_execution*", "wolf_markets*", "wolf_funding*", "wolf_lab*", "wolf_app*"]

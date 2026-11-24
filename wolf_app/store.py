@@ -18,6 +18,7 @@ from typing import Any
 
 from wolf_core.contracts import ContractError, Domain, utc_now
 from .context_router import route_context
+from .evidence_reasoner import interpret
 from .contracts import (
     BRIDGE_SCHEMA, MONEY_KEYS, NONNEGATIVE_KEYS, SESSION_STATES, SOURCES,
     TRANSACTION_KINDS, TRANSACTION_STATES, amount, check_no_secrets,
@@ -35,6 +36,7 @@ READ_OPS = frozenset({
     "accounts.list", "account.read", "financial.overview",
     "activity.list", "decisions.list", "bridge.capabilities",
     "sync.plan", "sync.inbox", "financial.history", "context.route",
+    "observation.discover",
 })
 MUTATIONS = frozenset({
     "account.register", "account.remove", "session.record",
@@ -705,6 +707,9 @@ class ApplicationStore:
                 "operation_class":"OBSERVATION"}
 
     def _read(self,operation,payload):
+        if operation=="observation.discover":
+            obj(payload,{"document"})
+            return interpret(payload["document"])
         if operation=="context.route":
             obj(payload,{"goal","capabilities","permissions"},
                 {"domain","account_id","target_id","requested_amount","money_budget"})

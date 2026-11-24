@@ -35,6 +35,7 @@
         "financial.history",
         "financial.overview",
         "host.startup",
+        "observation.discover",
         "observation.ingest",
         "session.record",
         "sync.cancel",
