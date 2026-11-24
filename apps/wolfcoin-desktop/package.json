@@ -1,6 +1,6 @@
 {
   "name": "wolfcoin-desktop-host",
-  "version": "0.7.2-dev",
+  "version": "0.8.0-dev",
   "private": true,
   "description": "Wolf-Coin UI host: Windows/Linux Chromium, persistent per-account browser profiles",
   "main": "main.cjs",
@@ -24,7 +24,11 @@
       "app.html",
       "package.json",
       "README.md",
-      "wolf_snapshot.js"
+      "wolf_snapshot.js",
+      "backend_host.cjs",
+      "backend_integration.cjs",
+      "backend-runtime/**/*",
+      "backend_ui.js"
     ],
     "asar": true,
     "win": {
@@ -43,6 +47,9 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true
-    }
+    },
+    "asarUnpack": [
+      "backend-runtime/**/*"
+    ]
   }
 }

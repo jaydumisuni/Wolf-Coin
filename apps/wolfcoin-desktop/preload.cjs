@@ -2,7 +2,7 @@
 const {contextBridge,ipcRenderer}=require('electron');
 const invoke=(channel,payload)=>ipcRenderer.invoke(channel,payload);
 const api={
- version:'0.7.2-dev',contract:'wolf.browser.v1',
+ version:'0.8.0-dev',contract:'wolf.browser.v1',
  status:()=>invoke('wolf:status'),
  showBrowser:request=>invoke('wolf:show-browser',request),
  hideBrowser:()=>invoke('wolf:hide-browser'),
@@ -24,3 +24,15 @@ const api={
  }
 };
 contextBridge.exposeInMainWorld('wolfNative',Object.freeze(api));
+contextBridge.exposeInMainWorld('wolfBackend',Object.freeze({
+ contract:'wolf.app.bridge.v2',
+ status:()=>invoke('wolf:backend-status'),
+ request:(operation,payload={})=>invoke('wolf:backend-request',{operation,payload}),
+ registerAccount:account=>invoke('wolf:backend-register',account),
+ observeAccount:account=>invoke('wolf:backend-observe',account),
+ recordSession:(account,state)=>invoke('wolf:backend-session',{account,state}),
+ removeAccount:account=>invoke('wolf:backend-remove',account),
+ snapshot:()=>invoke('wolf:backend-snapshot'),
+ syncAll:accounts=>invoke('wolf:backend-sync-all',{accounts}),
+ proposeAction:request=>invoke('wolf:backend-propose',request)
+}));

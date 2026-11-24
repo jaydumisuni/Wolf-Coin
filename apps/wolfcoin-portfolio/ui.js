@@ -63,20 +63,39 @@ document.addEventListener('click',async event=>{
   } else if(action==='propose'){
     const req=core.requestAction(state,el.dataset.key);
     save();render();
-    const backend=window.wolfBackend;
-    if(backend&&typeof backend.proposeAction==='function'){
-      try{
-       const receipt=await backend.proposeAction(req);
-       req.status=receipt?.status||'submitted_backend';
-       req.backendReceipt=receipt?.id||null;
-       save();render();toast('Candidate sent to backend; no action executed by UI');
-      }catch(e){req.status='pending_backend';save();render();toast('Backend unavailable; candidate remains queued','warn');}
+    if(window.wolfBackend?.proposeAction){
+      modal('Cross-platform action', '<form id="portfolio-proposal-form"><input type="hidden" name="request_id" value="'+html(req.id)+'">'+
+        '<div class="notice">'+html(req.candidate.market)+' / '+html(req.candidate.selection)+
+        ' · '+html(req.platform)+' · quote '+html(req.candidate.quote)+'</div>'+
+        '<label class="form-label">Action amount<input name="proposed_amount" type="number" step="any" min="0" required placeholder="Amount"></label>'+
+        '<label class="form-label">Available budget (optional)<input name="money_budget" type="number" step="any" min="0" placeholder="Budget"></label>'+
+        '<button class="btn primary" type="submit">Send to Wolf intelligence</button></form>');
     }else{
       window.dispatchEvent(new CustomEvent('wolf:action-request',{detail:req}));
-      toast('Evidence-linked candidate queued; awaits your backend adapter');
+      toast('Candidate queued for backend integration');
     }
+
   }
  }catch(e){toast('Portfolio: '+String(e.message||e),'warn');}
+},true);
+document.addEventListener('submit',async event=>{
+ if(event.target?.id!=='portfolio-proposal-form')return;
+ event.preventDefault();event.stopImmediatePropagation();
+ const values=Object.fromEntries(new FormData(event.target));
+ const req=core.initState(state).proposals.find(p=>p.id===values.request_id);
+ if(!req)return toast('Proposal no longer available','warn');
+ req.proposed_amount=String(values.proposed_amount||'').trim();
+ if(values.money_budget)req.money_budget=String(values.money_budget).trim();
+ save();closeModal();
+ try{
+  const result=await window.wolfBackend.proposeAction(req);
+  req.status=result?.status||'BACKEND_ACCEPTED';
+  req.backendReceipt=result?.decision_id||null;
+  req.backendNextStep=result?.selected_next_step||result?.next_step||null;
+  req.backendDetail=result;
+  save();render();
+  toast('Wolf intelligence: '+req.status+(req.backendNextStep?' · '+req.backendNextStep:''));
+ }catch(e){req.status='BACKEND_ERROR';req.backendError=String(e);save();render();toast('Wolf intelligence: '+String(e),'warn')}
 },true);
 paint();
 })();

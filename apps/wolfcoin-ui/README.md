@@ -10,3 +10,8 @@ A non-authoritative design-only preview can be built with --preview, but **must 
 Desktop and Android app.html/wolfcoin.html are generated/private delivery files and are ignored by Git. Do not overwrite the training/backend branches.
 
 Portfolio owner grouping and cross-platform comparisons are supplied by apps/wolfcoin-portfolio and bundled at assembly; backing authoritativeness remains the independent backend.
+
+v0.8 desktop assembly now includes backend_ui.js, binding Overview, Finance,
+Activity, audit history and report/export functions to the signed native
+application backend. Android compilation remains WebView-based while the
+native backend host is developed independently.

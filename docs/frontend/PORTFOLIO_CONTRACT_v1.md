@@ -45,3 +45,13 @@ A repeated candidate request returns the original request ID. The frontend can s
 - Ptah device C10-style APK evidence: installation SHA256 readback from on-device base.apk, resumed activity, real WebView, D-XQT, nine screens and screenshot capture — PASS on KRATOS emulator.
 - Windows portable Android emulator harness is provided, but not executed under Windows: ATHENA was offline.
 - Real legal ownership recognition, live quote coverage, provider terms/permissions, backend reconciliation, strategy learning, live action and independent financial execution acceptance are **not** proven by fixtures.
+
+## v0.8 signed native account coordination
+
+Desktop Sync All invokes the current browser partition for each registered
+account, collects page evidence and sends signed session/observation records
+to the backend. Two-account integration passed on KRATOS.
+The frontend sends normalized comparison candidates to the signed backend
+through a user-editable amount and optional budget entry when no amount is
+provided. The backend returns the context-driven next step and receipt state.
+Merely creating a proposal does not establish a website transaction result.

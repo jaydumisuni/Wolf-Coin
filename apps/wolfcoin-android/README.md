@@ -1,9 +1,22 @@
-# Wolf-Coin native Android browser v0.6 — development
+# Wolf-Coin Android v0.8.0 — WebView native application
 
-One APK project with nine-screen bundled UI and same-origin WebMessage bridge. Each website account uses a separate AndroidX WebKit named profile when MULTI_PROFILE is supported. If unavailable, managed website login is refused rather than sharing account cookies. The UI has no browser cookies, and no website receives the privileged WolfHost JavaScript interface.
+Wolf-Coin Android packages the nine-screen D-XQT frontend and an AndroidX
+WebKit-based Wolf Browser. Each account has its own persistent named WebView
+profile with isolated cookies and storage. Standard website controls are
+supported within the selected account's authenticated browsing session.
+The browser does not install product-category button restrictions.
 
-Native browser operations: show/hide/navigate, bounded DOM inspection, website screenshots, read-only network request metadata, bounded click/fill/scroll (financial/secret controls denied), snapshot candidates, account session wipe, and page-state callbacks. Cookies are retained by WebView profiles when the website permits persistence; logout wipes profile cookies and web storage. No third-party account is tested.
+Tested on KRATOS's real Android 15 x86_64 emulator: APK installation and
+SHA-256 readback, real Activity/WebView launch, D-XQT startup, all nine
+screens, two independently authenticated accounts, account-holder matching,
+portfolio comparison, app restart and cookie/profile isolation. Profile
+cookies are flushed after page navigation and when the app stops.
 
-Build: JDK 17+, Android SDK platform 35, Gradle 8.11.1+ and Android Gradle Plugin 8.9.1, with AndroidX WebKit 1.13.0; `gradle :app:assembleDebug`. `wolfcoin.html` contains the real D-XQT v8 binary already embedded.
+Build from the native Android Gradle project; its generated wolfcoin.html
+and the owner-held D-XQT binary are kept out of the public source branch.
+This APK is debug-signed, not production distribution-signed.
 
-Not qualified: physical Android installation, JavaScript bridge and profile behavior on specific WebView versions, OAuth popup compatibility, platform financial data reconciliation, financial execution or background autonomy.
+The 0.1.0a10 signed Python/SQLite native backend is integrated into
+Windows/Linux Electron, not yet embedded into this Android APK. Android
+production backend parity, third-party platform compatibility and physical
+Android-device acceptance remain separate tasks.

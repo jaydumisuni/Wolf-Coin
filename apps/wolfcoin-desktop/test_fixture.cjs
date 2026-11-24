@@ -15,6 +15,14 @@ const server=http.createServer((req,res)=>{
  if(req.url==='/signin'&&req.method==='POST'){
   req.resume();req.on('end',()=>{res.writeHead(302,{'set-cookie':'wolf_fixture=ok; Max-Age=7200; HttpOnly; SameSite=Lax; Path=/','location':'/dashboard'});res.end()});return;
  }
+ if(req.url==='/market'){
+  res.writeHead(200,{'content-type':'text/html; charset=utf-8'});
+  res.end('<!doctype html><title>Public Match Odds</title><h1>Public Markets</h1>'+
+    '<div class="market" data-market="Fixture Match 2026-12-01" data-currency="ZMW"><h2 class="market-title">Fixture Match 2026-12-01</h2>'+
+    '<button data-odds="2.10" data-selection="Home">Home 2.10</button>'+
+    '<button data-odds="3.15" data-selection="Draw">Draw 3.15</button></div>');
+  return;
+ }
  if(req.url==='/control'){
   res.writeHead(200,{'content-type':'text/html; charset=utf-8'});
   res.end("<!doctype html><title>Controlled Browser Actions</title><h1>Test controls</h1><input id=\"test-password\" type=\"password\" autocomplete=\"off\"><input id=\"test-number\" type=\"number\"><button id=\"place-bet\" type=\"button\" onclick=\"this.dataset.activated=&#39;yes&#39;\">Place Bet</button><button id=\"withdraw\" type=\"button\" onclick=\"this.dataset.activated=&#39;yes&#39;\">Withdraw</button><form method=\"POST\" action=\"/ack\"><button id=\"confirm-payment\" type=\"submit\">Confirm Payment</button></form>");return;

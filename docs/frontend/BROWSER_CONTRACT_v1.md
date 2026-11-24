@@ -22,3 +22,18 @@ Expected correlation fields: account identity, capture timestamp, source URL, cu
 ## v1 extension: portfolio and owner evidence
 
 Browser snapshots may now include bounded identity observations (a labeled account holder display string from a currently authenticated website DOM) and normalized opportunity candidates (market, selection, kind, side, quote and currency). Both are explicitly candidate-only browser evidence and are never proof of beneficial ownership or profitability. Linking is owner-confirmed; independent authenticated session partitions remain unchanged. See PORTFOLIO_CONTRACT_v1.md for owner matching, currency-safe portfolio aggregation and wolf.action.request.v1. The backend remains the authoritative execution/reconciliation boundary.
+
+## Native application bridge integration v0.8 (2026-11-24)
+
+The Electron host now starts the owner-held 0.1.0a10 native backend as an authenticated
+private Python child process. The top-level application renderer receives
+window.wolfBackend (status, request, registerAccount, observeAccount, recordSession,
+removeAccount, snapshot, proposeAction, syncAll). A third-party webpage does not
+receive that bridge or the host HMAC key.
+
+Account registrations, session state, browser DOM observations and activity
+records use the existing wolf.app.request.v1 / wolf.app.bridge.v2 contract.
+Multi-account Sync All inspects each independent persistent website partition,
+records current facts and refreshes the signed backend snapshot.
+The integrated desktop account, finance, audit history, CSV and report views
+read backend state. The backend decides how contextual action requests proceed.

@@ -179,6 +179,9 @@ class MainActivity : Activity() {
                 return null
             }
             override fun onPageFinished(view: WebView?, url: String?) {
+                // Persist the account's named WebView cookie jar after authenticated redirects.
+                try { view?.let { WebViewCompat.getProfile(it).cookieManager.flush() } }
+                catch (e: Exception) { android.util.Log.w("WolfBrowser", "Cookie persistence: "+e.message) }
                 if (activeId == id) sendPageState(id, url ?: "", view?.title ?: "")
             }
         }
@@ -351,6 +354,13 @@ class MainActivity : Activity() {
         else if(activeId!=null)hide()
         else if(ui.canGoBack())ui.goBack()
         else super.onBackPressed()
+    }
+    override fun onStop() {
+        sessions.values.forEach { browser ->
+            try { WebViewCompat.getProfile(browser).cookieManager.flush() }
+            catch (_: Exception) {}
+        }
+        super.onStop()
     }
     override fun onDestroy() {
         sessions.values.forEach { if(it.parent==root)root.removeView(it);it.destroy() }

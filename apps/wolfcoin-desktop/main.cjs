@@ -5,6 +5,24 @@ const path=require('node:path');
 const crypto=require('node:crypto');
 const {URL,fileURLToPath}=require('node:url');
 const fs=require('node:fs');
+const {WolfNativeBackend}=require('./backend_host.cjs');
+const {WolfAppIntegration}=require('./backend_integration.cjs');
+let appBackend=null,appAdapter=null,backendInitError=null;
+async function startAppBackend(){
+ const own=path.join(__dirname,'backend-runtime');
+ const unpacked=path.join(process.resourcesPath||'','app.asar.unpacked','backend-runtime');
+ const moduleDir=fs.existsSync(path.join(own,'wolf_app','bridge.py'))?own:unpacked;
+ const stateDir=process.env.WOLF_BACKEND_STATE_DIR||path.join(app.getPath('userData'),'backend');
+ const host=new WolfNativeBackend({stateDir,moduleDir});
+ try{
+  await host.start();appBackend=host;appAdapter=new WolfAppIntegration(host);
+  return {ok:true,schema:'wolf.app.bridge.v2'};
+ }catch(e){
+  backendInitError=e.message;console.error('WOLF_BACKEND_START_FAIL',e.message);
+  await host.stop().catch(()=>{});return {ok:false,error:e.message};
+ }
+}
+function requireAdapter(){if(!appAdapter)throw Error('Wolf backend unavailable: '+(backendInitError||'initializing'));return appAdapter;}
 let mainWindow=null, activeView=null, activeAccount=null;
 const views=new Map(), networkHistory=new Map(), events=new Map();
 let region={x:0,y:0,width:0,height:0};
@@ -39,7 +57,16 @@ function captureRequest(id,details){const list=networkHistory.get(id)||[];let ur
 }
 function browserView(id){
  const ses=getSession(id);
- ses.setPermissionRequestHandler((_wc,_permission,done)=>done(false));
+ ses.setPermissionRequestHandler((wc,permission,done)=>{
+  let origin='the current website';
+  try{origin=new URL(wc.getURL()).origin}catch{}
+  dialog.showMessageBox(mainWindow||undefined,{
+    type:'question',title:'Website permission',
+    message:origin+' requests '+String(permission)+' access',
+    detail:'Wolf Browser website permission request',
+    buttons:['Allow','Deny'],defaultId:0,cancelId:1,noLink:true
+  }).then(result=>done(result.response===0)).catch(()=>done(false));
+ });
  ses.webRequest.onCompleted(details=>captureRequest(id,details));
  ses.on('will-download',(_event,item)=>{ // Never silently write to Downloads.
   const proposed=path.basename(item.getFilename()).replace(/[^a-zA-Z0-9_.() -]/g,'_').slice(0,128)||'download';
@@ -74,6 +101,11 @@ const SNAPSHOT_SCRIPT=fs.readFileSync(path.join(__dirname,'wolf_snapshot.js'),'u
 async function snapshot(id){const wc=requireActive(id);const url=safeUrl(wc.getURL());const d=await wc.executeJavaScript(SNAPSHOT_SCRIPT,true);
  const source={type:CONTRACT,accountId:id,url,observedAt:d.observedAt,verification:'candidate_only',currencyHint:'ZMW',evidenceOrigin:'visible_dom'};
  return {...d,source,accountId:id,url,contract:CONTRACT};}
+async function backgroundSnapshot(id){
+ const wc=getView(id).webContents,url=safeUrl(wc.getURL());
+ const d=await wc.executeJavaScript(SNAPSHOT_SCRIPT,true);
+ return {...d,accountId:id,url,contract:CONTRACT,source:{type:CONTRACT,accountId:id,url,observedAt:d.observedAt,verification:'candidate_only',evidenceOrigin:'visible_dom'}};
+}
 async function domSnapshot(id){const wc=requireActive(id);const data=await wc.executeJavaScript(`(()=>{const nodes=[];const sel='a,button,input,select,textarea,[role=button]';for(const el of document.querySelectorAll(sel)){
  if(nodes.length>=250)break; if(!el.getClientRects().length)continue;
  const type=(el.getAttribute('type')||'').toLowerCase(), name=(el.getAttribute('name')||'').toLowerCase();
@@ -115,13 +147,47 @@ async function clearSession(id){id=idOf(id);const p=partitionFor(id);const v=vie
  if(v){if(activeView===v)attach(null,null);views.delete(p);v.webContents.close();}
  const ses=getSession(id);await ses.clearStorageData();await ses.clearCache();events.delete(id);networkHistory.delete(id);
  return {ok:true,accountId:id,localSessionCleared:true,serverRevocationNotGuaranteed:true};}
+async function synchronizeAccounts(accountList){
+ const backend=requireAdapter();
+ if(!Array.isArray(accountList))throw Error('Account list required');
+ const results=[];
+ const seen=new Set();
+ for(const a of accountList.slice(0,200)){
+  const id=idOf(a.id);
+  if(seen.has(id))continue;seen.add(id);
+  if(!a.url){results.push({id,status:'NO_WEBSITE'});continue;}
+  let website;
+  try{
+   const v=getView(id),url=safeUrl(a.url);
+   const existing=v.webContents.getURL();
+   if(existing!==url&&v.webContents.isLoadingMainFrame()===false)await v.webContents.loadURL(url);
+   website=await backgroundSnapshot(id);
+   const result=await backend.observe(a,website);
+   results.push({id,status:'OBSERVED',auth:website.auth,identity:website.identity||null,
+    opportunities:website.opportunities||[],backend:result.account,skippedStale:!!result.skippedStale});
+  }catch(e){results.push({id,status:'ERROR',message:String(e.message||e).slice(0,200)})}
+ }
+ return {schema:'wolf.host.sync.v1',results,backend:await backend.snapshot()};
+}
+function setupBackendIPC(){
+ const on=(channel,fn)=>ipcMain.handle(channel,async(e,p)=>{trusted(e);return fn(p||{});});
+ on('wolf:backend-status',()=>({available:!!appAdapter,schema:'wolf.app.bridge.v2',error:backendInitError}));
+ on('wolf:backend-request',p=>requireAdapter().request(p.operation,p.payload||{}));
+ on('wolf:backend-register',p=>requireAdapter().ensureAccount(p));
+ on('wolf:backend-observe',p=>snapshot(idOf(p.id)).then(d=>requireAdapter().observe(p,d)));
+ on('wolf:backend-session',p=>requireAdapter().session(p.account,p.state));
+ on('wolf:backend-remove',p=>requireAdapter().remove(p));
+ on('wolf:backend-snapshot',()=>requireAdapter().snapshot());
+ on('wolf:backend-propose',p=>requireAdapter().proposal(p));
+ on('wolf:backend-sync-all',p=>synchronizeAccounts(p.accounts));
+}
 function setupIPC(){
  const on=(channel,fn)=>ipcMain.handle(channel,async(e,payload)=>{trusted(e);return fn(payload||{});});
  on('wolf:status',()=>({schema:CONTRACT,host:'electron',version:app.getVersion(),browserOpen:!!activeView,accountId:activeAccount,mode:'browser_controls_available'}));
  on('wolf:bounds',r=>{region=rectOf(r);if(activeView)activeView.setBounds(region);return {ok:true};});
  on('wolf:hide-browser',()=>{attach(null,null);return {ok:true};});
  on('wolf:show-browser',async({url,accountId})=>{const id=idOf(accountId),address=safeUrl(url);const v=getView(id);attach(v,id);
-  if(!v.webContents.getURL()||v._wolfRequestedUrl!==address){v._wolfRequestedUrl=address;await v.webContents.loadURL(address);}
+  if(v.webContents.getURL()!==address&&v._wolfRequestedUrl!==address){v._wolfRequestedUrl=address;await v.webContents.loadURL(address);}
   return {ok:true,url:v.webContents.getURL(),accountId:id,partition:'persistent isolated profile'};
  });
  on('wolf:back',()=>{const wc=requireActive(activeAccount);if(wc.navigationHistory.canGoBack())wc.navigationHistory.goBack();return {ok:true};});
@@ -175,14 +241,16 @@ async function testFlow(){
  }else throw Error('Unknown test stage');
  setTimeout(()=>app.quit(),150);
 }
-app.whenReady().then(()=>{
+app.whenReady().then(async()=>{
+ await startAppBackend();
  mainWindow=new BrowserWindow({width:1540,height:1024,minWidth:720,minHeight:500,autoHideMenuBar:true,
   webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
- setupIPC();const html=path.join(__dirname,'app.html');
+ setupIPC();setupBackendIPC();const html=path.join(__dirname,'app.html');
  mainWindow.webContents.on('will-navigate',(event,url)=>{try{const u=new URL(url);if(u.protocol!=='file:'||path.resolve(fileURLToPath(u))!==html)event.preventDefault();}catch{event.preventDefault();}});
  mainWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  mainWindow.loadFile(html);
  mainWindow.on('closed',()=>{mainWindow=null;for(const v of views.values())if(!v.webContents.isDestroyed())v.webContents.close();views.clear();});
  if(TEST_MODE)mainWindow.webContents.once('did-finish-load',()=>{console.log('WOLF_NATIVE_READY');if(process.env.WOLF_TEST_FIXTURE)testFlow().catch(e=>{console.error('WOLF_NATIVE_TEST_FAIL',e.stack||e);app.exit(2);});});
 }).catch(e=>{console.error('WOLF_INIT_FAIL',e.stack||e);app.exit(3);});
+app.on('will-quit',()=>{appBackend?.child?.stdin?.end()});
 app.on('window-all-closed',()=>app.quit());

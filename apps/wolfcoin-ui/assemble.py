@@ -37,8 +37,12 @@ def build() -> None:
     html=html.replace("</body>", "<script>\n"+portfolio_core+"\n</script>\n<script>\n"+portfolio_ui+"\n</script>\n</body>",1)
 
     if args.desktop:
+        backend_ui=(here.parent/"wolfcoin-desktop"/"backend_ui.js").read_text(encoding="utf-8")
+        if "</script" in backend_ui.lower():
+            raise ValueError("Backend UI script contains a script terminator")
+        desktop_html=html.replace("</body>", "<script>\n"+backend_ui+"\n</script>\n</body>",1)
         args.desktop.parent.mkdir(parents=True,exist_ok=True)
-        args.desktop.write_text(html,encoding="utf-8")
+        args.desktop.write_text(desktop_html,encoding="utf-8")
     if args.android:
         bridge=here.parent/"wolfcoin-android"/"wolf_android_bridge.js"
         js=bridge.read_text(encoding="utf-8")

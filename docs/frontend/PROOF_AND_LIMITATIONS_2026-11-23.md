@@ -36,3 +36,39 @@ The actual finalized Linux .deb, after Debian extraction, passed the same native
 All three distributables were checked for exact embedded frontend-byte equivalence to their assembled source: Linux .deb and Windows ZIP use the desktop HTML, Android APK uses the Android-specific HTML with its same-origin host bridge.
 
 Release remains an owner-only draft integration candidate. It is not a production or real-money acceptance, nor evidence of Windows/Android runtime tests.
+
+## v0.8.0 integration acceptance (2026-11-24)
+
+- Native Electron + signed 0.1.0a10 application backend: two currency-separated
+  accounts, HMAC operations, history, restart and audit passed on KRATOS.
+- Real native UI Add Platform, controlled login, Inspect & Sync, five browser
+  tools and logout passed on the integrated Linux package. Actual SQLite
+  readback: one account, five observations, thirteen audit events, logged-out
+  account retained. No backend errors in the passing fixture run.
+- Finance, Activity, Overview, balance history, reports and CSV use backend
+  records instead of invented demo financial transactions in the desktop app.
+- Two separately authenticated platform sessions, owner match, linked portfolio,
+  quote comparison 2.1 vs 2.3 and queued candidate persistence passed in
+  the integrated desktop UI. Native Sync All refreshed both websites and
+  wrote both backends' account history without selecting their visible tabs.
+- Generic market DOM discovery of ordinary data-odds controls passed with
+  Home 2.10 and Draw 3.15. Provider-specific websites remain unqualified.
+- Linux .deb and Windows portable ZIP content and SHA passed. The exact
+  extracted Linux package also passed full browser/backend UI testing under
+  a development X server. Windows launch on ATHENA remains unverified.
+  Desktop native backend uses a Python 3.11+ runtime; Windows portable ZIP
+  does not include an embedded interpreter yet.
+- Android 15 emulator installed the v0.8 debug APK and verified package
+  readback, nine screens, D-XQT and independent profiles. Two logins, portfolio
+  comparison, restart account state, original cookie restoration and an
+  independently isolated new profile passed after the WebView flush fix.
+  Android native backend IPC is not integrated in this APK yet.
+- All nine actual UI screens captured at 1440x900 for visual inspection.
+  Pixel-exact match with the user's selected mockups has not been independently
+  approved. No live external platform login or financial operation was tested.
+
+Verified SHA-256:
+Linux deb: 52487c6636573ee20f7c8b6ab27d82eba22d2837355dfd25e4ef18a046a431f0
+Windows ZIP: 979b57d9956df66c52738cb4d2d6ea765b5ce5cb9310880ae2a058f8bb691f14
+Android debug APK: c770b78416f95ef2bae0a3afcf96e7eacb2affe3bdc122e5f642d16296790979
+Nine-screen visual archive: e6fef9a98b63ef8a488596a57ad31b06f48466dc9d82ec0898b090eb52bbe7c4
