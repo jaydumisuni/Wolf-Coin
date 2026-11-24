@@ -20,3 +20,9 @@ The 0.1.0a10 signed Python/SQLite native backend is integrated into
 Windows/Linux Electron, not yet embedded into this Android APK. Android
 production backend parity, third-party platform compatibility and physical
 Android-device acceptance remain separate tasks.
+
+
+Website camera/microphone/media permission requests use a normal website
+permission dialog and Android runtime permission prompts. They are not
+silently rejected by a hardcoded category rule. A physically connected
+phone is still required to qualify actual capture-device permission behavior.

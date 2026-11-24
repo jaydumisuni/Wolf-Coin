@@ -70,5 +70,16 @@ Release remains an owner-only draft integration candidate. It is not a productio
 Verified SHA-256:
 Linux deb: 52487c6636573ee20f7c8b6ab27d82eba22d2837355dfd25e4ef18a046a431f0
 Windows ZIP: 979b57d9956df66c52738cb4d2d6ea765b5ce5cb9310880ae2a058f8bb691f14
-Android debug APK: c770b78416f95ef2bae0a3afcf96e7eacb2affe3bdc122e5f642d16296790979
+Android debug APK: fd611795f52cbe1a933f340af2ef620a45ac3a221446ad0a96f5cf0ea0c5647a
 Nine-screen visual archive: e6fef9a98b63ef8a488596a57ad31b06f48466dc9d82ec0898b090eb52bbe7c4
+
+
+## Android browser website permissions (v0.8 final build)
+
+Removed a legacy WebChromeClient blanket permission denial. Websites now
+display Android's normal owner-visible permission prompt, with Android
+camera/microphone runtime permission requests when appropriate. No website
+permission is silently granted. The owner chooses at the OS prompt.
+The Android 15 emulator verified compile/install and all native WebView
+readbacks after this change. Media-permission hardware behavior on a physical
+phone remains unqualified.

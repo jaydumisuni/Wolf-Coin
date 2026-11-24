@@ -1,6 +1,9 @@
 package com.thetechguy.wolfcoin
 
+import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.pm.PackageManager
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -36,7 +39,7 @@ import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Wolf-Coin v0.6 native Android browser bridge. UI and credentials never share a WebView.
+ * Wolf-Coin v0.8 native Android browser bridge. UI and credentials never share a WebView.
  * All browser observations are candidates, not verified broker/bookmaker balances.
  */
 class MainActivity : Activity() {
@@ -44,6 +47,7 @@ class MainActivity : Activity() {
         const val ORIGIN = "https://appassets.androidplatform.net"
         const val CONTRACT = "wolf.browser.v1"
         const val UI_URL = "$ORIGIN/assets/wolfcoin.html"
+        const val WEBSITE_PERMISSION_REQUEST = 8107
     }
     private lateinit var root: FrameLayout
     private lateinit var ui: WebView
@@ -51,6 +55,7 @@ class MainActivity : Activity() {
     private val requested = HashMap<String, String>()
     private val network = ConcurrentHashMap<String, MutableList<JSONObject>>()
     private var activeId: String? = null
+    private var pendingWebPermission: PermissionRequest? = null
     private var area = intArrayOf(0, 0, 0, 0)
     private val snapshotScript by lazy { assets.open("wolf_snapshot.js").bufferedReader().use { it.readText() } }
     private val assetLoader by lazy {
@@ -158,7 +163,35 @@ class MainActivity : Activity() {
             javaScriptCanOpenWindowsAutomatically = false
         }
         browser.webChromeClient = object : WebChromeClient() {
-            override fun onPermissionRequest(request: PermissionRequest) { request.deny() }
+            override fun onPermissionRequest(request: PermissionRequest) {
+                runOnUiThread {
+                    val origin = request.origin?.toString() ?: "Website"
+                    AlertDialog.Builder(this@MainActivity)
+                        .setTitle("Website permission")
+                        .setMessage(origin+" requests: "+request.resources.joinToString(", "))
+                        .setPositiveButton("Allow") { _, _ ->
+                            val androidPermissions = mutableListOf<String>()
+                            if (request.resources.contains(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+                                androidPermissions.add(Manifest.permission.CAMERA)
+                            if (request.resources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE))
+                                androidPermissions.add(Manifest.permission.RECORD_AUDIO)
+                            val needed = androidPermissions.filter {
+                                checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED
+                            }
+                            if (needed.isEmpty()) request.grant(request.resources)
+                            else {
+                                pendingWebPermission=request
+                                requestPermissions(needed.toTypedArray(),WEBSITE_PERMISSION_REQUEST)
+                            }
+                        }
+                        .setNegativeButton("Deny") { _, _ -> request.deny() }
+                        .setOnCancelListener { request.deny() }
+                        .show()
+                }
+            }
+            override fun onPermissionRequestCanceled(request: PermissionRequest) {
+                if (pendingWebPermission === request) pendingWebPermission=null
+            }
         }
         browser.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -346,6 +379,18 @@ class MainActivity : Activity() {
         }
     }
 
+    override fun onRequestPermissionsResult(requestCode:Int, permissions:Array<out String>, grantResults:IntArray){
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults)
+        if(requestCode==WEBSITE_PERMISSION_REQUEST){
+            val website=pendingWebPermission
+            pendingWebPermission=null
+            if(website!=null){
+                if(grantResults.isNotEmpty() && grantResults.all{it==PackageManager.PERMISSION_GRANTED})
+                    website.grant(website.resources)
+                else website.deny()
+            }
+        }
+    }
     override fun onSaveInstanceState(outState: Bundle) { ui.saveState(outState);super.onSaveInstanceState(outState) }
     @Deprecated("Browser navigation uses built-in back handling for this development host")
     override fun onBackPressed() {
