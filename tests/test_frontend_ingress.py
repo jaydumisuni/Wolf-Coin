@@ -1,5 +1,6 @@
 """A single frontend protocol translator for websites with unseen layouts."""
 from __future__ import annotations
+from pathlib import Path
 from datetime import datetime,timezone
 import json
 import subprocess
@@ -143,7 +144,8 @@ def test_normalizer_cli_returns_payload_not_untrusted_browser_auth(tmp_path):
     cmd=subprocess.run(
         [sys.executable,"-m","wolf_app.frontend_ingress"],
         input=json.dumps(incoming),
-        capture_output=True,text=True,timeout=10)
+        capture_output=True,text=True,timeout=10,
+        cwd=Path(__file__).resolve().parents[1])
     assert cmd.returncode==0,cmd.stderr
     produced=json.loads(cmd.stdout)
     assert produced["operation"]=="observation.discover"
