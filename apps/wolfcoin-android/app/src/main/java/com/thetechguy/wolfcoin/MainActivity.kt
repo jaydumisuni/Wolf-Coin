@@ -10,6 +10,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.os.Message
 import android.util.Base64
 import android.view.View
 import android.view.ViewGroup
@@ -52,6 +53,7 @@ class MainActivity : Activity() {
     private lateinit var root: FrameLayout
     private lateinit var ui: WebView
     private val sessions = HashMap<String, WebView>()
+    private val popupOwners = LinkedHashMap<WebView,String>()
     private val requested = HashMap<String, String>()
     private val network = ConcurrentHashMap<String, MutableList<JSONObject>>()
     private var activeId: String? = null
@@ -159,8 +161,8 @@ class MainActivity : Activity() {
             allowFileAccess = false
             allowContentAccess = false
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
-            setSupportMultipleWindows(false)
-            javaScriptCanOpenWindowsAutomatically = false
+            setSupportMultipleWindows(true)
+            javaScriptCanOpenWindowsAutomatically = true
         }
         browser.webChromeClient = object : WebChromeClient() {
             override fun onPermissionRequest(request: PermissionRequest) {
@@ -192,6 +194,41 @@ class MainActivity : Activity() {
             override fun onPermissionRequestCanceled(request: PermissionRequest) {
                 if (pendingWebPermission === request) pendingWebPermission=null
             }
+            override fun onCreateWindow(view: WebView?, isDialog:Boolean, isUserGesture:Boolean,
+                                        resultMsg:Message?):Boolean {
+                val transport=resultMsg?.obj as? WebView.WebViewTransport ?: return false
+                val popup=WebView(this@MainActivity)
+                WebViewCompat.setProfile(popup,profileName(id))
+                popup.settings.apply {
+                    javaScriptEnabled=true
+                    domStorageEnabled=true
+                    allowFileAccess=false
+                    allowContentAccess=false
+                    mixedContentMode=WebSettings.MIXED_CONTENT_NEVER_ALLOW
+                    setSupportMultipleWindows(true)
+                    javaScriptCanOpenWindowsAutomatically=true
+                }
+                popup.webChromeClient=this
+                popup.webViewClient=object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(view:WebView?,request:WebResourceRequest?):Boolean {
+                        return try { safeUrl(request?.url?.toString() ?: "");false }
+                        catch (_: Exception) { true }
+                    }
+                    override fun onPageFinished(view:WebView?,url:String?) {
+                        try { view?.let { WebViewCompat.getProfile(it).cookieManager.flush() } }
+                        catch (_:Exception) {}
+                    }
+                }
+                popupOwners[popup]=id
+                root.addView(popup,FrameLayout.LayoutParams(-1,-1))
+                popup.bringToFront()
+                transport.webView=popup
+                resultMsg.sendToTarget()
+                return true
+            }
+            override fun onCloseWindow(window:WebView?) {
+                window?.let{closePopup(it)}
+            }
         }
         browser.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -201,13 +238,14 @@ class MainActivity : Activity() {
                 val req = request ?: return null
                 try {
                     val link = URI(req.url.toString())
-                    if (!link.path.contains(Regex("(?i)(?:token|password|secret|session|otp|auth)"))) {
-                        val entry = JSONObject().put("at", Instant.now().toString())
-                            .put("method", req.method).put("url", link.scheme + "://" + link.authority + link.path.split("/").joinToString("/") { segment -> if(segment.length>28) ":opaque" else segment }.take(160))
-                            .put("resourceType", if (req.isForMainFrame) "document" else "subresource")
-                        val list = network.computeIfAbsent(id) { Collections.synchronizedList(mutableListOf()) }
-                        synchronized(list) { list.add(entry); while (list.size > 120) list.removeAt(0) }
-                    }
+                    val safePath=link.path.split("/").joinToString("/") { segment ->
+                        if (segment.length>28 || segment.matches(Regex("(?i)^[a-f0-9]{24,}$"))) ":opaque" else segment
+                    }.take(160)
+                    val entry=JSONObject().put("at",Instant.now().toString())
+                        .put("method",req.method).put("url",link.scheme+"://"+link.authority+safePath)
+                        .put("resourceType",if(req.isForMainFrame) "document" else "subresource")
+                    val list=network.computeIfAbsent(id) { Collections.synchronizedList(mutableListOf()) }
+                    synchronized(list) {list.add(entry);while(list.size>120)list.removeAt(0)}
                 } catch (_: Exception) {}
                 return null
             }
@@ -220,6 +258,12 @@ class MainActivity : Activity() {
         }
         sessions[id] = browser
         return browser
+    }
+    private fun closePopup(popup:WebView){
+        popupOwners.remove(popup)
+        if(popup.parent==root)root.removeView(popup)
+        popup.stopLoading()
+        popup.destroy()
     }
     private fun sendPageState(id: String, url: String, title: String) {
         val data = JSONObject().put("schema", CONTRACT).put("accountId", id)
@@ -247,7 +291,10 @@ class MainActivity : Activity() {
         browser.visibility = View.VISIBLE
     }
     private fun hide() {
-        activeId?.let { id -> sessions[id]?.let { if (it.parent == root) root.removeView(it) } }
+        activeId?.let { id ->
+            popupOwners.filterValues { it==id }.keys.toList().forEach { closePopup(it) }
+            sessions[id]?.let { if (it.parent == root) root.removeView(it) }
+        }
         activeId = null
     }
     private fun dispatch(id: String, method: String, args: JSONObject, reply: JavaScriptReplyProxy) {
@@ -394,6 +441,10 @@ class MainActivity : Activity() {
     override fun onSaveInstanceState(outState: Bundle) { ui.saveState(outState);super.onSaveInstanceState(outState) }
     @Deprecated("Browser navigation uses built-in back handling for this development host")
     override fun onBackPressed() {
+        if(popupOwners.isNotEmpty()){
+            closePopup(popupOwners.keys.last())
+            return
+        }
         val current=activeId?.let{sessions[it]}
         if(current?.canGoBack()==true)current.goBack()
         else if(activeId!=null)hide()
@@ -408,6 +459,7 @@ class MainActivity : Activity() {
         super.onStop()
     }
     override fun onDestroy() {
+        popupOwners.keys.toList().forEach { closePopup(it) }
         sessions.values.forEach { if(it.parent==root)root.removeView(it);it.destroy() }
         sessions.clear();ui.destroy();super.onDestroy()
     }

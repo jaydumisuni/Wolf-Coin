@@ -26,3 +26,8 @@ Website camera/microphone/media permission requests use a normal website
 permission dialog and Android runtime permission prompts. They are not
 silently rejected by a hardcoded category rule. A physically connected
 phone is still required to qualify actual capture-device permission behavior.
+
+
+On v0.8 the native browser also supports website-created popup/child WebViews
+using the opening account's named profile; the controlled OAuth-style login
+fixture passed popup, parent-session reuse and independent account isolation.

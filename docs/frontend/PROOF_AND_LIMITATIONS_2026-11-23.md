@@ -68,9 +68,9 @@ Release remains an owner-only draft integration candidate. It is not a productio
   approved. No live external platform login or financial operation was tested.
 
 Verified SHA-256:
-Linux deb: 52487c6636573ee20f7c8b6ab27d82eba22d2837355dfd25e4ef18a046a431f0
-Windows ZIP: 979b57d9956df66c52738cb4d2d6ea765b5ce5cb9310880ae2a058f8bb691f14
-Android debug APK: fd611795f52cbe1a933f340af2ef620a45ac3a221446ad0a96f5cf0ea0c5647a
+Linux deb: 9a5feaf4a69c3394fd97bba950ac0c1c8121e9e9cc0ef114efe7e54f381c6e95
+Windows ZIP: da611de62ab7bcce32353119395b059f9758083d4215a05cc91f936cbe6d01c0
+Android debug APK: ec39e064267f6fdec7e86cc16337806a4f3664b600617722d655f0d504bf86db
 Nine-screen visual archive: e6fef9a98b63ef8a488596a57ad31b06f48466dc9d82ec0898b090eb52bbe7c4
 
 
@@ -83,3 +83,34 @@ permission is silently granted. The owner chooses at the OS prompt.
 The Android 15 emulator verified compile/install and all native WebView
 readbacks after this change. Media-permission hardware behavior on a physical
 phone remains unqualified.
+
+
+## Additional final v0.8 integration readbacks — 2026-11-24
+
+- The owner-held signed backend returned BROWSER_HANDOFF_READY from a synthetic
+  contextual proposal and accepted a NOT_EXECUTED native receipt; no external
+  website action or actual financial effect took place. Source test:
+  apps/wolfcoin-desktop/tests/backend-integration.e2e.cjs.
+- Generic visible-site classification was tested against the public betPawa
+  Zambia landing page, identifying its betting category from title/headings.
+  No markets or quotes were exposed in the inspected public DOM; none were
+  invented. This demonstrates public landing-page category discovery, not
+  provider-specific betting market acceptance.
+- Android WebView now implements child/popup windows using the account's
+  existing named WebView profile. A controlled OAuth-style popup login
+  completed and the parent WebView recognized the restored authenticated
+  account; a different account's profile remains separate. This does not
+  establish actual provider OAuth acceptance.
+- Android request-metadata observation no longer skips whole requests by
+  arbitrary URL path keywords; bounded/opaque path segment representation
+  remains in the metadata feed.
+- The final APK (SHA above) passed installed-APK hash readback, actual WebView,
+  embedded D-XQT, nine tabs and popup account authentication.
+- Final Linux package was extracted and passed the nine-tab/native backend
+  Chromium acceptance test, including logout state convergence and backend
+  SQLite readback. The logout test polls for both the native backend state and
+  visible UI rather than assuming an arbitrary 500 ms completion deadline.
+- All final Windows/Linux/Android package application bytes match assembled
+  sources. Windows runtime qualification, Linux system-installed sandbox,
+  Android embedded backend parity, actual external authenticated providers,
+  and mockup pixel-match approval remain open.

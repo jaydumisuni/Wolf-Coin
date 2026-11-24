@@ -100,10 +100,18 @@ try{
  await ui.eval("document.querySelector('[data-tab=accounts]').click()");
  await ui.eval("document.querySelector('[data-action=account-actions]').click()");
  await ui.eval("document.querySelector('[data-action=terminate-session]').click()");
- await sleep(500);
- state=JSON.parse(await ui.eval("JSON.stringify({accounts:state.accounts})"));
+ // Native session cleanup and signed backend reconciliation are asynchronous.
+ // Accept only the fully converged UI+backend result, not a fixed-delay guess.
+ let backState=null;
+ for(let attempt=0;attempt<55;attempt++){
+  state=JSON.parse(await ui.eval("JSON.stringify({accounts:state.accounts})"));
+  backState=JSON.parse(await ui.eval("JSON.stringify(window.WolfNativeIntegration?.snapshot?.accounts||[])"));
+  if(state.accounts[0]?.status==='loggedout' && backState[0]?.session_state==='LOGGED_OUT')break;
+  await sleep(120);
+ }
  assert.equal(state.accounts.length,1);
  assert.equal(state.accounts[0].status,'loggedout');
+ assert.equal(backState[0]?.session_state,'LOGGED_OUT');
  assert.equal(state.accounts[0].balance,750);
  result.logout={accounts:state.accounts.length,status:state.accounts[0].status,lastKnown:state.accounts[0].balance};
  console.log('WOLF_NATIVE_UI_E2E_PASS '+JSON.stringify(result));

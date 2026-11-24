@@ -23,6 +23,22 @@ const backend=new WolfNativeBackend({stateDir,moduleDir:path.join(__dirname,'..'
  assert.equal(full.accounts.length,1);
  assert.equal(full.history[0].observations.length,1);
  assert(full.activity.length>=3);
+ const candidate={id:'test_bet_01',accountId:acct.id,platform:acct.name,
+   candidate:{kind:'bet',side:'back',market:'Fixture Match',selection:'Home',quote:2.1,currency:'ZMW'},
+   proposed_amount:'10',money_budget:'100',
+   browser_capabilities:['PLACE_BET'],platform_permissions:['TRANSACT']};
+ const decision=await app.proposal(candidate);
+ assert.equal(decision.status,'BROWSER_HANDOFF_READY',JSON.stringify(decision));
+ assert.equal(decision.browser_action_executed,false);
+ const receipt=await app.request('decision.receipt',{
+   domain:'sports',account_id:acct.id,decision_id:decision.decision_id,
+   result_ref:'fixture_no_money_effect_001',outcome:'NOT_EXECUTED'
+ });
+ assert.equal(receipt.status,'NOT_EXECUTED');
+ console.log('WOLF_NATIVE_DECISION_RECEIPT_PASS '+JSON.stringify({
+  decision:decision.status,receipt:receipt.status,
+  source:'synthetic_backend_only',actualFinancialAction:false
+ }));
  await app.session(acct,'LOGGED_OUT');
  const after=await app.snapshot();
  assert.equal(after.accounts[0].session_state,'LOGGED_OUT');

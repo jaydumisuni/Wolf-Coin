@@ -27,3 +27,9 @@ history, logout and restart, two-platform Sync All, candidate comparison and
 UI screenshot capture. The Windows portable archive has passed structure
 and source checks, but Windows runtime acceptance remains to be performed.
 Real platform/OAuth/provider-specific acceptance is separate.
+
+
+The local page classifier can identify a betting/trading category from
+visible headings as well as price/odds controls; categories and market
+opportunities are separate observations. Public landing-page tests do not
+establish site-specific authenticated market support.

@@ -92,9 +92,16 @@
    editableFields:document.querySelectorAll('input:not([type=hidden]),textarea,select').length,
    interactiveControls:document.querySelectorAll('button,[role=button]').length
   };
+  const publicText=(document.title+' '+[...document.querySelectorAll('h1,h2,h3')].slice(0,12).map(el=>el.innerText).join(' ')).slice(0,1200);
+  const labelBet=/\b(?:sports\s*betting|online\s*betting|sportsbook|betting\s*odds|sport\s*betting)\b/i.test(publicText);
+  const labelTrade=/\b(?:online\s*trading|forex\s*trading|stock\s*broker|share\s*trading|trade\s*stocks)\b/i.test(publicText);
+  const category=affordances.odds?'betting':affordances.prices?'trading':
+    labelBet&&!labelTrade?'betting':labelTrade&&!labelBet?'trading':'unclassified';
+  const basis=(affordances.odds||affordances.prices)?'visible_market_controls':
+    category==='unclassified'?'unclassified':'visible_site_heading';
   return {hostname:location.hostname,title:document.title.slice(0,160),
-   category:affordances.odds?'betting':affordances.prices?'trading':'unclassified',
-   affordances,identifiedBy:'visible_dom',verification:'candidate_only'};
+   category,classificationBasis:basis,affordances,identifiedBy:'visible_dom',
+   verification:'candidate_only'};
  }
  const opportunities=opportunityCandidates();
  return {url:location.href,title:document.title,visibleText:all.slice(0,12000),elementCount:document.querySelectorAll('*').length,

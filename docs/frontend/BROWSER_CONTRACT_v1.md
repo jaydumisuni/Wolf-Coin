@@ -37,3 +37,16 @@ Multi-account Sync All inspects each independent persistent website partition,
 records current facts and refreshes the signed backend snapshot.
 The integrated desktop account, finance, audit history, CSV and report views
 read backend state. The backend decides how contextual action requests proceed.
+
+
+## Generic public-page classification and Android child windows
+
+A website's category may be inferred from its visible title/headings even
+when no quotes are present; the presence of real quote controls is still
+recorded separately. On a public sportsbook landing page Wolf Browser
+recognized the betting category, while recording zero observed quotes.
+
+Android child windows use the same named WebView profile as their opening
+account, retaining session isolation and the account's website cookies.
+This was verified with a controlled popup login and parent readback. Third-
+party OAuth provider compatibility is not yet confirmed.
