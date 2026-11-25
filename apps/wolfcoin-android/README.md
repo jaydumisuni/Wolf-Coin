@@ -47,3 +47,12 @@ arm64-v8a. This is debug signing, not a production-distribution signature.
 External venue login/OAuth, physical device compatibility, owner-approved
 pixel parity and production signing remain separate acceptance requirements.
 No actual financial transaction was performed.
+
+## v0.9.1 development build
+
+Android versionCode12/versionName0.9.1-dev passes Android 15 emulator
+installation, APK hash readback, signed backend financial observation,
+native UI reports, two-account Sync All and restart/cookie recovery.
+The old v0.9 test lab used a different debug certificate; its installed
+APK and private data were archived before reinstalling v0.9.1. Production
+upgrade continuity depends on a stable owner-held release certificate.

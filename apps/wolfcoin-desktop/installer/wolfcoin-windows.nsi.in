@@ -1,0 +1,44 @@
+; Wolf-Coin per-user Windows development installer.
+; @@SOURCE@@ and @@OUTPUT@@ are replaced at build time with verified asset paths.
+Unicode True
+Name "Wolf-Coin 0.9.1-dev1"
+OutFile "@@OUTPUT@@"
+InstallDir "$LOCALAPPDATA\Programs\Wolf-Coin"
+InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wolf-Coin" "InstallLocation"
+RequestExecutionLevel user
+SetCompressor zlib
+ShowInstDetails show
+ShowUninstDetails show
+
+!include "MUI2.nsh"
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_LANGUAGE "English"
+
+Section "Wolf-Coin" SecMain
+  SetOutPath "$INSTDIR"
+  File /r "@@SOURCE@@\*.*"
+  WriteUninstaller "$INSTDIR\Uninstall.exe"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wolf-Coin" "DisplayName" "Wolf-Coin 0.9.1-dev1"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wolf-Coin" "DisplayVersion" "0.9.1-dev1"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wolf-Coin" "Publisher" "THETECHGUY Digital Solutions"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wolf-Coin" "InstallLocation" "$INSTDIR"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wolf-Coin" "UninstallString" '"$INSTDIR\Uninstall.exe"'
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wolf-Coin" "NoModify" 1
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wolf-Coin" "NoRepair" 1
+  CreateDirectory "$SMPROGRAMS\Wolf-Coin"
+  CreateShortCut "$SMPROGRAMS\Wolf-Coin\Wolf-Coin.lnk" "$INSTDIR\Wolf-Coin.exe"
+  DetailPrint "Wolf-Coin installed. Account data is stored separately."
+SectionEnd
+
+Section "Uninstall"
+  Delete "$SMPROGRAMS\Wolf-Coin\Wolf-Coin.lnk"
+  RMDir "$SMPROGRAMS\Wolf-Coin"
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wolf-Coin"
+  ; Never erase the separate per-user account records in application data.
+  RMDir /r "$INSTDIR"
+SectionEnd

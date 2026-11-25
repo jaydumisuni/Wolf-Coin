@@ -33,3 +33,30 @@ The local page classifier can identify a betting/trading category from
 visible headings as well as price/odds controls; categories and market
 opportunities are separate observations. Public landing-page tests do not
 establish site-specific authenticated market support.
+
+## Windows 0.9.1 self-contained host and installer
+
+Windows portable/NSIS developer distributions include the official
+CPython 3.14.7 embeddable interpreter under resources/python. The host
+selects it automatically unless WOLF_BACKEND_PYTHON is explicitly supplied;
+the owner-controlled Python backend modules are found in the loose
+resources/app/backend-runtime or ASAR-unpacked resources directory.
+
+Stage the official CPython redistributable (SHA-256
+d297e5ff019966817ad8502465176139f2d3d840fa4ed84b13bed399a6ab1f15)
+using apps/wolfcoin-desktop/stage-windows-python.py.
+The original Python LICENSE.txt is included in the Windows payload.
+The staged interpreter and backend code are not tracked in public Git.
+
+The reproducible per-user NSIS setup is defined by
+apps/wolfcoin-desktop/installer/wolfcoin-windows.nsi.in and
+installer/build-nsis.py. The script requires the staged, owner-approved
+Windows portable directory and an NSIS compiler. The installer does not
+erase the separate per-user app state during uninstall.
+The installer is unsigned development output until owner-issued signing
+keys and end-to-end installation acceptance are supplied.
+
+ATHENA's opt-in WOLF_BACKGROUND_QA test passed fresh and restore flows
+while its game retained foreground ownership. The bundled Python interpreter
+was exercised without a host installation dependency. See
+docs/frontend/PROOF_AND_LIMITATIONS_2026-11-23.md.

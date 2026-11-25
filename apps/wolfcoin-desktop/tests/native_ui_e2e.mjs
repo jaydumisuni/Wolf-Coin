@@ -53,8 +53,18 @@ try{
  for(let i=0;i<30;i++){site=(await targets()).find(x=>x.url.includes(new URL(fixture).host+'/login'));if(site)break;await sleep(100)}
  assert(site,'The native managed website did not open');
  const page=await connect(site);
- try{await page.eval("(()=>{document.querySelector('[name=user]').value='fixture';document.querySelector('[name=pass]').value='fixture';document.querySelector('form').requestSubmit();return true})()");}
- finally{page.close()}
+ try{
+   // Target URL can appear before its form elements are hydrated in Chromium.
+   let formReady=false;
+   for(let attempt=0;attempt<50;attempt++){
+     try{formReady=await page.eval("!!document.querySelector('[name=user]')&&!!document.querySelector('[name=pass]')");}
+     catch(_){}
+     if(formReady)break;
+     await sleep(120);
+   }
+   assert(formReady,'Fixture login fields did not appear after navigation');
+   await page.eval("(()=>{document.querySelector('[name=user]').value='fixture';document.querySelector('[name=pass]').value='fixture';document.querySelector('form').requestSubmit();return true})()");
+ }finally{page.close()}
  await sleep(450);
  await ui.eval("document.querySelector('[data-action=sync-current]').click()");
  await sleep(600);

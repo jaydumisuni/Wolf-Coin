@@ -15,7 +15,8 @@ async function run(expression){
 try{
  const initial=JSON.parse(await run("JSON.stringify({ready:window.WolfNativeIntegration?.ready,backend:window.WolfNativeIntegration?.snapshot})"));
  assert.equal(initial.ready,true);
- assert(initial.backend.accounts.some(x=>x.account_id==='android_v09_lab_sports_3'));
+ const accountId=process.env.WOLF_ANDROID_ACCOUNT_ID||'android_v09_lab_sports_3';
+ assert(initial.backend.accounts.some(x=>x.account_id===accountId));
  await run("document.querySelector('[data-tab=overview]').click()");
  const overview=await run("document.querySelector('#main').textContent");
  assert(overview.includes('Backend Financial Snapshot'));

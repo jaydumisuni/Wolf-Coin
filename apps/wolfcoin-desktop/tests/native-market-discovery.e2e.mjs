@@ -23,6 +23,7 @@ try{
   await new Promise(r=>setTimeout(r,130));
  }
  assert(data,'No browser snapshot');
+ console.log('MARKET_SNAPSHOT_DEBUG',JSON.stringify({url:data.url,title:data.title,auth:data.auth,category:data.platformDiscovery?.category,opportunities:data.opportunities,source:data.source}));
  assert.equal(data.platformDiscovery?.category,'betting');
  assert(data.opportunities.some(x=>x.market==='Fixture Match 2026-12-01'&&x.selection==='Home'&&x.quote===2.1));
  assert(data.opportunities.some(x=>x.selection==='Draw'&&x.quote===3.15));

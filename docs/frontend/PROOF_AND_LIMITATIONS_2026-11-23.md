@@ -265,3 +265,77 @@ the newly bundled interpreter will be reported separately after ATHENA proof.
 Other still-open qualification: physically connected Android, production
 installer signing, owner approved pixel parity, and real authenticated
 third-party provider lifecycle and action results. No invented Gate 9.
+
+## v0.9.1 release candidate — 2026-11-25
+
+The 0.9.1 development candidate was assembled from this exact frontend branch
+with the owner-controlled D-XQT v8 and 0.1.0a10 backend staged locally.
+No private runtime, staged backend code, signing key or live account state
+is tracked in the public frontend Git branch.
+
+**Windows, ATHENA.** The isolated portable application ran with the official
+embedded CPython 3.14.7 runtime without the host Python override. Both fresh
+and restart QA sessions passed using a hidden, unfocusable, low-priority
+window. The signed backend returned all 22 operations and the native
+browser passed fixture login, independent sessions and cookie continuity.
+Call of Duty retained foreground PID 24304 throughout. This validates
+the bundled interpreter/bridge and prior host renderer. The byte-identical
+0.9.1 Windows ZIP itself was verified against staged source assets on
+KRATOS, but the final ZIP and new NSIS setup were not interactively launched
+on ATHENA while the user was gaming.
+
+**Linux, KRATOS.** The exact final 0.9.1 .deb was extracted and its
+application bytes matched the assembled source. Real Electron/Chromium under
+an isolated Xvfb session passed nine-tab navigation, account add/login,
+K750 balance, K100 pending, K60 P/L, five browser tools, logout/preserved
+last-known data, native backend Overview/Finance/Activity and history.
+Ordinary market-odds controls were extracted correctly in a separately
+isolated browser instance (Home 2.1, Draw 3.15).
+The market test failed when rerun inside a previously used browser test
+profile but passed on a fresh profile; the authenticated website test
+required waiting for the target form to finish loading. These were
+recorded as test-isolation/readiness findings, not silently ignored.
+
+**Android, KRATOS.** The exact source-built versionCode12 APK was installed
+on the Android 15 x86_64 emulator. Installed APK SHA-256 matched the source
+APK. The application demonstrated embedded D-XQT ready, nine native tabs,
+signed CPython 3.11/SQLite financial observation K750, native audit and
+contextual decision/NOT_EXECUTED receipt, two independently authenticated
+fixture websites with separate persisted financial histories, native
+Sync All and an observed same-owner matching suggestion. After force-stop
+and restart the account recovered initially PAUSED/STALE_LAST_KNOWN, then
+returned ACTIVE upon browser session cookie restoration and reobservation
+with history retained.
+
+The older lab APK and its application data were backed up before the
+0.9.1 reinstall. Its debug-signing certificate differed from the current
+build, so an in-place upgrade was not possible. The older lab artifacts
+were preserved; the 0.9.1 signing identity is laboratory-only. Production
+releases require a consistent owner-controlled signing key.
+
+**Installers.** The release includes a full owner-controlled Windows
+portable ZIP with Python 3.14.7, a Linux .deb, Android debug APK and a
+per-user Windows NSIS setup executable built on KRATOS. The NSIS compiler
+completed successfully twice with a reproducible executable SHA-256,
+and the file is identified as a PE32 NSIS self-extracting installer.
+No interactive Windows installation/uninstallation was exercised while
+ATHENA's game was running. Linux system-managed installation and physical
+Android qualification remain separate acceptance criteria.
+
+**Visual review.** All nine current source screens were captured at
+1440x900, and the Overview now follows the reference's four-KPI and
+3-column session/quick-action structure using actual backend data.
+Pixel-perfect matching and owner visual approval remain outstanding.
+
+**Final artifact SHA-256**
+- Linux .deb: a287f576030216c313c80dceea9c6dec8ec2000da13626cefd291a25dd1
+- Windows portable ZIP: c63c61ef2e7ce5de8050a7192efcf752824eb3a78a3199c701f8b289f249321d
+- Windows NSIS setup: 6fada8d002ed3512c7c037a7daf8e2c399dd8b0b23701058b790057ef5ef9de1
+- Android debug APK: 6a11b58e7e099b06a51e5113171f6bf98cb41366ca37ac531664439b5f5f13fb
+- Nine screenshots: 2aa06b0621f100a31ee38a6409657788b6341d55bfacbae99b453777fdf1d943
+
+The user-defined gates 5–8 cannot all be marked closed until visual
+approval, required physical/native install acceptance and real third-party
+authenticated workflow validation are supplied. There is no authoritative
+Gate 9 in the earlier eight-gate table. No new global product-mode
+restrictions have been introduced.

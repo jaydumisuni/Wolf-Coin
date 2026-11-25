@@ -207,6 +207,15 @@ async function testFlow(){
  const assert=require('node:assert/strict');
  if(BACKGROUND_QA)await mainWindow.webContents.executeJavaScript('window.WolfNativeIntegration?.refresh?.()',true);
  const id='fixture-sports-1',address=safeUrl(process.env.WOLF_TEST_FIXTURE),stage=process.env.WOLF_TEST_STAGE||'fresh';
+ const hostStatus=await requireAdapter().request('bridge.capabilities',{});
+ assert(Array.isArray(hostStatus.operations));
+ assert(hostStatus.operations.includes('accounts.list'));
+ const backendState=await requireAdapter().snapshot();
+ assert.equal(backendState.schema,'wolf.host.snapshot.v1');
+ console.log('WOLF_SIGNED_BACKEND_RUNTIME_PASS',JSON.stringify({
+    schema:'wolf.app.bridge.v2',operations:hostStatus.operations.length,
+    accounts:backendState.accounts.length,stage
+ }));
  const v=getView(id);attach(v,id);v.setBounds({x:0,y:0,width:1050,height:700});await v.webContents.loadURL(address);
  let s=await snapshot(id);
  if(stage==='fresh'){
