@@ -412,3 +412,61 @@ installation and removal**, not merely archive-integrity checks.
 These strengthen Gate 6/7 development package acceptance; they do not
 supply owner visual signoff, production publisher signing, real provider
 credentials, or an undefined ninth gate.
+
+## ATHENA visible nine-screen and native backend acceptance — 2026-11-25
+
+The owner authorized a visible/full Windows test after their game ended.
+This extends the prior isolated silent NSIS qualification with actual
+interactive installed-GUI testing.
+
+Installed release: Wolf-Coin 0.9.1-dev1; bundled Python 3.14.7.
+Installer SHA-256: 6fada8d002ed3512c7c037a7daf8e2c399dd8b0b23701058b790057ef5ef9de1.
+Installed executable SHA-256: 582c6eeaac0b32d7f78cfe5e225854a3cfe38ff16d725f41f590c20800054375.
+The test used isolated profiles; no existing normal-account records were overwritten.
+
+Eight Windows runtime acceptance checks PASS:
+1. WOLF_NATIVE_UI_E2E_PASS: zero demo accounts at boot, D-XQT ready,
+   all nine screens, Add Platform, actual native Chromium fixture login,
+   browser snapshot/DOM/network/screenshot/scroll tools and logout
+   retaining the account and K750 stale last-known balance.
+2. WOLF_NATIVE_FINANCIAL_ACTIVITY_UI_PASS: native backend K750 cash,
+   K100 pending, K60 net P/L; one account, five observation records,
+   thirteen audit entries, genuine backend Finance and Activity rows.
+3. WOLF_GENERIC_MARKET_BROWSER_PASS: ordinary visible HTML controls
+   yielded Home 2.10 and Draw 3.15, with candidate-only verification.
+4. WOLF_NATIVE_PORTFOLIO_E2E_PASS: two distinct fixture websites,
+   potential same-owner match, explicit owner-confirmed grouping,
+   quote 2.1/2.3 comparison, pending candidate and reload persistence.
+5. WOLF_NATIVE_CROSS_PLATFORM_SYNC_ALL_PASS: two independent native
+   Chromium account profiles refreshed signed backend records, with
+   two observations per account.
+6. WOLF_WINDOWS_SIGNED_DECISION_RECEIPT_PASS: contextual synthetic
+   BROWSER_HANDOFF_READY proposal and NOT_EXECUTED receipt, without any
+   actual financial action.
+7. Public website smoke: betPawa Zambia public landing page loaded and
+   was correctly classified as betting from visible headings, with
+   eight navigation links, zero observed quotes and no login.
+8. WOLF_NINE_SCREEN_VISUAL_CAPTURE_PASS: actual nine-screen screenshots
+   captured at 1440x900; capture is not pixel-perfect design approval.
+
+Evidence archive on ATHENA:
+%TEMP%/TTG-Wolf-v091-FullUI-QA/Wolf-Coin-v091-Windows-Visible-Acceptance.zip
+SHA-256: 83a9dd1d94cc9b921108a73930b8d14a457e880a220689193032341e04ecb1c8.
+Contains eight test logs, manifest, nine screenshots; no cookies or credentials.
+
+After QA, this session's fixture servers and debugging sessions were
+closed. The normal installed Wolf-Coin was launched visibly with the
+ordinary application profile and no remote-debugging port, and Windows
+reported it responsive and foreground.
+
+Canonical Builder recovered on ATHENA at D:/projects/THETECHGUY Software Builder.
+Its project instructions, state, generic Electron packaging and installer
+runtime-verification contracts were inspected. Generic packaging capability
+already exists — Already documented — No update required. Existing Builder
+uncommitted work was untouched. Wolf-Coin has no project-owned
+techguy-build.json yet, so this installer is not claimed as Builder-produced.
+
+Remaining independent acceptance: owner's pixel-exact visual approval,
+physical Android device, production code-signing certificate, system-managed
+Linux package installation and real authenticated sportsbook/trading provider
+data and result reconciliation. No ninth gate definition was discovered.
