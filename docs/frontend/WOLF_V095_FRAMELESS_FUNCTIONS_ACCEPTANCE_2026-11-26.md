@@ -88,3 +88,85 @@ visual acceptance. Backend decision/action authority remains the owner's.
 The Android QA package uses com.thetechguy.wolfcoin.qa and does not alter
 the standard Android app. D-XQT runtime stays owner-held in local compiled
 assets, never GitHub source.
+
+## ATHENA Windows installed acceptance — 2026-11-26
+
+The tested portable v0.9.5-dev application was assembled locally on ATHENA
+using the owner-held private D-XQT runtime recovered from the earlier
+installed app HTML, with cloned Git source commit 3f0a194. Never checked
+private D-XQT or compiled app HTML into public source.
+
+Controlled Windows QA with isolated login/backend data passed:
+- WOLF_NATIVE_FRAMELESS_WINDOW_CONTROLS_PASS (same native-window-controls
+  test used on Linux): three genuine OS controls next to notification bell
+  in each relevant header, no duplicate browser top bar, maximize/restore,
+  minimize. Verified Win32 client-to-screen top inset = 0px in the new
+  frameless QA app; previous installed app inset had been 30px.
+- WOLF_NATIVE_UI_E2E_PASS (9/9 tabs, website actions, session login,
+  screenshot, DOM/network and signed K750/K100/K60 candidate values).
+- WOLF_NATIVE_FINANCIAL_ACTIVITY_UI_PASS (one signed backend account,
+  five observations, thirteen audit events and clickable Activity detail).
+- WOLF_ALL_VISIBLE_ACTIONS_DISPATCH_AUDIT_PASS (65 visible action names,
+  zero missing dispatcher names across all 9 pages, 8 Settings sections,
+  6 Security sections and 5 browser utility panels).
+- WOLF_ORDER_ENTRY_E2E_PASS (Bet and Trade entry points open correct
+  registered provider profiles, preserve account isolation).
+- WOLF_CLEAR_ALL_NATIVE_SESSIONS_PASS (two test logins cleared; registered
+  accounts and last-known K750 balances preserved).
+All were controlled fixtures; no real money moved.
+
+The installed ATHENA v0.9.4-dev2 user app was gracefully closed and
+reopened from the same installed executable with v0.9.5-dev resources.
+Its original account/profile directory under AppData/Roaming was not
+modified. The five previous application resources were backed up under:
+AppData/Local/Programs/Wolf-Coin/resources/
+app-backup-v094-before-v095-20261126
+(including SHA256-MANIFEST.json). Live process was observed running and
+Win32 client-area top inset read 0px after update. The installed app
+HTML SHA256 was:
+c95bc51b0185c9d152f079822dd6ba864edff5f8790b4b2c31dd394c2958438b
+
+Builder audit, on ATHENA using installed THETECHGUY Software Builder:
+- The first isolated build correctly rejected the packaged candidate at
+  runtime because the stage lacked wolf_vault.cjs. Recovered that source
+  module along with current backend runtime modules.
+- Second run passed Electron source readiness, native NSIS build, runtime
+  module staging and Builder runtime smoke (main-window title observed).
+  The standard unsigned NSIS setup is archived in Builder's private area:
+  D:/projects/THETECHGUY Software Builder/builder_artifacts/
+  Wolf-Coin/v0.9.5-dev/Wolf-Coin Setup 0.9.5-dev.exe
+  SHA256 bd71bc48641a0f02152c800c1d34050d0434d626a88f96f150ea6a01ba311611
+- Builder's additional custom graphical-installer wrapper failed a
+  required free-disk preflight: 1.51 GiB required on project drive C:,
+  only approximately 0.67 GiB available. No unrelated project or older
+  Builder artifacts were deleted to bypass this gate. This is NOT a
+  qualified graphical-wrapper release and is not represented as one.
+- After copying the NSIS and Builder reports to its private artifact
+  area, only disposable v0.9.5 test profiles, duplicated QA portable and
+  newly created staging dist were cleaned. The user's original app,
+  current user data, other Builder source and prior build outputs remain.
+
+Android acceptance on API35 QA emulator:
+- com.thetechguy.wolfcoin.qa v0.9.5-dev, versionCode 17, installed
+  and readback package hash matched artifact.
+- SHA256 762cf62cb2749d3f43dd4eb8096b173945053e7005621dd84790b4a305aa0832
+- Nine views, D-XQT v8, signed backend, isolated WebView profiles,
+  AndroidKeyStore credential-vault availability and zero fake desktop
+  window controls. The standard Android package was untouched.
+- Physical-device qualification and original Android signing-key
+  continuity remain independent.
+
+Private local release artifacts (NOT GitHub source or public release):
+- KRATOS: /home/kratos/projects/Wolf-Coin/.workspace/releases/wolf-v0.9.5-dev1
+  (Debian + Android QA and SHA256SUMS).
+- ATHENA: existing Builder artifact folder above (NSIS and smoke reports).
+
+## Contribution classification
+
+Update existing documentation. The v0.9.5 implementation and controlled
+cross-platform proofs are new relative to v0.9.4. Owner final visual
+sign-off has not been obtained. Native app lock / biometric auth /
+application-wide encryption remain unimplemented, with false toggles
+removed rather than claiming enforcement. Runtime handler coverage is
+not a guarantee of third-party provider execution, current account login,
+physical device qualification or independent production acceptance.
