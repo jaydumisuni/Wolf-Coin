@@ -27,6 +27,9 @@ let mainWindow=null, activeView=null, activeAccount=null;
 const views=new Map(), networkHistory=new Map(), events=new Map();
 let region={x:0,y:0,width:0,height:0};
 const TEST_MODE=process.env.WOLF_TEST_MODE==='1';
+// Opt-in invisible acceptance session: no desktop activation or GPU contention.
+const BACKGROUND_QA=TEST_MODE && process.env.WOLF_BACKGROUND_QA==='1';
+if(BACKGROUND_QA)app.disableHardwareAcceleration();
 if(TEST_MODE && process.env.WOLF_TEST_USER_DATA)app.setPath('userData',process.env.WOLF_TEST_USER_DATA);
 const CONTRACT='wolf.browser.v1';
 const MAX_TEXT=16000;
@@ -244,7 +247,8 @@ async function testFlow(){
 app.whenReady().then(async()=>{
  await startAppBackend();
  mainWindow=new BrowserWindow({width:1540,height:1024,minWidth:720,minHeight:500,autoHideMenuBar:true,
-  webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+  show:!BACKGROUND_QA,focusable:!BACKGROUND_QA,skipTaskbar:BACKGROUND_QA,
+  webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,backgroundThrottling:!BACKGROUND_QA}});
  setupIPC();setupBackendIPC();const html=path.join(__dirname,'app.html');
  mainWindow.webContents.on('will-navigate',(event,url)=>{try{const u=new URL(url);if(u.protocol!=='file:'||path.resolve(fileURLToPath(u))!==html)event.preventDefault();}catch{event.preventDefault();}});
  mainWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
