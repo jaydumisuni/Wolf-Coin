@@ -5,13 +5,11 @@ const path=require('node:path');
 const crypto=require('node:crypto');
 const {URL,fileURLToPath}=require('node:url');
 const fs=require('node:fs');
-const {WolfNativeBackend}=require('./backend_host.cjs');
+const {WolfNativeBackend,backendModuleDirectory}=require('./backend_host.cjs');
 const {WolfAppIntegration}=require('./backend_integration.cjs');
 let appBackend=null,appAdapter=null,backendInitError=null;
 async function startAppBackend(){
- const own=path.join(__dirname,'backend-runtime');
- const unpacked=path.join(process.resourcesPath||'','app.asar.unpacked','backend-runtime');
- const moduleDir=fs.existsSync(path.join(own,'wolf_app','bridge.py'))?own:unpacked;
+ const moduleDir=backendModuleDirectory(process.resourcesPath||path.dirname(__dirname),__dirname);
  const stateDir=process.env.WOLF_BACKEND_STATE_DIR||path.join(app.getPath('userData'),'backend');
  const host=new WolfNativeBackend({stateDir,moduleDir});
  try{

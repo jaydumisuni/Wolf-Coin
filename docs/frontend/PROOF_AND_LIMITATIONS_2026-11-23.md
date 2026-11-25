@@ -193,3 +193,75 @@ Gate 7 production installers/signing and system-installed Linux sandbox remain
 open; Gate 8 requires owner-authorized real-provider end-to-end proof.
 The most recent acceptance table lists eight gates; no authoritative Gate 9
 was found in that table, and an unrelated older Phase 9 must not be conflated.
+
+
+## Windows ATHENA invisible runtime acceptance — 2026-11-25
+
+ATHENA's original owner-only draft Windows ZIP was transferred using Windows
+BITS Low priority while Call of Duty remained in the foreground. Its complete
+139703784-byte SHA-256 matched the previously frozen package digest
+da611de62ab7bcce32353119395b059f9758083d4215a05cc91f936cbe6d01c0.
+An isolated copy was extracted, and only the frontend main.cjs was patched
+from the source branch to enable WOLF_BACKGROUND_QA.
+
+The invisible QA Electron launch (show=false, focusable=false,
+skipTaskbar=true, disableHardwareAcceleration in test mode) passed:
+- WOLF_NATIVE_FIXTURE_PASS with authenticated DOM observations K750 / K100
+  pending / K60 P/L, native account/profile isolation and website controls.
+- WOLF_NATIVE_RESTART_AND_REMOVE_PASS with persisted authenticated session
+  across restart and confirmed removal.
+- Node.js and Python 3.14 were installed on ATHENA.
+- The same foreground Call of Duty process, PID 24304, remained active and
+  retained the foreground window throughout both stages.
+- Windows PowerShell's Start-Process wrapper returned a null (unavailable)
+  managed ExitCode even though WaitForExit succeeded; the first test wrapper
+  incorrectly treated null as failure. That harness defect is corrected:
+  a non-null nonzero exit code fails, and every stage additionally requires
+  its explicit in-application PASS marker and completed process. No zero exit
+  code is asserted where the host did not return one.
+- A gratuitous remote-debugging port flag was removed from invisible QA;
+  it had caused a harmless DevToolsActivePort write error under the temp path.
+
+This passes an offscreen functional Windows integration check for the
+isolated portable package. It does not certify a system-installed Windows
+release, production signature, pixel-exact UI, or any real sportsbook account.
+
+## v0.9.1 combined-frontend and Windows packaging acceptance, 2026-11-25
+
+Updated the actual backend-connected nine-screen Overview to the four financial
+KPI cards and a paired Account Summary / Session Health / Quick Actions layout
+closer to the owner-selected mockup. The lower row now contains backend-derived
+balance history, audited activity and financial/backend health. The numbers
+come from current native backend observation records and are not fabricated.
+When currencies differ, totals explicitly remain separated instead of summing
+incompatible units. The old UI Prototype title was corrected.
+
+KRATOS rendered all nine revised native Chromium screens at 1440x900 to
+private visual evidence and passed the full native UI fixture and financial
+backend view tests. This is improved layout fidelity, NOT an approved
+pixel-exact mockup match.
+
+ATHENA Windows no-focus acceptance on 2026-11-25 passed two stages using an
+isolated owner-only Windows portable package with the offscreen mode patch:
+- fresh authenticated login / DOM balance candidate K750, pending K100 and
+  P/L K60 / network telemetry and independent account sessions,
+- restart with authenticated cookie persistence and explicit session removal.
+The same Call of Duty process PID 24304 retained foreground ownership.
+No visible Wolf-Coin window was opened. The PowerShell process ExitCode field
+was unavailable (null) despite successful WaitForExit and both application
+PASS markers; the harness was corrected to report that fact explicitly and
+still reject any reported nonzero process status.
+
+The Windows 0.9.1 host now selects an official, locally bundled embeddable
+CPython 3.14.7 executable when available and otherwise supports the existing
+host installation. The release staging procedure validates the official
+Python archive SHA-256
+d297e5ff019966817ad8502465176139f2d3d840fa4ed84b13bed399a6ab1f15,
+keeps PSF LICENSE.txt, and configures Python's private ._pth import path
+for both loose and ASAR-unpacked owner-held backend modules.
+This packaged-Python build path is source-tested; runtime acceptance using
+the newly bundled interpreter will be reported separately after ATHENA proof.
+
+Other still-open qualification: physically connected Android, production
+installer signing, owner approved pixel parity, and real authenticated
+third-party provider lifecycle and action results. No invented Gate 9.

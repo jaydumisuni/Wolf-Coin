@@ -34,7 +34,11 @@ if (-not $PythonExe) {
  $detected=@(& py.exe -3.14 -c 'import sys;print(sys.executable)' 2>$null)
  if ($LASTEXITCODE -eq 0 -and $detected.Count -gt 0) { $PythonExe=[string]$detected[-1] }
 }
-$pyVersion=if ($PythonExe -and (Test-Path -LiteralPath $PythonExe)) { (& $PythonExe -c 'import sys;print(sys.version)').Trim() } else { 'missing' }
+$embeddedPython=if ($PackageRoot) { Join-Path $PackageRoot 'resources\python\python.exe' } else { '' }
+$usesEmbedded=[bool]($embeddedPython -and (Test-Path -LiteralPath $embeddedPython))
+$pyVersion=if ($usesEmbedded) { 'embedded '+((& $embeddedPython --version) -join ' ') }
+ elseif ($PythonExe -and (Test-Path -LiteralPath $PythonExe)) { (& $PythonExe -c 'import sys;print(sys.version)').Trim() }
+ else { 'missing' }
 $main=if ($PackageRoot) { Join-Path $PackageRoot 'resources\app\main.cjs' } else { '' }
 $exe=if ($PackageRoot) { Join-Path $PackageRoot 'wolf-coin.exe' } else { '' }
 $source=if ($main -and (Test-Path -LiteralPath $main)) { [IO.File]::ReadAllText($main) } else { '' }
@@ -48,6 +52,7 @@ $packageReady=[bool]($exe -and (Test-Path -LiteralPath $exe) -and $hasOffscreen)
  foreground_pid=$foregroundBefore
  node_installed=[bool]$node
  python_version=$pyVersion
+ embedded_python=$usesEmbedded
  package_ready=$packageReady
  offscreen_marker=$hasOffscreen
  decision=if($packageReady -and $node -and $pyVersion -ne 'missing'){'can-run-hidden'}else{'preflight-only'}
@@ -69,7 +74,7 @@ try {
  $env:WOLF_BACKGROUND_QA='1'
  $env:WOLF_TEST_USER_DATA=Join-Path $EvidenceDir 'isolated-profile'
  $env:WOLF_TEST_FIXTURE='http://127.0.0.1:'+([string]$FixturePort)+'/login'
- $env:WOLF_BACKEND_PYTHON=$PythonExe
+ $env:WOLF_BACKEND_PYTHON=if($usesEmbedded){$null}else{$PythonExe}
  $env:WOLF_FIXTURE_PORT=[string]$FixturePort
  $fixtureProc=Start-Process -FilePath $node.Source -ArgumentList ('"'+$fixtureScript+'"') -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $EvidenceDir 'fixture.log') -RedirectStandardError (Join-Path $EvidenceDir 'fixture.err')
  $fixtureProc.PriorityClass=[Diagnostics.ProcessPriorityClass]::BelowNormal
@@ -78,14 +83,14 @@ try {
   $env:WOLF_TEST_STAGE=$stage
   $logOut=Join-Path $EvidenceDir ($stage+'.stdout.log')
   $logErr=Join-Path $EvidenceDir ($stage+'.stderr.log')
-  $proc=Start-Process -FilePath $exe -ArgumentList @('--disable-gpu','--remote-debugging-port=0') -WindowStyle Hidden -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
+  $proc=Start-Process -FilePath $exe -ArgumentList @('--disable-gpu') -WindowStyle Hidden -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
   try {
    $proc.PriorityClass=[Diagnostics.ProcessPriorityClass]::BelowNormal
    if (-not $proc.WaitForExit(65000)) { $proc.Kill();throw ('Background '+$stage+' timed out') }
    $log=if(Test-Path -LiteralPath $logOut){[IO.File]::ReadAllText($logOut)}else{''}
    $expected=if($stage -eq 'fresh'){'WOLF_NATIVE_FIXTURE_PASS'}else{'WOLF_NATIVE_RESTART_AND_REMOVE_PASS'}
-   if($proc.ExitCode -ne 0 -or -not $log.Contains($expected)) { throw ('Acceptance stage '+$stage+' failed, inspect '+$logOut) }
-   $results+=@{stage=$stage;marker=$expected;exit_code=$proc.ExitCode}
+   if(($null -ne $proc.ExitCode -and $proc.ExitCode -ne 0) -or -not $log.Contains($expected)) { throw ('Acceptance stage '+$stage+' failed, inspect '+$logOut) }
+   $results+=@{stage=$stage;marker=$expected;exit_code=$proc.ExitCode;process_terminated=$true;exit_code_available=($null -ne $proc.ExitCode)}
   }finally{
    if(-not $proc.HasExited){$proc.Kill()}
    $proc.Dispose()
@@ -95,7 +100,7 @@ try {
  $gameAfter=Get-Process -Name 'sp26-cod' -ErrorAction SilentlyContinue|Select-Object -First 1
  if($game -and (-not $gameAfter -or $gameAfter.Id -ne $game.Id)){throw 'Game process continuity changed.'}
  if($game -and $foregroundBefore -ne $foregroundAfter){throw 'Foreground focus changed during background qualification.'}
- [ordered]@{schema='wolf.windows.background-acceptance.v1';result='PASS';stages=$results;foreground_preserved=($foregroundAfter -eq $foregroundBefore);evidence_dir=$EvidenceDir}|ConvertTo-Json -Compress -Depth 5
+ [ordered]@{schema='wolf.windows.background-acceptance.v1';result='PASS';stages=$results;foreground_preserved=($foregroundAfter -eq $foregroundBefore);embedded_python=$usesEmbedded;evidence_dir=$EvidenceDir}|ConvertTo-Json -Compress -Depth 5
 }finally{
  if($fixtureProc -and -not $fixtureProc.HasExited){$fixtureProc.Kill()}
  if($fixtureProc){$fixtureProc.Dispose()}

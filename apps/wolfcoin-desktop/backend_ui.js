@@ -75,19 +75,79 @@ function evidenceChart(){
  }
  return plots.join('');
 }
+function nativeMetrics(){
+ const rows=Object.entries(cached?.finance?.currency_totals||{});
+ const only=rows.length===1?rows[0]:null;
+ const labelValue=field=>only?fmt(only[1][field],only[0]):rows.length?'By currency':'—';
+ const detail=rows.length===1?only[0]:rows.length?'See currency breakdown':'Awaiting observations';
+ const a=cached?.accounts||[];
+ const active=a.filter(x=>x.session_state==='ACTIVE').length;
+ return '<div class="metrics">'+
+  metric('Total Balance',labelValue('cash_balance'),'balance',detail)+
+  metric('Total Profit/Loss',labelValue('realized_pnl'),'profit',detail)+
+  metric('Total Pending',labelValue('pending_bets'),'pending',detail)+
+  metric('Connected Accounts',String(active)+' / '+a.length,'accounts',
+    (a.length-active)+' not active')+'</div>';
+}
+function nativeSessionRows(){
+ const accounts=(cached?.accounts||[]).slice(0,5);
+ if(!accounts.length)return '<div class="empty">No registered accounts yet.</div>';
+ return accounts.map(a=>{
+  const active=a.session_state==='ACTIVE';
+  const statusText=a.session_state==='LOGGED_OUT'?'Logged out':
+    a.session_state==='PAUSED'?'Paused':active?'Active':'Unverified';
+  const statusClass=active?'status':a.session_state==='LOGGED_OUT'?'status out':'status warn';
+  return '<div class="session-row backend-session-row">'+
+    '<span class="backend-session-dot '+(active?'is-active':'')+'"></span>'+
+    '<div><div class="session-name">'+html(a.display_name)+'</div><div class="session-sub">'+
+    html(a.platform_id||a.domain)+' · '+html(a.freshness||'')+'</div></div>'+
+    '<span class="'+statusClass+'">'+html(statusText)+'</span></div>';
+ }).join('');
+}
+function nativeQuickActions(){
+ return '<div class="backend-quick-actions">'+[
+  ['globe','Open Platform','nav-browser'],
+  ['plus','Add Account','add-account'],
+  ['refresh','Sync All Data','sync-all'],
+  ['file','View Reports','reports']
+ ].map(([ic,label,action])=>
+  '<button class="backend-quick-button" data-action="'+action+'">'+
+   icon(ic,'sm')+'<span>'+label+'</span>'+icon('chevron','sm')+'</button>'
+ ).join('')+'</div>';
+}
+function nativeHealth(){
+ const a=cached?.accounts||[],h=cached?.history||[],events=cached?.activity||[];
+ const dx=window.WOLF_DXQT?.status;
+ const items=[
+  ['Native browser',!!window.wolfNative,'Chromium host'],
+  ['Application backend',connected,'Signed local bridge'],
+  ['D-XQT runtime',dx==='ready',dx==='ready'?'Initialized':'Initializing'],
+  ['Account registry',true,a.length+' registered'],
+  ['Audit history',true,events.length+' events']
+ ];
+ return '<div class="backend-health">'+items.map(([label,ok,detail])=>
+  '<div><span>'+html(label)+'</span><span class="'+(ok?'positive':'muted')+'">'+
+  html(detail)+'</span></div>').join('')+'</div>';
+}
 const oldOverview=overview;
 overview=function(){
  if(!connected)return oldOverview();
- const a=cached?.accounts||[];
- const active=a.filter(x=>x.session_state==='ACTIVE').length;
- return pageHeader('Overview','Your connected platforms, accounts and financial performance','',true)+
-   '<div class="metrics">'+metric('Registered Accounts',String(a.length),'accounts')+
-   metric('Active Sessions',String(active),'layers')+
-   metric('Currencies',String(Object.keys(cached?.finance?.currency_totals||{}).length),'wallet')+'</div>'+
-   '<div class="dash-grid">'+panel('Account Summary','users',accountTable(true))+
-   panel('Backend Financial Snapshot','wallet','<div class="panel-body">'+currencySummary()+'</div>')+'</div>'+
-   panel('Balance History','chart',evidenceChart())+
-   panel('Recent Activity','list','<div class="panel-body">'+audit()+'</div>')+note();
+ return '<div class="overview-page backend-overview">'+
+  pageHeader('Overview','All platforms, accounts and financial activity in one place.',
+   btn('Sync Now','sync-all','primary'),false)+nativeMetrics()+
+  '<div class="backend-dashboard-top">'+
+    panel('Account Summary','users',accountTable(true),
+      '<button class="linklike" data-action="go" data-tab="accounts">View All →</button>')+
+    panel('Session Health','monitor','<div class="panel-body">'+nativeSessionRows()+'</div>',
+      '<button class="linklike" data-action="go" data-tab="sessions">View All →</button>')+
+    panel('Quick Actions','activity','<div class="panel-body">'+nativeQuickActions()+'</div>')+
+  '</div><div class="backend-dashboard-bottom">'+
+    panel('Balance History','chart',evidenceChart())+
+    panel('Activity Feed','list','<div class="panel-body">'+audit()+'</div>',
+      '<button class="linklike" data-action="go" data-tab="activity">View All →</button>')+
+    panel('Backend Financial Snapshot','wallet',
+      '<div class="panel-body">'+currencySummary()+nativeHealth()+'</div>')+
+  '</div>'+note()+'</div>';
 };
 RENDER.overview=overview;
 const oldFinance=financePage;

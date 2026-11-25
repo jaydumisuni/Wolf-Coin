@@ -1,3 +1,6 @@
 
 # Generated owner-held backend source copied from the independent native backend.
 apps/wolfcoin-desktop/backend-runtime/
+
+# Windows CPython redistributable staged from official PSF release.
+apps/wolfcoin-desktop/python-runtime/

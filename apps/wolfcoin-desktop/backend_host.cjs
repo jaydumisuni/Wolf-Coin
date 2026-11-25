@@ -11,8 +11,20 @@ const canon=x=>{
  if(x!==null&&typeof x==='object')return '{'+Object.keys(x).sort().map(k=>JSON.stringify(k)+':'+canon(x[k])).join(',')+'}';
  return JSON.stringify(x);
 };
+function pythonForHost(platform=process.platform,moduleDir=__dirname){
+ if(platform!=='win32')return 'python3';
+ const embedded=path.resolve(moduleDir,'..','python','python.exe');
+ return fs.existsSync(embedded)?embedded:'python';
+}
+function backendModuleDirectory(resourcesDir,sourceDir=__dirname){
+ const unpacked=path.join(resourcesDir,'app.asar.unpacked','backend-runtime');
+ if(fs.existsSync(path.join(unpacked,'wolf_app','bridge.py')))return unpacked;
+ const loose=path.join(sourceDir,'backend-runtime');
+ if(fs.existsSync(path.join(loose,'wolf_app','bridge.py')))return loose;
+ throw Error('Owner-held backend Python modules are not staged');
+}
 class WolfNativeBackend{
- constructor({stateDir,moduleDir=path.join(__dirname,'backend-runtime'),python=process.env.WOLF_BACKEND_PYTHON||((process.platform==='win32')?'python':'python3')}={}){
+ constructor({stateDir,moduleDir=path.join(__dirname,'backend-runtime'),python=process.env.WOLF_BACKEND_PYTHON||pythonForHost()}={}){
   if(!stateDir)throw Error('Private backend state directory required');
   this.stateDir=stateDir;this.moduleDir=moduleDir;this.python=python;
   this.keyFile=path.join(stateDir,'native-bridge.key');
@@ -80,4 +92,4 @@ class WolfNativeBackend{
   p.stdin.end();await new Promise(resolve=>{p.once('exit',resolve);setTimeout(()=>{if(p.exitCode===null)p.kill();resolve()},1500).unref()});
  }
 }
-module.exports={WolfNativeBackend,canon};
+module.exports={WolfNativeBackend,canon,pythonForHost,backendModuleDirectory};
