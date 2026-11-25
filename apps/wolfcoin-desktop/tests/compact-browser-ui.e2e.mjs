@@ -39,6 +39,7 @@ try{
  assert(pane.pane.width>=225);
 assert(pane.browser.width<collapsed.browser.width-200);
  assert.equal(await evalJS("!!document.querySelector('[data-action=native-snapshot]')"),true);
+ assert.equal(await evalJS("!!document.querySelector('[data-action=browser-open-external]')"),true,"Supported-system-browser OAuth handoff missing");
  await evalJS("document.querySelector('[data-action=browser-panel-tab][data-panel=history]').click()");
  assert.equal(await evalJS("!!document.querySelector('[data-action=browser-clear-history]')"),true);
  await evalJS("document.querySelector('[data-action=browser-panel-tab][data-panel=bookmarks]').click()");
@@ -59,5 +60,5 @@ assert(pane.browser.width<collapsed.browser.width-200);
  assert.equal(JSON.parse(chosen).currency,'EUR');
  assert.equal(JSON.parse(chosen).selected,true);
  await evalJS("document.querySelector('[data-tab=browser]').click()");
- console.log('WOLF_COMPACT_BROWSER_UI_E2E_PASS',JSON.stringify({browserInitialWidth:Math.round(initialWidth),afterCollapse:Math.round(collapsed.browser.width),withToolsOpen:Math.round(pane.browser.width),withToolsClosed:Math.round(closed.browser.width),leftRailWidth:Math.round(collapsed.left.width),browserHeight:Math.round(full.browser.height),tools:6,panes:5,currencies:currencies.length,suggestion:JSON.parse(suggested),manualSelection:'EUR',accountsKeepOwnCurrency:true}));
+ console.log('WOLF_COMPACT_BROWSER_UI_E2E_PASS',JSON.stringify({browserInitialWidth:Math.round(initialWidth),afterCollapse:Math.round(collapsed.browser.width),withToolsOpen:Math.round(pane.browser.width),withToolsClosed:Math.round(closed.browser.width),leftRailWidth:Math.round(collapsed.left.width),browserHeight:Math.round(full.browser.height),tools:7,panes:5,currencies:currencies.length,suggestion:JSON.parse(suggested),manualSelection:'EUR',accountsKeepOwnCurrency:true}));
 }finally{ws.close()}
