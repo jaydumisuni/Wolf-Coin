@@ -1,6 +1,6 @@
 {
   "name": "wolfcoin-desktop-host",
-  "version": "0.9.4-dev",
+  "version": "0.9.4-dev2",
   "private": true,
   "description": "Wolf-Coin UI host: Windows/Linux Chromium, persistent per-account browser profiles",
   "main": "main.cjs",

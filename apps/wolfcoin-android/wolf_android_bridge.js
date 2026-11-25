@@ -22,7 +22,7 @@
     catch(error){pending.delete(id);reject(error)}
   });
   window.wolfNative=Object.freeze({
-    version:'0.9.4-dev',contract:'wolf.browser.v1',
+    version:'0.9.4-dev2',contract:'wolf.browser.v1',
     status:()=>invoke('status'),
     showBrowser:data=>invoke('showBrowser',data),
     hideBrowser:()=>invoke('hideBrowser'),

@@ -220,3 +220,58 @@ https://developers.google.com/identity/protocols/oauth2/native-app
 Production-signed Windows installer, original Android signing-key
 continuity, physical Android hardware and real third-party broker/
 sportsbook financial order readback are not certified by these tests.
+
+## Browser-only search completion — 2026-11-26 (v0.9.4-dev2)
+
+User decision: Google Account sign-in and native OAuth account linking are
+NOT prerequisites for Wolf browsing. Google account integration has been
+left unchanged. The only required capability here is ordinary web searching
+and navigating to sites, including public search results without an account.
+
+The installed v0.9.4-dev1 browser originally routed text queries to Google
+Search; live testing returned an unusual-traffic challenge. Brave Search
+likewise returned a bot-verification challenge on this session. Native
+Chromium tests of Bing and DuckDuckGo Lite returned accessible search
+results. The address bar's text-query default is now Bing:
+https://www.bing.com/search?q=... with the query URL encoded. A direct
+HTTP(S) URL or domain still navigates to that destination. Removed a
+stale warning claiming the address was only saved and needed another
+Open Website action. No Google cookies or authentication handling changed.
+Users may still navigate to other search engines manually.
+
+New controlled end-to-end test:
+apps/wolfcoin-desktop/tests/browser-search.e2e.mjs
+- WOLF_SEARCH_AND_DIRECT_NAVIGATION_PASS on installed KRATOS Linux:
+  typing a query opened actual Bing results in native Chromium; entering
+  the fixture address opened it directly in an independent profile.
+- WOLF_SEARCH_AND_DIRECT_NAVIGATION_PASS on ATHENA Windows with its
+  updated installed resources in an isolated QA instance. The user's
+  existing Wolf-Coin window and original account profiles were not
+  closed or modified. The already-open instance will pick up source
+  changes on its next normal restart.
+- WOLF_SEARCH_AND_DIRECT_NAVIGATION_PASS on Android API35 emulator,
+  side-by-side QA package com.thetechguy.wolfcoin.qa, versionCode 16.
+  APK hash readback matched the built APK. The standard Android app and
+  physical device were not altered. Different emulator loopback
+  addressing was accounted for by test code.
+
+Linux app package 0.9.4~dev2 installed with dpkg, with its source HTML
+verified against the assembled candidate. Isolated rootless package
+install/backend/browser tests passed including world-readable resources.
+The prior Debian dev1 archive is retained intact. Windows resource files
+were backed up to app-pre-search-hotfix-20261126 prior to modifying
+app.html, package.json and preload.cjs, without touching user profiles.
+The private Windows portable release candidate retains the original
+tested Electron binary with only the updated packaged app resources.
+
+Local owner-only artifacts (NOT a public GitHub release):
+- Debian wolf-coin_0.9.4~dev2_amd64.deb
+  SHA256 3e3f802f1af1adedfd46895e52cbbc14ce9ff464377f01d514e58a13ebeb300f
+- Windows Wolf-Coin_Windows_x64_v0.9.4-dev2_portable.zip
+  SHA256 7ba9eacbe36310e66d7ab6922b16579e4df34ab491a59734ca4c577f994632aa
+- Android QA Wolf-Coin_Android_v0.9.4-dev2-QA.apk
+  SHA256 fc278c205a151020c556ad7b41523a4244b1ee083d7d65bce455d7a1e26b6d68
+
+All bundles containing owner-held D-XQT assets remain private. This
+patch closes ordinary search navigation, not production app signing or
+provider-specific Google OAuth and financial transaction qualification.
