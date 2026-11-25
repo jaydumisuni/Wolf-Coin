@@ -470,3 +470,14 @@ Remaining independent acceptance: owner's pixel-exact visual approval,
 physical Android device, production code-signing certificate, system-managed
 Linux package installation and real authenticated sportsbook/trading provider
 data and result reconciliation. No ninth gate definition was discovered.
+
+## 2026-11-25 public market classification correction
+
+See PUBLIC_MARKET_RECOGNITION_PROOF_2026-11-25.md. Real ATHENA Chromium
+evidence exposed a false probable_authenticated reading on public Google
+Finance and missing GOOGL/USD quote. Source v0.9.2 distinguishes visible
+Sign In from authenticated identity, stores public prices separately from
+broker actions and classifies the page as market_data. Public betPawa was
+recognized as betting with no invented odds. Local authenticated fixture,
+nine-screen browser controls and native backend history remained passing.
+This correction was not in the frozen v0.9.1 release binary.

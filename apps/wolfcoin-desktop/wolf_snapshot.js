@@ -4,8 +4,10 @@
  const sections=all.split(/\n+/).map(x=>x.trim()).filter(Boolean).slice(0,1100);
  const loginForm=[...document.querySelectorAll('input[type=password]')].some(e=>e.getClientRects().length>0);
  const signout=[...document.querySelectorAll('a,button')].some(e=>e.getClientRects().length>0&&/^(?:log\s*out|sign\s*out)$/i.test((e.innerText||e.getAttribute('aria-label')||'').trim()));
- const accountHeader=/(?:my account|account overview|my wallet|portfolio|account balance|account details)/i.test(sections.slice(0,140).join(' '));
- const auth=loginForm&&!signout?'login_required':signout||accountHeader?'probable_authenticated':'unverified';
+ // A public "Create a portfolio" link is NOT evidence of a logged-in account.
+ const signin=[...document.querySelectorAll('a,button')].some(e=>e.getClientRects().length>0&&/^(?:sign\s*in|log\s*in|login)$/i.test((e.innerText||e.getAttribute('aria-label')||'').trim()));
+ const accountHeader=/(?:\bmy account\b|account overview|my wallet|account balance|account details)/i.test(sections.slice(0,140).join(' '));
+ const auth=loginForm&&!signout?'login_required':signout?'probable_authenticated':signin?'unverified':accountHeader?'probable_authenticated':'unverified';
  function candidate(type){
   const regex=type==='balance'?/^(?:available\s+)?(?:account\s+)?balance\b|^wallet(?: balance)?\b/i:type==='pending'?/^pending(?: bets| amount| exposure| stakes)?\b|^open(?: positions| bets| exposure)\b/i:/^(?:net\s+)?profit\s*(?:\/|&|and)\s*loss\b|^net\s*p\s*\/?\s*l\b|^realized\s+p\s*\/?\s*l\b/i;
   const found=[];
@@ -81,7 +83,33 @@
   }
   return candidates;
  }
- function platformDiscovery(opportunities){
+ // Public market price observations are not actionable broker trade controls.
+ // Cross-check an instrument identifier in the URL, a visible title price,
+ // and the currency displayed near that instrument before emitting evidence.
+ function publicMarketQuotes(){
+   const quotes=[];
+   const title=document.title.trim();
+   const m=title.match(/^([A-Z][A-Z0-9.-]{0,15})\s+((?:USD|CAD|AUD|EUR|GBP|ZMW)\s+|[$€£])\s*([0-9][0-9,]*(?:\.[0-9]{1,4})?)/i);
+   if(!m)return quotes;
+   let pathname;
+   try{pathname=decodeURIComponent(location.pathname)}catch{return quotes}
+   const pathMatch=pathname.match(/\/(?:finance\/quote|quote)\/([A-Za-z0-9._:-]{1,36})/i);
+   if(!pathMatch)return quotes;
+   const instrument=pathMatch[1].toUpperCase(),symbol=m[1].toUpperCase();
+   if(instrument!==symbol&&!instrument.startsWith(symbol+':')&&!instrument.startsWith(symbol+'.'))return quotes;
+   const value=Number(m[3].replaceAll(',',''));
+   if(!Number.isFinite(value)||value<=0||value>1e12)return quotes;
+   const instrumentAt=all.toUpperCase().indexOf(instrument);
+   const context=instrumentAt>=0?all.slice(instrumentAt,instrumentAt+650):all.slice(0,3500);
+   const currency=context.match(/\b(?:USD|CAD|AUD|EUR|GBP|ZMW|JPY)\b/i)?.[0]?.toUpperCase()||
+     (/^(?:USD|CAD|AUD|EUR|GBP|ZMW)\s/i.test(m[2])?m[2].trim().toUpperCase():null);
+   const visible=(m[2].trim()+m[3]).replace(/\s+/g,'');
+   if(!currency||!context.replace(/\s+/g,'').includes(visible)&&!context.includes(m[3]))return quotes;
+   quotes.push({instrument,symbol,quote:value,currency,kind:'public_market_price',
+     source:'visible_title_url_and_currency',verification:'candidate_only'});
+   return quotes;
+ }
+ function platformDiscovery(opportunities,marketQuotes){
   const links=[...document.querySelectorAll('a[href]')].slice(0,300);
   const affordances={
    navigation:links.length,
@@ -89,6 +117,7 @@
    account:accountHeader||signout,
    odds:opportunities.some(x=>x.kind==='bet'),
    prices:opportunities.some(x=>x.kind==='trade'),
+   publicMarketPrices:marketQuotes.length,
    editableFields:document.querySelectorAll('input:not([type=hidden]),textarea,select').length,
    interactiveControls:document.querySelectorAll('button,[role=button]').length
   };
@@ -96,16 +125,19 @@
   const labelBet=/\b(?:sports\s*betting|online\s*betting|sportsbook|betting\s*odds|sport\s*betting)\b/i.test(publicText);
   const labelTrade=/\b(?:online\s*trading|forex\s*trading|stock\s*broker|share\s*trading|trade\s*stocks)\b/i.test(publicText);
   const category=affordances.odds?'betting':affordances.prices?'trading':
-    labelBet&&!labelTrade?'betting':labelTrade&&!labelBet?'trading':'unclassified';
+    marketQuotes.length?'market_data':labelBet&&!labelTrade?'betting':
+    labelTrade&&!labelBet?'trading':'unclassified';
   const basis=(affordances.odds||affordances.prices)?'visible_market_controls':
+    marketQuotes.length?'public_price_evidence':
     category==='unclassified'?'unclassified':'visible_site_heading';
   return {hostname:location.hostname,title:document.title.slice(0,160),
    category,classificationBasis:basis,affordances,identifiedBy:'visible_dom',
    verification:'candidate_only'};
  }
  const opportunities=opportunityCandidates();
+ const marketQuotes=publicMarketQuotes();
  return {url:location.href,title:document.title,visibleText:all.slice(0,12000),elementCount:document.querySelectorAll('*').length,
-  auth,authEvidence:{loginFormVisible:loginForm,logoutControlVisible:signout,accountHeaderVisible:accountHeader},
-  candidates:{balance:candidate('balance'),pending:candidate('pending'),pnl:candidate('pnl')},identity:identityCandidate(),opportunities,platformDiscovery:platformDiscovery(opportunities),observedAt:new Date().toISOString(),
+  auth,authEvidence:{loginFormVisible:loginForm,logoutControlVisible:signout,signInControlVisible:signin,accountHeaderVisible:accountHeader},
+  candidates:{balance:candidate('balance'),pending:candidate('pending'),pnl:candidate('pnl')},identity:identityCandidate(),opportunities,marketQuotes,platformDiscovery:platformDiscovery(opportunities,marketQuotes),observedAt:new Date().toISOString(),
   provenance:'browser visible DOM; heuristic candidates not independently verified'};
 })()
