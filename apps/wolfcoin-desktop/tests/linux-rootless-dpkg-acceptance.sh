@@ -7,14 +7,17 @@ PKG=$(realpath "$1")
 APPDIR=$(cd "$(dirname "$0")/.." && pwd)
 TESTROOT=$(mktemp -d /tmp/wolf-dpkg-acceptance-XXXXXX)
 ROOT="$TESTROOT/root"
-PORT=13972
-FIXTURE_PORT=44671
+PORT=${WOLF_QA_CDP_PORT:-13972}
+FIXTURE_PORT=${WOLF_QA_FIXTURE_PORT:-44671}
+if curl -fsS --max-time 1 "http://127.0.0.1:$PORT/json" >/dev/null 2>&1; then
+ echo "DevTools port $PORT is occupied; supply WOLF_QA_CDP_PORT" >&2;exit 3
+fi
 mkdir -p "$ROOT/var/lib/dpkg"/{updates,info,alternatives,triggers,parts}
 touch "$ROOT/var/lib/dpkg/status"
 APP_PID=
 FIXTURE_PID=
 cleanup() {
-  if test -n "$APP_PID"; then kill "$APP_PID" 2>/dev/null || :; fi
+  if test -n "$APP_PID"; then kill -- "-$APP_PID" 2>/dev/null || kill "$APP_PID" 2>/dev/null || :; fi
   if test -n "$FIXTURE_PID"; then kill "$FIXTURE_PID" 2>/dev/null || :; fi
 }
 trap cleanup EXIT
@@ -23,7 +26,7 @@ fakeroot dpkg --force-depends --instdir="$ROOT" --admindir="$ROOT/var/lib/dpkg" 
 dpkg-query --admindir="$ROOT/var/lib/dpkg" -W wolf-coin | tee "$TESTROOT/status.txt"
 env WOLF_FIXTURE_PORT="$FIXTURE_PORT" node "$APPDIR/test_fixture.cjs" >"$TESTROOT/fixture.log" 2>&1 &
 FIXTURE_PID=$!
-env WOLF_TEST_MODE=1 WOLF_TEST_USER_DATA="$TESTROOT/app-profile" \
+setsid env WOLF_TEST_MODE=1 WOLF_TEST_USER_DATA="$TESTROOT/app-profile" \
  xvfb-run -a "$ROOT/opt/wolf-coin/wolf-coin" \
  --no-sandbox --disable-gpu "--remote-debugging-port=$PORT" \
  "$ROOT/opt/wolf-coin" >"$TESTROOT/electron.log" 2>&1 &
