@@ -207,6 +207,7 @@ function setupIPC(){
 }
 async function testFlow(){
  const assert=require('node:assert/strict');
+ if(BACKGROUND_QA)await mainWindow.webContents.executeJavaScript('window.WolfNativeIntegration?.refresh?.()',true);
  const id='fixture-sports-1',address=safeUrl(process.env.WOLF_TEST_FIXTURE),stage=process.env.WOLF_TEST_STAGE||'fresh';
  const v=getView(id);attach(v,id);v.setBounds({x:0,y:0,width:1050,height:700});await v.webContents.loadURL(address);
  let s=await snapshot(id);
@@ -222,7 +223,7 @@ async function testFlow(){
   s=await snapshot(id);
   assert.equal(s.auth,'probable_authenticated');assert.equal(s.candidates.balance?.value,750);
   assert.equal(s.candidates.pending?.value,100);assert.equal(s.candidates.pnl?.value,60);
-  assert((await requireActive(id).capturePage()).toPNG().length>1000);
+  if(!BACKGROUND_QA)assert((await requireActive(id).capturePage()).toPNG().length>1000); // Hidden QA has no display surface; DOM/navigation assertions remain.
   assert((networkHistory.get(id)||[]).length>0);
   assert.equal((await action(id,'click',{selector:'button'})).ok,true); // Log Out on controlled fixture
   await new Promise(resolve=>v.webContents.once('did-finish-load',resolve));
