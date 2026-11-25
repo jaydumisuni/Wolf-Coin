@@ -395,3 +395,20 @@ installation and removal**, not merely archive-integrity checks.
 - The earlier canonical checklist defines eight gates; no authoritative
   Gate 9 contract is established. No extra product action restrictions were
   added and the game desktop was not manipulated.
+
+### Reproducible end-to-end script readbacks, same day
+- The exact committed source-controlled Windows NSIS script passed on ATHENA
+  against the downloaded release build: sha256 checked, silent install,
+  bundled Python 3.14.7, fresh/restore native fixture PASS markers,
+  unmodified foreground owner, silent uninstall, registry cleanup and
+  preserved isolated account profile. Report schema:
+  wolf.windows.nsis.v1, result=PASS.
+- The exact committed Linux rootless dpkg script passed on KRATOS against
+  the frozen release .deb: private dpkg registration, real installed
+  Chromium/signed backend, nine-screen UI, finance/activity readback,
+  private package removal and preserved profile. Report marker:
+  WOLF_LINUX_DPKG_INSTALL_LAUNCH_REMOVE_PASS.
+
+These strengthen Gate 6/7 development package acceptance; they do not
+supply owner visual signoff, production publisher signing, real provider
+credentials, or an undefined ninth gate.
