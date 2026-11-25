@@ -179,3 +179,44 @@ application cannot receive the new debug APK because the certificate
 changed; v0.9.4 QA uses a side-by-side package name. No physical Android
 phone was connected during these tests, and no real Google OAuth client
 registration or live provider financial transaction was validated.
+
+## Installed Linux re-verification — 2026-11-26
+
+Performed against the actual system-installed executable under
+/opt/wolf-coin/wolf-coin, not a package extraction. All tests used isolated
+Xvfb/Chromium user-data, backend paths and controlled local fixtures.
+
+- WOLF_NATIVE_UI_E2E_PASS: D-XQT, 9/9 screens, account registration,
+  K750/K100/K60 fixture, DOM/network/screenshot/actions and logout.
+- WOLF_ORDER_ENTRY_E2E_PASS: visible Place Bet and Trade from Overview,
+  Accounts and Browser, each opening its own registered website/profile.
+  No real financial order was submitted.
+- WOLF_CLEAR_ALL_NATIVE_SESSIONS_PASS: two independently authenticated
+  fixture website profiles cleared, while account registrations and
+  last-known K750 balances remained.
+- WOLF_NATIVE_FINANCIAL_ACTIVITY_UI_PASS: fresh independent backend
+  fixture, one account, five observations and thirteen signed audit
+  entries with clickable detail and financial views.
+  Reusing the earlier two-account clearing fixture had produced an
+  expected 3 != 1 assertion; the isolated clean-profile rerun passed.
+- Archived and cached Debian SHA-256:
+  779ae47621f06614ea9e1c0348c9ea205fae75392a2d057613d7eba391c9ddbf
+  The package version reads 0.9.4~dev1 and dpkg reports installed.
+  An alternative user-provided SHA-256:
+  a297a6075afd9998ff2dfe34a317535ff877436751530890405ef2518ac4f4e9
+  was not found among local package candidates. These are distinct
+  reported hashes, NOT verified as the same package.
+
+Google / OAuth remains provider-specific. Official Google OAuth policy
+disallows authorization in embedded user agents, including WebViews
+under application control. Wolf can hand off to the system browser,
+but its external session and cookies are not in Wolf's account profile
+and cannot be cleared using Wolf's local-session controls. Approved
+provider-native OAuth client registration, redirect/consent and token
+integration remain independent work:
+https://developers.google.com/identity/protocols/oauth2/policies
+https://developers.google.com/identity/protocols/oauth2/native-app
+
+Production-signed Windows installer, original Android signing-key
+continuity, physical Android hardware and real third-party broker/
+sportsbook financial order readback are not certified by these tests.
