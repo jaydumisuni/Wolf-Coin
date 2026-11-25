@@ -34,7 +34,7 @@ if (-not $PythonExe) {
  $detected=@(& py.exe -3.14 -c 'import sys;print(sys.executable)' 2>$null)
  if ($LASTEXITCODE -eq 0 -and $detected.Count -gt 0) { $PythonExe=[string]$detected[-1] }
 }
-$pyVersion=if ($PythonExe -and (Test-Path -LiteralPath $PythonExe)) { (& $PythonExe -c 'import sys;print(sys.version_info.major,sys.version_info.minor,sep=".")').Trim() } else { 'missing' }
+$pyVersion=if ($PythonExe -and (Test-Path -LiteralPath $PythonExe)) { (& $PythonExe -c 'import sys;print(sys.version)').Trim() } else { 'missing' }
 $main=if ($PackageRoot) { Join-Path $PackageRoot 'resources\app\main.cjs' } else { '' }
 $exe=if ($PackageRoot) { Join-Path $PackageRoot 'wolf-coin.exe' } else { '' }
 $source=if ($main -and (Test-Path -LiteralPath $main)) { [IO.File]::ReadAllText($main) } else { '' }
