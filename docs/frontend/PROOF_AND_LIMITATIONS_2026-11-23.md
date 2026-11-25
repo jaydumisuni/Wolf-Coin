@@ -339,3 +339,59 @@ approval, required physical/native install acceptance and real third-party
 authenticated workflow validation are supplied. There is no authoritative
 Gate 9 in the earlier eight-gate table. No new global product-mode
 restrictions have been introduced.
+
+## v0.9.1 actual Windows NSIS and isolated Linux dpkg acceptance — 2026-11-25
+
+This extends the earlier v0.9.1 candidate record with **actual package
+installation and removal**, not merely archive-integrity checks.
+
+**ATHENA Windows NSIS development installer**
+- The exact GitHub draft Wolf-Coin_Setup_v0.9.1-dev1_x64.exe asset
+  (137867767 bytes) passed the frozen SHA-256 digest
+  6fada8d002ed3512c7c037a7daf8e2c399dd8b0b23701058b790057ef5ef9de1.
+- Silent NSIS /S installation to an isolated user Temp directory returned
+  exit code 0. HKCU uninstall metadata reflected version 0.9.1-dev1 and
+  the correct installation directory. The executable, backend host and
+  hidden-test marker were present. The bundled Python executable is
+  at resources/python/python.exe (Python 3.14.7).
+- The **installed** executable passed nonfocusable native QA:
+  WOLF_NATIVE_FIXTURE_PASS and WOLF_NATIVE_RESTART_AND_REMOVE_PASS,
+  using its signed backend and isolated fixture profile. Foreground
+  window ownership did not change. The Call of Duty process was not
+  listed during this particular pass; do not claim simultaneous gameplay.
+- Silent NSIS uninstall returned exit code 0. Installation directory,
+  registry uninstall entry and Start Menu shortcut were removed; the
+  separate account/session QA profile remained present.
+- The release is still **NotSigned** according to Windows Authenticode.
+  A production signing certificate and publisher qualification remain open.
+- Added a reproducible Windows acceptance script at
+  apps/wolfcoin-desktop/tests/windows-installed-package-acceptance.ps1.
+
+**KRATOS isolated Linux dpkg acceptance**
+- Exact 0.9.1 Debian SHA-256 matched the frozen build:
+  a287f576030216c313c80dceea9c6dec8ec2000da13626cefd20ced291a25dd1.
+- A disposable fakeroot/private dpkg database registered
+  wolf-coin 0.9.1~dev1 without changing system package state.
+  Dependencies were force-accepted because the private database starts empty;
+  installed Electron used the real host libraries outside chroot.
+- The binary from that installation launched inside private Xvfb. Nine
+  screens, fixture login, real backend financial observations (K750 cash,
+  K100 pending, K60 P/L), browser tools, logout persistence, audit/history
+  and native finance/activity E2E all PASS.
+- Private dpkg removal deleted the installed binary while retaining the
+  separate QA profile. Reproducer:
+  apps/wolfcoin-desktop/tests/linux-rootless-dpkg-acceptance.sh.
+- The test is a **rootless dpkg transaction**, not a system-wide apt
+  installation. KRATOS sudo -n was unavailable; system-owned package
+  and dependency resolver qualification remains open.
+
+**Other acceptance**
+- No ADB-connected physical Android device appeared on ATHENA or KRATOS.
+  KRATOS had one Xiaomi USB device in fastboot mode; it was untouched.
+- The owner-selected nine-screen mockups still have visible differences
+  from the current application and cannot be declared pixel-approved.
+- No authenticated third-party trading/sportsbook account or real market
+  transaction outcome was observed by these package tests.
+- The earlier canonical checklist defines eight gates; no authoritative
+  Gate 9 contract is established. No extra product action restrictions were
+  added and the game desktop was not manipulated.

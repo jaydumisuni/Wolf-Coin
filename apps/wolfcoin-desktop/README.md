@@ -60,3 +60,20 @@ ATHENA's opt-in WOLF_BACKGROUND_QA test passed fresh and restore flows
 while its game retained foreground ownership. The bundled Python interpreter
 was exercised without a host installation dependency. See
 docs/frontend/PROOF_AND_LIMITATIONS_2026-11-23.md.
+
+## v0.9.1 actual installer qualification
+
+Two additional reproducible qualification scripts are maintained:
+- tests/windows-installed-package-acceptance.ps1: checks NSIS SHA-256,
+  refuses existing installations, silently installs into a private test
+  directory, runs the unfocusable Windows fixture/restart harness and
+  silently uninstalls while preserving the separate account profile.
+- tests/linux-rootless-dpkg-acceptance.sh: performs isolated fakeroot/dpkg
+  registration, launches installed Chromium and signed backend under Xvfb,
+  validates nine-screen UI and financial audit E2E, then removes the
+  package without affecting host system package database or profile.
+
+Actual silent NSIS install, integrated app runtime, silent uninstall and
+rootless dpkg install/run/removal passed on ATHENA and KRATOS. Production
+Authenticode signing, system-managed Linux installation, real account
+acceptance and owner pixel approval remain independent.
