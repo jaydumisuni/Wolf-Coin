@@ -142,3 +142,54 @@ SHA-256:
 Remaining: Windows launch on ATHENA, Debian installed sandbox, physical
 Android acceptance, exact owner-approved visual mockup parity, production
 signing and real authenticated third-party venue end-to-end acceptance.
+
+## 2026-11-25 visual and game-safe Windows acceptance review
+
+Recovered the approved/reference Wolf-Coin concepts in the user's file library and
+compared them against all nine genuine 1440x900 screenshots in the earlier
+v0.8 draft release visual-evidence ZIP. This is a visual review, not an
+owner-signed pixel-equivalence certificate.
+
+Observed material differences requiring correction before Gate 5:
+- Overview: reference has four financial KPI cards, a paired account/session
+  dashboard, richer chart and activity areas; the genuine v0.8 native screen
+  has registered-account/session/currency counts, a larger balance-history
+  panel and an audit-oriented activity list. Actual backend facts must remain
+  truthful; missing financial data must not be filled with fabricated values.
+- Accounts: dark wolf identity and blue active-navigation style are present,
+  but account-card proportions, table density, typography and artwork
+  placement differ from the reference.
+- Browser: live controlled fixture login displays correctly, but the
+  surrounding tabs/navigation/header spacing and branded start-page framing
+  do not reproduce the selected conceptual browser composition exactly.
+- Financial Data / Activity: actual backend records replace illustrative
+  concept transactions; lists are substantially less decorated and the
+  reference's dense, multicolored ledger/chart treatment is not yet matched.
+- Sessions / Platforms / Settings / Security: all pages render, but the
+  reference uses larger sections, higher contrast, more prominent status
+  graphics and more carefully distributed cards. Empty states are genuine.
+
+Windows acceptance preparation (no user desktop activation):
+- ATHENA was reachable by Oracle terminal, and Call of Duty was running in
+  the foreground. No visible application windows, focus switches, keyboard,
+  pointer operations, game restarts or priority changes were performed.
+- Node.js 24.19 and Python 3.14 were found on the machine.
+- Added opt-in WOLF_BACKGROUND_QA=1, usable only with WOLF_TEST_MODE=1,
+  creating an invisible/unfocusable taskbar-free Electron QA window with
+  hardware acceleration disabled in that test configuration.
+- Added windows-background-acceptance.ps1 with explicit package marker
+  verification, independent fixture profile, low-priority child processes,
+  expected native fresh/restore proof markers and foreground PID continuity.
+- PowerShell parser and Node syntax checks passed on ATHENA; terminal-only
+  preflight returned game_active=true, foreground_pid=24304,
+  package_ready=false, decision=preflight-only. The released Windows ZIP was
+  not yet locally staged; a full Windows runtime test was therefore NOT run.
+- KRATOS workstation control was refused by Oracle (AI Takeover OFF), so
+  no new KRATOS/UI package build or production installation was attempted.
+
+Gate 5 remains unaccepted due visible design differences; Gate 6 still needs
+actual hidden Windows package execution and a physical Android confirmation;
+Gate 7 production installers/signing and system-installed Linux sandbox remain
+open; Gate 8 requires owner-authorized real-provider end-to-end proof.
+The most recent acceptance table lists eight gates; no authoritative Gate 9
+was found in that table, and an unrelated older Phase 9 must not be conflated.
