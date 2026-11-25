@@ -14,8 +14,9 @@ const opts={};
 for(let i=2;i<process.argv.length;i+=2){if(!process.argv[i].startsWith('--'))throw Error('Use --key value args');opts[process.argv[i].slice(2)]=process.argv[i+1]}
 const apk=path.resolve(opts.apk||'');
 if(!apk||opts.apk===undefined)throw Error('Required --apk path');
-const app='com.thetechguy.wolfcoin';
-const activity=app+'/.MainActivity';
+const app=opts.package||'com.thetechguy.wolfcoin';
+if(!/^com\.thetechguy\.wolfcoin(?:\.qa)?$/.test(app))throw Error('Unexpected package identity');
+const activity=app+'/com.thetechguy.wolfcoin.MainActivity';
 const sdk=process.env.ANDROID_SDK_ROOT||process.env.ANDROID_HOME||'';
 const suffix=process.platform==='win32'?'.exe':'';
 const bin=opts.adb||(sdk?path.join(sdk,'platform-tools','adb'+suffix):'adb');
@@ -58,7 +59,7 @@ let activityResumed=false;
 for(let i=0;i<25;i++){
  const activities=String(device(serial,['shell','dumpsys','activity','activities']));
  activityResumed=activities.includes('topResumedActivity=ActivityRecord')&&
-   /com\.thetechguy\.wolfcoin\/(?:com\.thetechguy\.wolfcoin\.)?MainActivity/.test(activities);
+   activities.includes(app+'/com.thetechguy.wolfcoin.MainActivity');
  if(activityResumed)break;
  await sleep(180);
 }

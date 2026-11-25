@@ -164,7 +164,8 @@ function nativeSessionRows(){
 }
 function nativeQuickActions(){
  return '<div class="backend-quick-actions">'+[
-  ['globe','Open Platform','nav-browser'],
+  ['globe','Place Bet','start-bet'],
+  ['activity','Trade','start-trade'],
   ['plus','Add Account','add-account'],
   ['refresh','Sync All Data','sync-all'],
   ['file','View Reports','reports']
@@ -192,7 +193,7 @@ overview=function(){
  if(!connected)return oldOverview();
  return '<div class="overview-page backend-overview">'+
   pageHeader('Overview','All platforms, accounts and financial activity in one place.',
-   btn('Sync Now','sync-all','primary'),false)+nativeMetrics()+
+   btn('Place Bet','start-bet','primary')+btn('Trade','start-trade','primary')+btn('Sync Now','sync-all'),false)+nativeMetrics()+
   '<div class="backend-dashboard-top">'+
     panel('Account Summary','users',accountTable(true),
       '<button class="linklike" data-action="go" data-tab="accounts">View All →</button>')+

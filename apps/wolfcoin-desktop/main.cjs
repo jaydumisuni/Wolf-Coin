@@ -24,7 +24,7 @@ async function startAppBackend(){
 }
 function requireAdapter(){if(!appAdapter)throw Error('Wolf backend unavailable: '+(backendInitError||'initializing'));return appAdapter;}
 let mainWindow=null, activeView=null, activeAccount=null;
-const views=new Map(), networkHistory=new Map(), events=new Map(),downloadHistory=[];
+const views=new Map(), popupWindows=new Map(), networkHistory=new Map(), events=new Map(),downloadHistory=[];
 let region={x:0,y:0,width:0,height:0};
 const TEST_MODE=process.env.WOLF_TEST_MODE==='1';
 // Opt-in invisible acceptance session: no desktop activation or GPU contention.
@@ -93,6 +93,8 @@ function browserView(id){
  // Do not permit authenticated pages to pivot into file:, data:, or other privileged protocols.
  for(const name of ['will-navigate','will-redirect'])v.webContents.on(name,(event,target)=>{try{safeUrl(target);}catch{event.preventDefault();}});
  v.webContents.on('did-create-window',popup=>{
+   const set=popupWindows.get(id)||new Set();set.add(popup);popupWindows.set(id,set);
+   popup.on('closed',()=>{set.delete(popup);if(!set.size)popupWindows.delete(id)});
    for(const name of ['will-navigate','will-redirect'])popup.webContents.on(name,(event,target)=>{try{safeUrl(target);}catch{event.preventDefault();}});
    popup.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  });
@@ -164,9 +166,17 @@ async function fillSavedLogin(id,{autoOnly=false}={}){
  return {filled:!!outcome?.filled,usernameFilled:!!outcome?.usernameFilled,submitted:false,reason:outcome?.reason};
 }
 async function clearSession(id){id=idOf(id);const p=partitionFor(id);const v=views.get(p);
+ const popups=popupWindows.get(id);
+ if(popups){for(const popup of [...popups]){if(!popup.isDestroyed())popup.close();}popupWindows.delete(id);}
  if(v){if(activeView===v)attach(null,null);views.delete(p);v.webContents.close();}
- const ses=getSession(id);await ses.clearStorageData();await ses.clearCache();events.delete(id);networkHistory.delete(id);
- return {ok:true,accountId:id,localSessionCleared:true,serverRevocationNotGuaranteed:true};}
+ const ses=getSession(id);
+ await ses.clearStorageData({storages:['cookies','localstorage','indexdb','websql','serviceworkers','cachestorage','filesystem']});
+ await ses.clearCache();
+ await ses.flushStorageData();
+ const left=(await ses.cookies.get({})).length;
+ if(left)throw Error('Cookies remain in profile after clearance');
+ events.delete(id);networkHistory.delete(id);
+ return {ok:true,accountId:id,localSessionCleared:true,remainingCookies:left,serverRevocationNotGuaranteed:true};}
 async function synchronizeAccounts(accountList){
  const backend=requireAdapter();
  if(!Array.isArray(accountList))throw Error('Account list required');

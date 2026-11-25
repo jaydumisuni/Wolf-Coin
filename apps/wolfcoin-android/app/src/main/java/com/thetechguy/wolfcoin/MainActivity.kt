@@ -475,7 +475,9 @@ class MainActivity : Activity() {
             }
             "clearSession" -> {
                 val account=accountId(args.getString("accountId"))
-                val web=sessions.remove(account);if(activeId==account)hide();requested.remove(account)
+                if(activeId==account)hide()
+                popupOwners.filterValues{it==account}.keys.toList().forEach { closePopup(it) }
+                val web=sessions.remove(account);requested.remove(account)
                 val profile=if(WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE))
                     (web?.let{WebViewCompat.getProfile(it)} ?: ProfileStore.getInstance().getOrCreateProfile(profileName(account)))
                     else null
