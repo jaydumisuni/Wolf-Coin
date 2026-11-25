@@ -56,3 +56,12 @@ native UI reports, two-account Sync All and restart/cookie recovery.
 The old v0.9 test lab used a different debug certificate; its installed
 APK and private data were archived before reinstalling v0.9.1. Production
 upgrade continuity depends on a stable owner-held release certificate.
+
+## v0.9.2 browser and native backend
+
+The shared wolf_snapshot.js distinguishes public sign-in from an authenticated
+account and records independently evidenced public market quotes without
+conflating them with actionable broker controls. VersionCode13, version
+0.9.2-dev. Actual Android15 emulator package, native signed Python backend,
+financial UI, restart persistence and two-account Sync All passed. Evidence:
+docs/frontend/WOLF_V092_ANDROID_BUILD_PROOF_2026-11-25.md.

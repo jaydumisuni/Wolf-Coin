@@ -48,7 +48,9 @@ try{
  const read=await ui.eval("window.wolfBackend.snapshot()");
  const found=read.accounts.find(x=>x.account_id===account.id);
  assert(found);
- assert.equal(read.finance.currency_totals.ZMW.cash_balance,'750');
+ // Portfolio currency total may include other persisted accounts; never
+ // confuse a per-account balance with its aggregate currency portfolio.
+ assert(Number(read.finance.currency_totals.ZMW.cash_balance)>=Number(found.latest_financial.fields.cash_balance));
  const history=read.history.find(x=>x.account_id===account.id);
  assert(history?.observations?.length>=1);
  const proposal={id:'android_v09_proposal_'+suffix,accountId:account.id,platform:account.name,

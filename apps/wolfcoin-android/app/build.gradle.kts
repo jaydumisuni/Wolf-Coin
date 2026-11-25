@@ -11,8 +11,8 @@ android {
   applicationId = "com.thetechguy.wolfcoin"
   minSdk = 26
   targetSdk = 35
-  versionCode = 12
-  versionName = "0.9.1-dev"
+  versionCode = 13
+  versionName = "0.9.2-dev"
  }
  buildTypes { getByName("release") { isMinifyEnabled = false } }
  compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }

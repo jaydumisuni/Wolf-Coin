@@ -481,3 +481,12 @@ broker actions and classifies the page as market_data. Public betPawa was
 recognized as betting with no invented odds. Local authenticated fixture,
 nine-screen browser controls and native backend history remained passing.
 This correction was not in the frozen v0.9.1 release binary.
+
+## Android v0.9.2 package readback — 2026-11-25
+
+See WOLF_V092_ANDROID_BUILD_PROOF_2026-11-25.md. Exact offline source
+Gradle build, Android15 emulator package digest readback, D-XQT, native
+signed account/SQLite history, restart session recovery and separately
+observed two-account portfolio Sync All passed. APK SHA256:
+aa241285ce12052be4170385ad28be7fd20c8bc7aa74b2c2be9ad79271ef66c7
+Physical device and third-party live-provider acceptance remain open.

@@ -15,9 +15,10 @@ async function attach(t){
  },close:()=>ws.close()};
 }
 const ui=await attach(await until(async()=>(await targets()).find(t=>t.url?.includes('appassets.androidplatform.net/assets/wolfcoin.html'))));
+const suiteId=String(process.env.WOLF_ANDROID_PAIR_SUFFIX||'v09').replace(/[^A-Za-z0-9_]/g,'_').slice(0,20);
 const accounts=[
- {id:'android_v09_pair_sports_a',name:'Local Sports Provider A',url:'http://10.0.2.2:44567/login',type:'Betting',financialCurrency:'ZMW'},
- {id:'android_v09_pair_sports_b',name:'Local Sports Provider B',url:'http://10.0.2.2:44568/login',type:'Betting',financialCurrency:'ZMW'}
+ {id:'android_'+suiteId+'_pair_sports_a',name:'Local Sports Provider A',url:'http://10.0.2.2:44567/login',type:'Betting',financialCurrency:'ZMW'},
+ {id:'android_'+suiteId+'_pair_sports_b',name:'Local Sports Provider B',url:'http://10.0.2.2:44568/login',type:'Betting',financialCurrency:'ZMW'}
 ];
 try{
  for(const account of accounts){
@@ -38,7 +39,8 @@ try{
  const previous=backend.history.filter(x=>accounts.some(a=>a.id===x.account_id));
  assert.equal(previous.length,2);
  assert(previous.every(x=>x.observations.length>=1));
- const sync=await ui.eval("window.wolfBackend.syncAll(state.accounts.filter(a=>a.id.startsWith('android_v09_pair_')))");
+ const ids=accounts.map(a=>a.id);
+ const sync=await ui.eval("window.wolfBackend.syncAll(state.accounts.filter(a=>"+JSON.stringify(ids)+".includes(a.id)))");
  assert.equal(sync.results.length,2);
  assert(sync.results.every(x=>x.status==='OBSERVED'),JSON.stringify(sync.results));
  const persisted=await ui.eval("window.wolfBackend.snapshot()");
