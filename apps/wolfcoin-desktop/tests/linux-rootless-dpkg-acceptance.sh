@@ -24,6 +24,15 @@ trap cleanup EXIT
 fakeroot dpkg --force-depends --instdir="$ROOT" --admindir="$ROOT/var/lib/dpkg" \
  --log="$TESTROOT/dpkg.log" --install "$PKG" >"$TESTROOT/dpkg-install.log" 2>&1
 dpkg-query --admindir="$ROOT/var/lib/dpkg" -W wolf-coin | tee "$TESTROOT/status.txt"
+# An isolated fakeroot install executes as the package owner, which can hide
+# a root-installed 0600 JS/HTML defect. Normal users must be able to read
+# the application source/resources after a real system installation.
+unreadable=$(find "$ROOT/opt/wolf-coin/resources/app" "$ROOT/usr/share/applications" \
+ -type f ! -perm -004 -print -quit)
+if test -n "$unreadable";then
+ echo "Package contains root-only unreadable resource: $unreadable" >&2;exit 4
+fi
+echo "WOLF_DEB_WORLD_READABLE_RESOURCE_GATE_PASS"
 env WOLF_FIXTURE_PORT="$FIXTURE_PORT" node "$APPDIR/test_fixture.cjs" >"$TESTROOT/fixture.log" 2>&1 &
 FIXTURE_PID=$!
 setsid env WOLF_TEST_MODE=1 WOLF_TEST_USER_DATA="$TESTROOT/app-profile" \

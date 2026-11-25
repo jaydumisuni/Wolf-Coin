@@ -36,7 +36,7 @@ for betting/trading and cross-platform saved/clearable website sessions.
   install, full signed backend UI/financial history E2E and uninstall
   passed (`WOLF_LINUX_DPKG_INSTALL_LAUNCH_REMOVE_PASS`).
   SHA-256:
-  `9f63cbac07d6f3c74cfcfcb8b64adf89308fa750c346f7971b5c42484447b8ed`.
+  `779ae47621f06614ea9e1c0348c9ea205fae75392a2d057613d7eba391c9ddbf`.
 - Windows portable candidate built from a verified v0.9.1 Electron
   distribution, with private D-XQT binary retained locally.
   SHA-256:
@@ -117,7 +117,7 @@ existing differently signed original.
 
 | Artifact (private, local only) | SHA-256 |
 | --- | --- |
-| `wolf-coin_0.9.4~dev1_amd64.deb` | `9f63cbac07d6f3c74cfcfcb8b64adf89308fa750c346f7971b5c42484447b8ed` |
+| `wolf-coin_0.9.4~dev1_amd64.deb` | `779ae47621f06614ea9e1c0348c9ea205fae75392a2d057613d7eba391c9ddbf` |
 | `Wolf-Coin_Windows_x64_v0.9.4-dev_portable.zip` | `4fa9aa159821e7c8db7f915041651aae96b7e84b017b4ee9d8b4fdcab6961c0d` |
 | `Wolf-Coin_Android_v0.9.4-QA.apk` | `c295640d0c2dbdf3820a31aa7510992a01bc4e98a559fe1d8e3adfaa522366e6` |
 | `Wolf-Coin_Android_v0.9.4-dev-debug.apk` | `f2d1836199f7c845881d6a73eb1440d70034519b7934c71294668a264b4e69a0` |
@@ -147,3 +147,35 @@ receipt/readback. Real-money placement was not claimed, and no external
 transaction was executed by these QA workflows. The source repository is
 PUBLIC and the private D-XQT-bearing package artifacts must not be
 published there.
+
+## Installed application closure — 2026-11-25
+
+**KRATOS Ubuntu 26.04:** The v0.9.4 Debian package was installed
+into the real host package database with `sudo dpkg -i`, version
+`0.9.4~dev1` read back, desktop entry present. First launch revealed
+a packaging mode defect: `wolf_vault.cjs` and the desktop file shipped
+as 0600, so a normal user could not load the app. The two files were
+corrected to 0644 in the package stage; rebuilt package SHA-256 is the
+updated value above. Reinstallation succeeded. A normal-user launch
+from `/opt/wolf-coin/wolf-coin` and genuine Chromium/Electron end-to-end
+tests passed native browser, signed backend financial UI, Place Bet/Trade
+and Clear All on two profile-isolated fixture logins. A static world-read
+resource gate has been added to the rootless package acceptance test.
+
+**ATHENA Windows 11:** The installed Wolf-Coin app's native resources
+were upgraded from v0.9.1-dev to v0.9.4-dev, with the original
+`resources/app` preserved as
+`resources/app-pre-v094-20261125`. The Electron executable itself was
+retained. `%APPDATA%/wolfcoin-desktop-host` and user cookies/accounts
+were **not modified** by the deployment; acceptance ran with a separate
+QA user-data path. Readback from the actually installed executable
+passed all nine UI tabs, native financial/backend history, Place Bet/Trade
+routing, two-account session clearing and data preservation. This is a
+working in-place *development app resource upgrade*, not a production
+code-signed NSIS installer.
+
+**Android:** Two verified emulator packages remain intact. The original
+application cannot receive the new debug APK because the certificate
+changed; v0.9.4 QA uses a side-by-side package name. No physical Android
+phone was connected during these tests, and no real Google OAuth client
+registration or live provider financial transaction was validated.
