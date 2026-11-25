@@ -211,9 +211,60 @@ function setupBackendIPC(){
  on('wolf:backend-propose',p=>requireAdapter().proposal(p));
  on('wolf:backend-sync-all',p=>synchronizeAccounts(p.accounts));
 }
+function windowState(){
+ return {frameless:process.platform!=='darwin',maximized:!!mainWindow?.isMaximized(),fullscreen:!!mainWindow?.isFullScreen(),
+   minimized:!!mainWindow?.isMinimized(),resizable:!!mainWindow?.isResizable()};
+}
+function emitWindowState(){
+ if(mainWindow&&!mainWindow.isDestroyed()&&!mainWindow.webContents.isDestroyed())
+  mainWindow.webContents.send('wolf:window-state-changed',windowState());
+}
+function startupFile(){
+ const config=TEST_MODE?(process.env.WOLF_TEST_STARTUP_CONFIG||path.join(app.getPath('userData'),'isolated-startup')):(process.env.XDG_CONFIG_HOME||path.join(app.getPath('home'),'.config'));
+ return path.join(config,'autostart','wolf-coin.desktop');
+}
+function startupStatus(){
+ if(process.platform==='win32'){
+  const record=app.getLoginItemSettings({path:process.execPath});
+  return {supported:true,enabled:!!record.openAtLogin,provider:'Windows login items'};
+ }
+ if(process.platform==='linux'){
+  return {supported:true,enabled:fs.existsSync(startupFile()),provider:'XDG autostart'};
+ }
+ return {supported:false,enabled:false,provider:'native platform'};
+}
+function setStartup(enabled){
+ if(typeof enabled!=='boolean')throw Error('Invalid startup setting');
+ if(process.platform==='win32'){
+  if(TEST_MODE)throw Error('Startup registration is not changed during QA');
+  app.setLoginItemSettings({openAtLogin:enabled,path:process.execPath,args:[]});
+  const result=startupStatus();if(result.enabled!==enabled)throw Error('Windows startup registration did not persist');
+  return result;
+ }
+ if(process.platform==='linux'){
+  const file=startupFile();
+  if(TEST_MODE&&!process.env.WOLF_TEST_STARTUP_CONFIG)throw Error('Explicit QA startup directory required');
+  if(enabled){
+   fs.mkdirSync(path.dirname(file),{recursive:true,mode:0o700});
+   const exe=process.execPath;
+   const contents='[Desktop Entry]\nType=Application\nName=Wolf-Coin\nComment=Wolf-Coin browser\nExec="'+exe+'"\nTerminal=false\nX-GNOME-Autostart-enabled=true\n';
+   fs.writeFileSync(file,contents,{mode:0o600});
+  }else if(fs.existsSync(file))fs.unlinkSync(file);
+  const result=startupStatus();if(result.enabled!==enabled)throw Error('Linux startup registration did not persist');
+  return result;
+ }
+ throw Error('Startup integration unsupported on this platform');
+}
 function setupIPC(){
  const on=(channel,fn)=>ipcMain.handle(channel,async(e,payload)=>{trusted(e);return fn(payload||{});});
  on('wolf:status',()=>({schema:CONTRACT,host:'electron',version:app.getVersion(),browserOpen:!!activeView,accountId:activeAccount,mode:'browser_controls_available'}));
+ on('wolf:startup-status',()=>startupStatus());
+ on('wolf:startup-set',p=>setStartup(p.enabled));
+ on('wolf:window-state',()=>windowState());
+ on('wolf:window-minimize',()=>{mainWindow.minimize();return windowState()});
+ on('wolf:window-toggle-maximize',()=>{mainWindow.isMaximized()?mainWindow.unmaximize():mainWindow.maximize();return windowState()});
+ on('wolf:window-close',()=>{mainWindow.close();return {closed:true}});
+
  on('wolf:bounds',r=>{region=rectOf(r);if(activeView)activeView.setBounds(region);return {ok:true};});
  on('wolf:hide-browser',()=>{attach(null,null);return {ok:true};});
  on('wolf:show-browser',async({url,accountId})=>{const id=idOf(accountId),address=safeUrl(url);const v=getView(id);attach(v,id);
@@ -290,12 +341,16 @@ async function testFlow(){
 app.whenReady().then(async()=>{
  await startAppBackend();
  mainWindow=new BrowserWindow({width:1540,height:1024,minWidth:720,minHeight:500,autoHideMenuBar:true,
+  frame:process.platform==='darwin',backgroundColor:'#071320',resizable:true,
   show:!BACKGROUND_QA,focusable:!BACKGROUND_QA,skipTaskbar:BACKGROUND_QA,
-  webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,backgroundThrottling:!BACKGROUND_QA}});
+  webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,backgroundThrottling:false}});
  setupIPC();setupBackendIPC();const html=path.join(__dirname,'app.html');
  mainWindow.webContents.on('will-navigate',(event,url)=>{try{const u=new URL(url);if(u.protocol!=='file:'||path.resolve(fileURLToPath(u))!==html)event.preventDefault();}catch{event.preventDefault();}});
  mainWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  mainWindow.loadFile(html);
+ for(const name of ['maximize','unmaximize','enter-full-screen','leave-full-screen','restore','focus','blur'])
+  mainWindow.on(name,emitWindowState);
+ mainWindow.webContents.once('did-finish-load',emitWindowState);
  mainWindow.on('closed',()=>{mainWindow=null;for(const v of views.values())if(!v.webContents.isDestroyed())v.webContents.close();views.clear();});
  if(TEST_MODE)mainWindow.webContents.once('did-finish-load',()=>{console.log('WOLF_NATIVE_READY');if(process.env.WOLF_TEST_FIXTURE)testFlow().catch(e=>{console.error('WOLF_NATIVE_TEST_FAIL',e.stack||e);app.exit(2);});});
 }).catch(e=>{console.error('WOLF_INIT_FAIL',e.stack||e);app.exit(3);});

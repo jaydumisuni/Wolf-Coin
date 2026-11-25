@@ -46,7 +46,7 @@ try{
  await ui.eval("(()=>{let f=document.querySelector('#account-form');f.querySelector('[name=name]').value='E2E Fixture Sports';f.querySelector('[name=url]').value="+JSON.stringify(fixture)+";f.querySelector('[name=type]').value='Betting';f.requestSubmit()})()");
  await sleep(250);
  let state=JSON.parse(await ui.eval("JSON.stringify({tab:state.tab,accounts:state.accounts})"));
- assert.equal(state.accounts.length,1);assert.equal(state.tab,'browser');assert.equal(state.accounts[0].status,'unverified');
+ assert.equal(state.accounts.length,1);assert.equal(state.tab,'browser');assert(['unverified','loggedout'].includes(state.accounts[0].status),'New registration must require login or verification');
  result.add={status:state.accounts[0].status,accounts:state.accounts.length};
  // Real browser login (test fixture has test-only login fields).
  let site;

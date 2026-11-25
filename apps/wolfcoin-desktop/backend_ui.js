@@ -20,7 +20,7 @@ function updateAccount(x){
  a.pending=values.pending_bets!==undefined?Number(values.pending_bets):null;
  a.pnl=values.realized_pnl!==undefined?Number(values.realized_pnl):null;
  a.known=a.balance!==null&&Number.isFinite(a.balance);
- a.status=x.session_state==='LOGGED_OUT'&&x.latest_financial?'loggedout':x.session_state==='ACTIVE'&&x.freshness==='CURRENT_UNVERIFIED'?'connected':'unverified';
+ a.status=state.monitorPausedIds?.[a.id]?'paused':x.session_state==='PAUSED'?'paused':x.session_state==='LOGGED_OUT'?((Number(x.observation_count)>0||a.status==='loggedout'||Date.parse(x.session_changed_at)>Date.parse(x.registered_at))?'loggedout':'unverified'):x.session_state==='ACTIVE'&&x.freshness==='CURRENT_UNVERIFIED'?'connected':'unverified';
  a.sync=x.freshness;
  a.lastObserved=x.latest_financial?.observed_at||null;
 }
@@ -255,7 +255,7 @@ const oldSyncAll=syncAll;
 syncAll=async function(){
  if(!connected)return oldSyncAll();
  try{
-  const sync=await back.syncAll(state.accounts.filter(a=>a.url&&['Betting','Trading'].includes(a.type)));
+  const sync=await back.syncAll(state.accounts.filter(a=>a.url&&a.status!=='paused'&&!state.monitorPausedIds?.[a.id]&&['Betting','Trading'].includes(a.type)));
   for(const item of sync.results){
    const a=state.accounts.find(x=>x.id===item.id);
    if(!a)continue;
@@ -297,7 +297,7 @@ runAction=async function(action,el,event){
  if(!connected||!selected)return result;
  try{
   if(action==='terminate-session')await back.recordSession(selected,'LOGGED_OUT');
-  else if(action==='pause-session')await back.recordSession(selected,'PAUSED');
+  else if(action==='pause-session'||action==='resume-session'||action==='pause-all'||action==='resume-all')return result;
   else if(action==='confirm-remove-account')await back.removeAccount(selected);
   else return result;
   await refresh();

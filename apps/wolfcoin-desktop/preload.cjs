@@ -2,8 +2,20 @@
 const {contextBridge,ipcRenderer}=require('electron');
 const invoke=(channel,payload)=>ipcRenderer.invoke(channel,payload);
 const api={
- version:'0.9.4-dev2',contract:'wolf.browser.v1',
+ version:'0.9.5-dev',contract:'wolf.browser.v1',
  status:()=>invoke('wolf:status'),
+ startupStatus:()=>invoke('wolf:startup-status'),
+ startupSet:enabled=>invoke('wolf:startup-set',{enabled}),
+ windowState:()=>invoke('wolf:window-state'),
+ windowMinimize:()=>invoke('wolf:window-minimize'),
+ windowToggleMaximize:()=>invoke('wolf:window-toggle-maximize'),
+ windowClose:()=>invoke('wolf:window-close'),
+ onWindowState:callback=>{
+  if(typeof callback!=='function')throw new TypeError('Callback required');
+  const listener=(_event,detail)=>callback(detail);
+  ipcRenderer.on('wolf:window-state-changed',listener);
+  return ()=>ipcRenderer.removeListener('wolf:window-state-changed',listener);
+ },
  showBrowser:request=>invoke('wolf:show-browser',request),
  hideBrowser:()=>invoke('wolf:hide-browser'),
  browserBounds:rect=>invoke('wolf:bounds',rect),
