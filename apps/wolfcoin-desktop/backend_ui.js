@@ -48,10 +48,68 @@ function transactions(){
  return all.length?all.slice(0,100).map(x=>'<div class="mini-stat"><span>'+html(x.occurred_at)+' '+html(x.account)+' '+html(x.kind)+
   ' '+html(x.status)+'</span><b>'+html(x.amount)+'</b></div>').join(''):'<div class="notice">No backend transactions recorded.</div>';
 }
-function audit(){
- const all=cached?.activity||[];
- return all.length?all.slice(0,100).map(x=>'<div class="mini-stat"><span>'+html(x.occurred_at)+' '+html(x.kind)+
-  '</span><small>#'+html(x.seq)+'</small></div>').join(''):'<div class="notice">No backend events.</div>';
+let detailRecords=[];
+function activityRecords(){
+ const accounts=new Map((cached?.accounts||[]).map(x=>[x.account_id,x]));
+ const rows=[];
+ for(const h of cached?.history||[]){
+  const account=accounts.get(h.account_id),isTrade=account?.domain==='trading';
+  for(const tx of h.transactions||[]){
+   rows.push({type:isTrade?'Trades':'Bets',kind:'transaction',title:(isTrade?'Trade':'Bet')+' · '+String(tx.kind||'Transaction'),
+    when:tx.occurred_at||'',accountName:account?.display_name||h.account_id,accountId:h.account_id,
+    currency:account?.currency||'',detail:tx,status:tx.status||'Not stated',amount:tx.amount});
+  }
+ }
+ for(const item of cached?.activity||[]){
+  const data=item.detail||{},aid=data.account_id||null,account=accounts.get(aid);
+  const isTrade=account?.domain==='trading',financial=/(?:decision|bet|trade|transaction|settlement|receipt)/i.test(item.kind||'');
+  const type=financial&&account?(isTrade?'Trades':'Bets'):'System';
+  rows.push({type,kind:'audit',title:String(item.kind||'Audit event'),
+   when:item.occurred_at||'',accountName:account?.display_name||aid||'Wolf-Coin',accountId:aid,
+   currency:account?.currency||'',detail:item,status:data.status||data.outcome||'Recorded',amount:data.amount??data.proposed_amount??null});
+ }
+ return rows.sort((x,y)=>String(y.when).localeCompare(String(x.when)));
+}
+function renderActivityRows(limit=150){
+ detailRecords=activityRecords();
+ const f=state.activityFilter||'All',q=String(state.activityQuery||'').toLowerCase().trim();
+ const chosen=detailRecords.map((row,id)=>({...row,id})).filter(x=>
+   (f==='All'||f===x.type)&&(!q||[x.title,x.accountName,x.status,x.when,JSON.stringify(x.detail)].join(' ').toLowerCase().includes(q)));
+ return chosen.slice(0,limit).map(x=>`<button type="button" class="backend-activity-entry" data-action="backend-event-details" data-record-index="${x.id}">
+  <span class="backend-activity-main"><b>${html(x.title)}</b><small>${html(x.accountName)} · ${html(x.when)}</small></span>
+  <span>${html(x.status)}</span>${x.amount==null?'':`<strong>${html(fmt(x.amount,x.currency))}</strong>`}
+  ${icon('chevron','sm')}</button>`).join('')||'<div class="empty">No matching transactions or activity recorded.</div>';
+}
+function audit(){return renderActivityRows(35);}
+function eventDetailDialog(record){
+ if(!record)return;
+ const x=record.detail||{},details=record.kind==='audit'?(x.detail||{}):x;
+ const accountId=record.accountId;
+ const fields=[
+  ['Event',record.title],['Category',record.type],['Platform',record.accountName],
+  ['Timestamp',record.when],['Status',record.status],['Amount',record.amount==null?'Not recorded':fmt(record.amount,record.currency)],
+  ['Transaction ID',details.transaction_id],['Action / kind',details.action_kind||details.kind],
+  ['Market or instrument',details.instrument||details.market],
+  ['Selection / side',details.selection||details.side],
+  ['Odds / quote',details.quote||details.odds],
+  ['Decision ID',details.decision_id],
+  ['Result reference',details.result_ref],
+  ['Recorded evidence',details.source_observation_id||details.observation_id],
+  ['Audit sequence',x.seq],
+  ['Verification',record.kind==='audit'?'Signed local audit; platform outcome requires readback':'Unverified platform-reported record']
+ ].filter(([label,val])=>val!==undefined&&val!==null&&val!=='');
+ const safeDetails=Object.fromEntries(Object.entries(details||{}).filter(([key])=>!/(password|secret|cookie|token|credential|api.?key|private.?key)/i.test(key)));
+ const known=new Set(['transaction_id','action_kind','kind','instrument','market','selection','side','quote','odds','decision_id','result_ref','source_observation_id','observation_id','amount','proposed_amount','status','outcome']);
+ for(const [key,value] of Object.entries(safeDetails)){
+  if(known.has(key))continue;if(fields.length>=32)break;
+  fields.push([key,typeof value==='object'?JSON.stringify(value).slice(0,2000):String(value).slice(0,300)]);
+ }
+ modal(record.kind==='audit'?'Activity record':'Transaction details',`<div class="stack">${fields.map(([label,value])=>
+  `<div class="mini-stat"><span class="muted">${html(label)}</span><strong style="overflow-wrap:anywhere;max-width:65%;text-align:right">${html(value)}</strong></div>`).join('')}
+  ${!('instrument' in safeDetails||'market' in safeDetails||'selection' in safeDetails||'side' in safeDetails)?'<div class="notice">The source did not record a specific market/selection for this event. No details have been invented.</div>':''}
+  </div>`,accountId&&state.accounts.some(a=>a.id===accountId)?
+    btn('View account','inspect-account','',`data-id="${html(accountId)}"`)+btn('Close','close-modal'):
+    btn('Close','close-modal'));
 }
 function evidenceChart(){
  const groups=(cached?.history||[]).map(h=>({
@@ -161,8 +219,14 @@ financePage=function(){
 const oldActivity=activityPage;
 activityPage=function(){
  if(!connected)return oldActivity();
- return pageHeader('Activity','Native backend audit history',btn('Refresh','backend-refresh','primary'))+
-  panel('Activity','list','<div class="panel-body">'+audit()+'</div>')+note();
+ const filters=['All','Bets','Trades','System'];
+ const n=activityRecords();
+ return pageHeader('Activity','Recorded bets, trades, transaction outcomes and signed audit trail',btn('Refresh','backend-refresh','primary')+
+  btn('Export log','export-events'))+
+  panel('Recorded Activity ('+n.length+')','list',`<div class="panel-body">
+   <div class="inline-row spread" style="margin-bottom:12px"><div class="chip-row">${filters.map(f=>`<button class="chip ${f===state.activityFilter?'active':''}" data-action="activity-filter" data-filter="${f}">${f}</button>`).join('')}</div>
+    <label class="search-field">${icon('search','sm')}<input id="activity-search" placeholder="Search account, event or outcome..." value="${html(state.activityQuery)}"></label></div>
+  ${renderActivityRows()}</div>`)+note();
 };
 RENDER.finance=financePage;RENDER.activity=activityPage;
 const oldReport=showReport;
@@ -219,6 +283,13 @@ syncNativeAccount=async function(id,opts={}){
  }catch(e){if(!opts.quiet)toast('Backend sync: '+String(e),'warn')}
 };
 const oldAction=runAction;
+document.addEventListener('click',e=>{
+ const button=e.target.closest('[data-action="backend-event-details"]');
+ if(!button)return;
+ e.preventDefault();e.stopImmediatePropagation();
+ eventDetailDialog(detailRecords[Number(button.dataset.recordIndex)]);
+},true);
+
 runAction=async function(action,el,event){
  const selected=el?.dataset?.id?getAccount(el.dataset.id):getAccount(state.selectedAccount);
  const result=await oldAction(action,el,event);
@@ -251,3 +322,5 @@ window.WolfNativeIntegration={refresh,get snapshot(){return cached},get ready(){
 back.status().then(async v=>{if(!v.available){toast('Native backend unavailable: '+v.error,'warn');return}connected=true;await refresh()})
  .catch(e=>console.warn('Wolf backend:',String(e)));
 })();
+
+const activityCSS=document.createElement('style');activityCSS.textContent='.backend-activity-entry{display:flex;align-items:center;width:100%;gap:12px;padding:12px 8px;background:transparent;border:0;border-bottom:1px solid #294158;text-align:left;color:#eff7ff;cursor:pointer;font-size:12px}.backend-activity-entry:hover{background:#102c46}.backend-activity-main{flex:1;min-width:0}.backend-activity-main b,.backend-activity-main small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.backend-activity-main small{font-size:11px;color:#9bb6cb;margin-top:5px}';document.head.appendChild(activityCSS);

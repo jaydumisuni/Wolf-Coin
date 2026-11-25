@@ -1,0 +1,63 @@
+import assert from 'node:assert/strict';
+const port=Number(process.env.WOLF_TEST_CDP_PORT||13987);
+const targets=(await(await fetch('http://127.0.0.1:'+port+'/json')).json()).filter(x=>x.type==='page');
+const app=targets.find(x=>x.url?.startsWith('file:'));
+assert(app,'Native UI renderer target missing');
+const ws=new WebSocket(app.webSocketDebuggerUrl);
+await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej});
+let seq=0;const pending=new Map();
+ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result)}};
+async function evalJS(expression){
+ const r=await new Promise((resolve,reject)=>{
+  const id=++seq;pending.set(id,{resolve,reject});
+  ws.send(JSON.stringify({id,method:'Runtime.evaluate',params:{expression,returnByValue:true,awaitPromise:true}}));
+ });
+ if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);
+ return r.result?.value;
+}
+const metric=()=>evalJS(`(()=>{const $=s=>document.querySelector(s),rect=s=>{let r=$(s)?.getBoundingClientRect();return r?{x:r.x,y:r.y,width:r.width,height:r.height}:null};return {tab:state.tab,topbar:$('#topbar')?getComputedStyle($('#topbar')).display:null,left:rect('#sidebar'),browser:rect('.browser-content'),main:rect('#main'),pane:rect('.browser-tools-pane'),collapsed:state.sidebarCollapsed,panelOpen:state.browserToolsOpen,currency:state.settings.currency,zone:DEVICE_CURRENCY.zone,defaultCurrency:DEVICE_CURRENCY.currency,navItems:document.querySelectorAll('#sidebar .nav-button').length,hasDuplicateTop:!!document.querySelector('[data-action="profile"]'),hasPageHeading:document.querySelector('#main')?.textContent.includes('Chromium-powered browser workspace')||false,newSessionButton:document.querySelector('#main')?.textContent.includes('New Session')||false};})()`);
+try{
+ await evalJS("state.sidebarCollapsed=false;state.browserToolsOpen=false;render()");
+ await evalJS("document.querySelector('[data-tab=browser]').click()");
+ const full=await metric();
+ assert.equal(full.tab,'browser');
+ assert.equal(full.topbar,'none');
+ assert.equal(full.navItems,9);
+ assert.equal(full.hasDuplicateTop,false);
+ assert.equal(full.hasPageHeading,false);
+ assert.equal(full.newSessionButton,false);
+ assert(full.browser?.height>300,'Browser viewport unexpectedly short');
+ const initialWidth=full.browser.width;
+ await evalJS("document.querySelector('[data-action=toggle-sidebar]').click()");
+ const collapsed=await metric();
+ assert.equal(collapsed.collapsed,true);
+ assert(collapsed.left.width<75,'Collapsed rail did not contract');
+ assert(collapsed.browser.width>initialWidth+70,'Collapsing navigation did not expand browser viewport');
+ await evalJS("document.querySelector('[data-action=browser-panel-tools]').click()");
+ const pane=await metric();
+ assert.equal(pane.panelOpen,true);
+ assert(pane.pane.width>=225);
+assert(pane.browser.width<collapsed.browser.width-200);
+ assert.equal(await evalJS("!!document.querySelector('[data-action=native-snapshot]')"),true);
+ await evalJS("document.querySelector('[data-action=browser-panel-tab][data-panel=history]').click()");
+ assert.equal(await evalJS("!!document.querySelector('[data-action=browser-clear-history]')"),true);
+ await evalJS("document.querySelector('[data-action=browser-panel-tab][data-panel=bookmarks]').click()");
+ assert.equal(await evalJS("!!document.querySelector('.browser-side-content').textContent.includes('Bookmarks')"),true);
+ await evalJS("document.querySelector('[data-action=browser-panel-tab][data-panel=vault]').click()");
+ assert.equal(await evalJS("!!document.querySelector('[data-action=vault-add]')"),true);
+ await evalJS("document.querySelector('[data-action=toggle-browser-panel]').click()");
+ const closed=await metric();
+ assert.equal(closed.panelOpen,false);
+ assert(closed.browser.width>=collapsed.browser.width-3);
+ await evalJS("document.querySelector('[data-tab=settings]').click()");
+ await evalJS("state.prefSection='Data & Sync';render()");
+ const currencies=await evalJS("Array.from(document.querySelector('[data-setting-select=currency]').options).map(x=>x.value)");
+ assert(currencies.includes('USD')&&currencies.includes('ZMW')&&currencies.includes('EUR')&&currencies.length>=35);
+ const suggested=await evalJS("JSON.stringify({zone:DEVICE_CURRENCY.zone,source:DEVICE_CURRENCY.currency,current:state.settings.currency,flag:state.settings.currencyUserSelected})");
+ await evalJS("(()=>{const s=document.querySelector('[data-setting-select=currency]');s.value='EUR';s.dispatchEvent(new Event('change',{bubbles:true}));return true})()");
+ const chosen=await evalJS("JSON.stringify({currency:state.settings.currency,selected:state.settings.currencyUserSelected,origins:state.accounts.map(a=>a.financialCurrency)})");
+ assert.equal(JSON.parse(chosen).currency,'EUR');
+ assert.equal(JSON.parse(chosen).selected,true);
+ await evalJS("document.querySelector('[data-tab=browser]').click()");
+ console.log('WOLF_COMPACT_BROWSER_UI_E2E_PASS',JSON.stringify({browserInitialWidth:Math.round(initialWidth),afterCollapse:Math.round(collapsed.browser.width),withToolsOpen:Math.round(pane.browser.width),withToolsClosed:Math.round(closed.browser.width),leftRailWidth:Math.round(collapsed.left.width),browserHeight:Math.round(full.browser.height),tools:6,panes:5,currencies:currencies.length,suggestion:JSON.parse(suggested),manualSelection:'EUR',accountsKeepOwnCurrency:true}));
+}finally{ws.close()}

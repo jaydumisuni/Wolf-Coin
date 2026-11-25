@@ -1,6 +1,6 @@
 {
   "name": "wolfcoin-desktop-host",
-  "version": "0.9.2-dev",
+  "version": "0.9.3-dev",
   "private": true,
   "description": "Wolf-Coin UI host: Windows/Linux Chromium, persistent per-account browser profiles",
   "main": "main.cjs",
@@ -25,6 +25,7 @@
       "package.json",
       "README.md",
       "wolf_snapshot.js",
+      "wolf_vault.cjs",
       "backend_host.cjs",
       "backend_integration.cjs",
       "backend-runtime/**/*",

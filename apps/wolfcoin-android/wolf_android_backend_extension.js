@@ -19,7 +19,7 @@
     const found=existing.accounts.find(x=>x.domain===d.domain&&x.account_id===d.account_id);
     if(found)return found;
     const url=new URL(account.url||snapshot?.url);
-    const currency=String(account.financialCurrency||account.currency||snapshot?.candidates?.balance?.currency||'ZMW').toUpperCase();
+    const currency=String(account.financialCurrency||account.currency||snapshot?.candidates?.balance?.currency||state.settings.currency||'USD').toUpperCase();
     if(!/^[A-Z]{3}$/.test(currency))throw Error('Account currency is missing');
     await nativeRequest('account.register',{
       ...d,platform_id:'website_'+url.hostname.toLowerCase().replace(/[^a-z0-9_]/g,'_').slice(0,58),

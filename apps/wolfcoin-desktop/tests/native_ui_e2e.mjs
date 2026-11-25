@@ -66,6 +66,7 @@ try{
    await page.eval("(()=>{document.querySelector('[name=user]').value='fixture';document.querySelector('[name=pass]').value='fixture';document.querySelector('form').requestSubmit();return true})()");
  }finally{page.close()}
  await sleep(450);
+ await ui.eval("document.querySelector('[data-action=browser-panel-tools]').click()");
  await ui.eval("document.querySelector('[data-action=sync-current]').click()");
  await sleep(600);
  state=JSON.parse(await ui.eval("JSON.stringify({tab:state.tab,accounts:state.accounts})"));
@@ -75,7 +76,7 @@ try{
  assert.equal(state.accounts[0].pnl,60);
  result.sync={status:state.accounts[0].status,balance:state.accounts[0].balance,pending:state.accounts[0].pending,pnl:state.accounts[0].pnl};
  // Verify the Browser Tools menu has real native effects, not placeholder toasts.
- await ui.eval("document.querySelector('[data-action=browser-tools]').click()");
+ await ui.eval("document.querySelector('[data-action=browser-panel-tools]').click()");
  assert.equal(await ui.eval("!!document.querySelector('[data-action=native-snapshot]')"),true);
  await ui.eval("document.querySelector('[data-action=native-snapshot]').click()");
  await sleep(130);
@@ -83,25 +84,25 @@ try{
  assert.equal(await ui.eval("document.querySelector('#modalRoot textarea').value.includes('750')"),true);
  await ui.eval("document.querySelector('[data-action=close-modal]').click()");
  await sleep(90);
- await ui.eval("document.querySelector('[data-action=browser-tools]').click()");
+ await ui.eval("document.querySelector('[data-action=browser-panel-tools]').click()");
  await ui.eval("document.querySelector('[data-action=native-dom]').click()");
  await sleep(110);
  assert.equal(await ui.eval("document.querySelector('#modalRoot textarea').value.includes('nodes')"),true);
  await ui.eval("document.querySelector('[data-action=close-modal]').click()");
  await sleep(90);
- await ui.eval("document.querySelector('[data-action=browser-tools]').click()");
+ await ui.eval("document.querySelector('[data-action=browser-panel-tools]').click()");
  await ui.eval("document.querySelector('[data-action=native-network]').click()");
  await sleep(110);
  assert.equal(await ui.eval("document.querySelector('#modalRoot textarea').value.includes('records')"),true);
  await ui.eval("document.querySelector('[data-action=close-modal]').click()");
  await sleep(90);
- await ui.eval("document.querySelector('[data-action=browser-tools]').click()");
+ await ui.eval("document.querySelector('[data-action=browser-panel-tools]').click()");
  await ui.eval("document.querySelector('[data-action=native-screenshot]').click()");
  await sleep(250);
  assert.equal(await ui.eval("document.querySelector('#modalRoot img')?.src.startsWith('data:image/png;base64,')"),true);
  await ui.eval("document.querySelector('[data-action=close-modal]').click()");
  await sleep(90);
- await ui.eval("document.querySelector('[data-action=browser-tools]').click()");
+ await ui.eval("document.querySelector('[data-action=browser-panel-tools]').click()");
  await ui.eval("document.querySelector('[data-action=native-action]').click()");
  assert.equal(await ui.eval("!!document.querySelector('#native-action-form')"),true);
  await ui.eval("document.querySelector('#native-action-form').requestSubmit()");

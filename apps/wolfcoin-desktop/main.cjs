@@ -1,13 +1,15 @@
 'use strict';
 /* Wolf Browser desktop host; controls are not filtered by platform category. */
-const {app,BrowserWindow,WebContentsView,ipcMain,session,shell,dialog}=require('electron');
+const {app,BrowserWindow,WebContentsView,ipcMain,session,shell,dialog,safeStorage}=require('electron');
 const path=require('node:path');
 const crypto=require('node:crypto');
 const {URL,fileURLToPath}=require('node:url');
 const fs=require('node:fs');
 const {WolfNativeBackend,backendModuleDirectory}=require('./backend_host.cjs');
 const {WolfAppIntegration}=require('./backend_integration.cjs');
-let appBackend=null,appAdapter=null,backendInitError=null;
+const {WolfVault,originOf,FILL_JS}=require('./wolf_vault.cjs');
+let appBackend=null,appAdapter=null,backendInitError=null,vaultStore=null;
+function vault(){return vaultStore||(vaultStore=new WolfVault({safeStorage,userData:app.getPath('userData'),allowLoopback:process.env.WOLF_TEST_MODE==='1'}));}
 async function startAppBackend(){
  const moduleDir=backendModuleDirectory(process.resourcesPath||path.dirname(__dirname),__dirname);
  const stateDir=process.env.WOLF_BACKEND_STATE_DIR||path.join(app.getPath('userData'),'backend');
@@ -22,7 +24,7 @@ async function startAppBackend(){
 }
 function requireAdapter(){if(!appAdapter)throw Error('Wolf backend unavailable: '+(backendInitError||'initializing'));return appAdapter;}
 let mainWindow=null, activeView=null, activeAccount=null;
-const views=new Map(), networkHistory=new Map(), events=new Map();
+const views=new Map(), networkHistory=new Map(), events=new Map(),downloadHistory=[];
 let region={x:0,y:0,width:0,height:0};
 const TEST_MODE=process.env.WOLF_TEST_MODE==='1';
 // Opt-in invisible acceptance session: no desktop activation or GPU contention.
@@ -73,6 +75,9 @@ function browserView(id){
   const proposed=path.basename(item.getFilename()).replace(/[^a-zA-Z0-9_.() -]/g,'_').slice(0,128)||'download';
   const dir=path.join(app.getPath('downloads'),'Wolf-Coin');fs.mkdirSync(dir,{recursive:true});
   item.setSavePath(path.join(dir,Date.now()+'-'+proposed));sessionEvent(id,'download.started',{filename:proposed});
+  const itemMeta={id:crypto.randomUUID(),accountId:id,filename:proposed,at:new Date().toISOString(),status:'Downloading'};
+  downloadHistory.unshift(itemMeta);if(downloadHistory.length>80)downloadHistory.length=80;
+  item.on('done',(_event,state)=>{itemMeta.status=state==='completed'?'Completed':String(state||'Interrupted')});
  });
  const v=new WebContentsView({webPreferences:{session:ses,sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,allowRunningInsecureContent:false}});
  // Popup/OAuth flows stay inside a Wolf-owned Chromium window with the same isolated profile.
@@ -81,6 +86,9 @@ function browserView(id){
   return {action:'allow',overrideBrowserWindowOptions:{width:700,height:740,webPreferences:{session:ses,sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true}}};
  });
  for(const name of ['did-navigate','did-navigate-in-page','did-finish-load'])v.webContents.on(name,()=>inform(v.webContents,id));
+ v.webContents.on('did-finish-load',()=>{ // Only exact-origin saved logins, never submitted automatically.
+   fillSavedLogin(id,{autoOnly:true}).catch(()=>{});
+ });
  v.webContents.on('did-fail-load',(_e,code,description,attempted,isMainFrame)=>{if(isMainFrame)sessionEvent(id,'navigation.failure',{code,description,url:attempted?.slice(0,500)});});
  // Do not permit authenticated pages to pivot into file:, data:, or other privileged protocols.
  for(const name of ['will-navigate','will-redirect'])v.webContents.on(name,(event,target)=>{try{safeUrl(target);}catch{event.preventDefault();}});
@@ -100,7 +108,7 @@ function getView(id){const p=partitionFor(id);let v=views.get(p);if(!v){v=browse
 function receipt(id,action,ok,extra={}){return sessionEvent(id,action,{ok,...extra});}
 const SNAPSHOT_SCRIPT=fs.readFileSync(path.join(__dirname,'wolf_snapshot.js'),'utf8');
 async function snapshot(id){const wc=requireActive(id);const url=safeUrl(wc.getURL());const d=await wc.executeJavaScript(SNAPSHOT_SCRIPT,true);
- const source={type:CONTRACT,accountId:id,url,observedAt:d.observedAt,verification:'candidate_only',currencyHint:'ZMW',evidenceOrigin:'visible_dom'};
+ const source={type:CONTRACT,accountId:id,url,observedAt:d.observedAt,verification:'candidate_only',currencyHint:d.candidates?.balance?.currency||null,evidenceOrigin:'visible_dom'};
  return {...d,source,accountId:id,url,contract:CONTRACT};}
 async function backgroundSnapshot(id){
  const wc=getView(id).webContents,url=safeUrl(wc.getURL());
@@ -143,6 +151,17 @@ async function action(id,type,payload={}){
   return receipt(id,type,res?.ok===true,{startedAt:at,selector,reason:res.reason||null});
  }
  throw Error('Unsupported action');
+}
+async function fillSavedLogin(id,{autoOnly=false}={}){
+ const wc=requireActive(id);
+ const current=safeUrl(wc.getURL());
+ const rec=vault().forUrl(current,{autoOnly});
+ if(!rec)return {filled:false,reason:'no_matching_saved_login'};
+ // The renderer can never choose a different site to receive a password.
+ if(originOf(wc.getURL(),TEST_MODE)!==rec.origin)throw Error('Credential origin mismatch');
+ const outcome=await wc.executeJavaScript(FILL_JS(rec),true);
+ sessionEvent(id,'vault.autofill',{origin:rec.origin,filled:!!outcome?.filled,auto:autoOnly});
+ return {filled:!!outcome?.filled,usernameFilled:!!outcome?.usernameFilled,submitted:false,reason:outcome?.reason};
 }
 async function clearSession(id){id=idOf(id);const p=partitionFor(id);const v=views.get(p);
  if(v){if(activeView===v)attach(null,null);views.delete(p);v.webContents.close();}
@@ -201,6 +220,12 @@ function setupIPC(){
  on('wolf:screenshot',async p=>{const id=idOf(p.accountId);const img=await requireActive(id).capturePage();const bytes=img.toPNG();if(bytes.length>4*1024*1024)throw Error('Screenshot too large');return {schema:CONTRACT,accountId:id,observedAt:new Date().toISOString(),mimeType:'image/png',dataUrl:'data:image/png;base64,'+bytes.toString('base64')};});
  on('wolf:events',p=>({schema:CONTRACT,accountId:idOf(p.accountId),records:(events.get(idOf(p.accountId))||[]).slice(-50)}));
  on('wolf:clear-session',p=>clearSession(p.accountId));
+ on('wolf:vault-status',()=>vault().status());
+ on('wolf:vault-list',()=>vault().list());
+ on('wolf:vault-save',p=>vault().save(p));
+ on('wolf:vault-delete',p=>vault().remove(p));
+ on('wolf:vault-fill',p=>fillSavedLogin(idOf(p.accountId)));
+ on('wolf:downloads',()=>({items:downloadHistory.slice(0,70)}));
  on('wolf:open-external',p=>shell.openExternal(safeUrl(p.url)).then(()=>({ok:true})));
 }
 async function testFlow(){

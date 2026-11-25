@@ -13,6 +13,7 @@ async function run(expression){
  return r.result?.value;
 }
 try{
+ await run("window.WolfNativeIntegration.refresh()");
  const initial=JSON.parse(await run("JSON.stringify({ready:window.WolfNativeIntegration?.ready,backend:window.WolfNativeIntegration?.snapshot})"));
  assert.equal(initial.ready,true);
  const accountId=process.env.WOLF_ANDROID_ACCOUNT_ID||'android_v09_lab_sports_3';
@@ -26,7 +27,11 @@ try{
  assert(finance.includes('Balance History'));
  await run("document.querySelector('[data-tab=activity]').click()");
  const activity=await run("document.querySelector('#main').textContent");
- assert(activity.includes('Native backend audit history'));
+ assert(activity.includes('Recorded bets, trades, transaction outcomes and signed audit trail'));
+ assert.equal(await run("document.querySelectorAll('[data-action=backend-event-details]').length>0"),true);
+ await run("document.querySelector('[data-action=backend-event-details]').click()");
+ const details=await run("document.querySelector('#modalRoot').textContent");
+ assert(details.includes('Event')&&details.includes('Timestamp'));
  assert(activity.includes('observation.ingest'));
  console.log('WOLF_ANDROID_BACKEND_NINE_SCREEN_BINDING_PASS '+JSON.stringify({
   registered:initial.backend.accounts.length,currencies:Object.keys(initial.backend.finance.currency_totals||{}),

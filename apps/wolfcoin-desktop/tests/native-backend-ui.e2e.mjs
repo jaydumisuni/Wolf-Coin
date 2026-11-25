@@ -41,7 +41,11 @@ try{
  assert(!financeText.includes('Recorded Deposits (illustrative)'));
  await evaluate("document.querySelector('[data-tab=activity]').click()");
  const activityText=await evaluate("document.querySelector('#main').textContent");
- assert(activityText.includes('Native backend audit history'));
+ assert(activityText.includes('Recorded bets, trades, transaction outcomes and signed audit trail'));
  assert(activityText.includes('observation.ingest'));
+ assert.equal(await evaluate("document.querySelectorAll('[data-action=backend-event-details]').length>0"),true);
+ await evaluate("document.querySelector('[data-action=backend-event-details]').click()");
+ const detailText=await evaluate("document.querySelector('#modalRoot').textContent");
+ assert(detailText.includes('Event')&&detailText.includes('Timestamp'),detailText);
  console.log('WOLF_NATIVE_FINANCIAL_ACTIVITY_UI_PASS '+JSON.stringify({registered:1,observations:snap.data.history[0].observations.length,auditEvents:snap.data.activity.length,financeReal:true,activityReal:true}));
 }finally{ws.close()}

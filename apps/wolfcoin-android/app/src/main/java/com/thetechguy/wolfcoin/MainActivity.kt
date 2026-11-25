@@ -64,6 +64,7 @@ class MainActivity : Activity() {
     private var pendingWebPermission: PermissionRequest? = null
     private val backendWorker=Executors.newSingleThreadExecutor()
     private var nativePythonBackend:PyObject?=null
+    private val passwords by lazy { PasswordStore(this) }
 
     private fun signedBackend():PyObject {
         val current=nativePythonBackend
@@ -290,6 +291,7 @@ class MainActivity : Activity() {
                 try { view?.let { WebViewCompat.getProfile(it).cookieManager.flush() } }
                 catch (e: Exception) { android.util.Log.w("WolfBrowser", "Cookie persistence: "+e.message) }
                 if (activeId == id) sendPageState(id, url ?: "", view?.title ?: "")
+                if(view!=null) fillSavedLogin(id,view,true,null,null)
             }
         }
         sessions[id] = browser
@@ -333,6 +335,28 @@ class MainActivity : Activity() {
         }
         activeId = null
     }
+    private fun fillSavedLogin(account:String,view:WebView,auto:Boolean,
+                               requestId:String?,reply:JavaScriptReplyProxy?) {
+        try {
+            val current=view.url ?: error("Website not loaded")
+            val secret=passwords.forPage(current,auto)
+            if(secret==null){
+                if(requestId!=null&&reply!=null)respond(reply,requestId,JSONObject()
+                    .put("filled",false).put("reason","no_matching_saved_login"))
+                return
+            }
+            check(passwords.origin(current)==passwords.origin(view.url?:"")){"Login origin changed"}
+            view.evaluateJavascript(passwords.fillScript(secret)){ output ->
+                if(requestId!=null&&reply!=null) {
+                    try{respond(reply,requestId,JSONObject(output))}
+                    catch(e:Exception){respond(reply,requestId,null,"Autofill: "+e.message)}
+                }
+            }
+        }catch(e:Exception){
+            if(requestId!=null&&reply!=null)respond(reply,requestId,null,
+                "Autofill unavailable: "+(e.message?:"browser error"))
+        }
+    }
     private fun dispatch(id: String, method: String, args: JSONObject, reply: JavaScriptReplyProxy) {
         when (method) {
             "backendStatus" -> backendCall(id,"bridge.capabilities",JSONObject(),reply,true)
@@ -342,6 +366,16 @@ class MainActivity : Activity() {
                 .put("browserOpen",activeId!=null).put("accountId",activeId)
                 .put("multiProfile",WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE))
                 .put("mode","browser_controls_available"))
+            "vaultStatus" -> respond(reply,id,passwords.status())
+            "vaultList" -> respond(reply,id,passwords.list())
+            "vaultSave" -> respond(reply,id,passwords.save(args.getString("url"),
+                args.getString("username"),args.getString("password"),args.optBoolean("autofill",true)))
+            "vaultDelete" -> respond(reply,id,passwords.delete(args.getString("origin")))
+            "vaultFill" -> {
+                val account=accountId(args.getString("accountId"))
+                fillSavedLogin(account,activeBrowser(account),false,id,reply)
+            }
+            "downloads" -> respond(reply,id,JSONObject().put("items",JSONArray()))
             "browserBounds" -> { bounds(args);respond(reply,id,JSONObject().put("ok",true)) }
             "hideBrowser" -> { hide();respond(reply,id,JSONObject().put("ok",true)) }
             "showBrowser" -> {

@@ -23,13 +23,16 @@ const accounts=[
 try{
  for(const account of accounts){
   await ui.eval("(()=>{const a="+JSON.stringify(account)+";if(!state.accounts.some(x=>x.id===a.id))state.accounts.push({...a,known:false,status:'unverified',sync:'Not synchronized',device:'Android Wolf Browser',balance:null,pending:null,pnl:null});createTab(a.url,a.id);return true})()");
-  const target=await until(async()=>(await targets()).find(t=>t.url===account.url));
-  const web=await attach(target);
-  try{
-   await until(async()=>await web.eval("!!document.querySelector('[name=pass]')"));
-   await web.eval("(()=>{document.querySelector('[name=user]').value='fixture';document.querySelector('[name=pass]').value='fixture';document.querySelector('form').requestSubmit();return true})()");
-  }finally{web.close()}
-  const snapshot=await until(async()=>{const x=await ui.eval("window.wolfNative.snapshot({accountId:"+JSON.stringify(account.id)+"})");return x?.auth==='probable_authenticated'?x:null});
+  // Account-scope actions through the real native WebView instead of
+  // selecting a possibly stale CDP tab with an identical fixture URL.
+  await until(async()=>{try{const x=await ui.eval("window.wolfNative.snapshot({accountId:"+JSON.stringify(account.id)+"})");return x?.auth==='login_required'?x:null}catch{return null}});
+  for(const [selector,text] of [['input[name=user]','fixture'],['input[name=pass]','fixture']]){
+   const res=await ui.eval("window.wolfNative.action("+JSON.stringify({accountId:account.id,type:'fill',selector,text})+")");
+   assert.equal(res.ok,true,JSON.stringify(res));
+  }
+  const click=await ui.eval("window.wolfNative.action("+JSON.stringify({accountId:account.id,type:'click',selector:'button[type=submit]'})+")");
+  assert.equal(click.ok,true,JSON.stringify(click));
+  const snapshot=await until(async()=>{try{const x=await ui.eval("window.wolfNative.snapshot({accountId:"+JSON.stringify(account.id)+"})");return x?.auth==='probable_authenticated'?x:null}catch{return null}},110);
   assert.equal(snapshot.identity?.displayName,'Alex Example');
   await ui.eval("window.wolfBackend.observeAccount(state.accounts.find(x=>x.id==="+JSON.stringify(account.id)+"))");
  }

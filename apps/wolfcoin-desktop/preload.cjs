@@ -2,7 +2,7 @@
 const {contextBridge,ipcRenderer}=require('electron');
 const invoke=(channel,payload)=>ipcRenderer.invoke(channel,payload);
 const api={
- version:'0.9.1-dev',contract:'wolf.browser.v1',
+ version:'0.9.3-dev',contract:'wolf.browser.v1',
  status:()=>invoke('wolf:status'),
  showBrowser:request=>invoke('wolf:show-browser',request),
  hideBrowser:()=>invoke('wolf:hide-browser'),
@@ -15,6 +15,12 @@ const api={
  action:request=>invoke('wolf:action',request),
  events:request=>invoke('wolf:events',request),
  clearSession:accountId=>invoke('wolf:clear-session',{accountId}),
+ vaultStatus:()=>invoke('wolf:vault-status'),
+ vaultList:()=>invoke('wolf:vault-list'),
+ vaultSave:entry=>invoke('wolf:vault-save',entry),
+ vaultDelete:entry=>invoke('wolf:vault-delete',entry),
+ vaultFill:entry=>invoke('wolf:vault-fill',entry),
+ downloads:()=>invoke('wolf:downloads'),
  openExternal:url=>invoke('wolf:open-external',{url}),
  onPageState:callback=>{
   if(typeof callback!=='function')throw new TypeError('Callback required');
