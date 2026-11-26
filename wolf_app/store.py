@@ -40,7 +40,7 @@ READ_OPS = frozenset({
 })
 MUTATIONS = frozenset({
     "account.register", "account.remove", "session.record",
-    "observation.ingest", "decision.propose", "decision.receipt",
+    "observation.ingest", "decision.propose", "decision.receipt", "decision.reconcile",
     "sync.enqueue", "sync.claim", "sync.receipt",
     "sync.reconcile", "sync.cancel", "host.startup",
 })
@@ -361,6 +361,8 @@ class ApplicationStore:
             return self._propose(db,request_id,payload)
         if operation=="decision.receipt":
             return self._receipt(db,request_id,payload)
+        if operation=="decision.reconcile":
+            return self._decision_reconcile(db,request_id,payload)
         if operation=="sync.enqueue":
             return self._sync_enqueue(db,request_id,payload)
         if operation=="sync.claim":
@@ -560,6 +562,78 @@ class ApplicationStore:
                     terminal=="AWAITING_PLATFORM_RECONCILIATION",
                 "browser_result_is_self_reported":True,
                 "duplicate_dispatch_possible":False}
+
+    def _decision_reconcile(self,db,request_id,payload):
+        """Bind a previously reported native submission to observed transaction history.
+
+        Local matching is not independent platform verification, a payout, or a
+        learning label. No browser actions or new financial effects occur here.
+        """
+        obj(payload,{"domain","account_id","decision_id","transaction_id",
+                     "observation_id","evidence_sha256"})
+        scope=self._scope(payload)
+        self._require_account(db,scope)
+        decision=ident(payload["decision_id"],"decision ID")
+        transaction=ident(payload["transaction_id"],"transaction ID")
+        observation=ident(payload["observation_id"],"observation ID")
+        proof=payload["evidence_sha256"]
+        if not re_hex(proof):
+            raise ContractError("readback evidence SHA-256 required")
+        row=db.execute("""SELECT observation_id,action_kind,proposed_amount,
+                status,result_ref,recorded_at FROM app_decisions
+                WHERE domain=? AND account_id=? AND decision_id=?""",
+                (*scope,decision)).fetchone()
+        if not row:
+            raise AppConflict("unknown decision")
+        before,kind,size,status,ref,created=row
+        if status not in ("AWAITING_PLATFORM_RECONCILIATION",
+                          "PLATFORM_REPORTED_PENDING_UNVERIFIED"):
+            raise AppConflict("decision not awaiting observed transaction readback")
+        expected_kind={"PLACE_BET":"BET","PLACE_TRADE":"TRADE"}.get(kind)
+        if expected_kind is None:
+            raise AppConflict("placement transaction readback requires a placement decision")
+        if transaction!=ref:
+            raise AppConflict("provider reference differs from native submission reference")
+        existing=db.execute("""SELECT decision_id FROM app_decisions
+               WHERE domain=? AND account_id=? AND result_ref=? AND decision_id<>?
+               AND status IN ('AWAITING_PLATFORM_RECONCILIATION',
+                   'PLATFORM_REPORTED_PENDING_UNVERIFIED',
+                   'PLATFORM_REPORTED_SETTLED_UNVERIFIED',
+                   'PLATFORM_REPORTED_CANCELLED_UNVERIFIED')""",
+               (*scope,transaction,decision)).fetchone()
+        if existing:
+            raise AppConflict("provider reference bound to multiple decisions")
+        tx=db.execute("""SELECT kind,amount,status,occurred_at,source_observation_id
+              FROM app_transactions WHERE domain=? AND account_id=? AND transaction_id=?""",
+              (*scope,transaction)).fetchone()
+        if not tx:
+            raise AppConflict("provider transaction not observed")
+        observed_kind,observed_amount,observed_state,occurred,source_id=tx
+        if (observed_kind!=expected_kind or Decimal(observed_amount)!=Decimal(size)
+            or source_id!=observation or occurred<created):
+            raise AppConflict("transaction identity, amount or chronology mismatch")
+        initial=db.execute("""SELECT origin,observed_at FROM app_observations
+               WHERE domain=? AND account_id=? AND observation_id=?""",(*scope,before)).fetchone()
+        latest=db.execute("""SELECT origin,observed_at,evidence_sha256 FROM app_observations
+               WHERE domain=? AND account_id=? AND observation_id=?""",(*scope,observation)).fetchone()
+        if (not initial or not latest or latest[0]!=initial[0]
+            or latest[1]<=initial[1] or latest[1]<occurred or latest[2]!=proof):
+            raise AppConflict("readback not linked to later same-origin evidence")
+        self.verify_audit_connection(db)
+        new_status="PLATFORM_REPORTED_"+observed_state+"_UNVERIFIED"
+        db.execute("""UPDATE app_decisions SET status=?
+              WHERE domain=? AND account_id=? AND decision_id=?""",
+              (new_status,*scope,decision))
+        self._audit(db,request_id,"decision.reconcile",{
+            "domain":scope[0],"account_id":scope[1],"decision_id":decision,
+            "transaction_id":transaction,"observation_id":observation,
+            "evidence_sha256":proof,"status":new_status,
+            "independently_platform_verified":False})
+        return {"decision_id":decision,"transaction_id":transaction,
+                "status":new_status,"observation_id":observation,
+                "independently_platform_verified":False,
+                "payout_or_realized_pnl_established":False,
+                "learning_label_established":False}
 
     def _sync_enqueue(self,db,request_id,payload):
         obj(payload,{"domain","account_id","job_id","reason"})

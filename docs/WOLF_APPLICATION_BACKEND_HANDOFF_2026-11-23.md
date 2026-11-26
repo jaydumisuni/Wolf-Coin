@@ -137,3 +137,30 @@ This a10 section is the current contract; earlier a8/a9 notes below document his
 - Source suite **409/409 PASS**, including legacy v1→v2 schema conversion, cached old status archival, signed native transport, old schema backup without unintended mutation, and contextual browser/financial routing. Cookpit micro **PASS** (**75 focused tests**) receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-remove-forced-app-mode/evidence/20261123T231441Z-micro-74bf8e8ec9d7.json`; Cookpit heavy **PASS** (**409 tests**, installed wheel, legacy a6 lab unchanged) receipt `/home/kratos/.local/state/ttg-cookpit/projects/wolf-coin-remove-forced-app-mode/evidence/20261123T231443Z-heavy-74bf8e8ec9d7.json`. Earlier Cookpit source-path negative receipts were retained and corrected. No recurring new supervisor.
 - An old historical PAPER-only laboratory executable may still exist in the original a6 release and as source fixture; it is **not a Wolf-Coin application operating mode**, and is not used in `wolf_app` selection. Existing training evidence/strategy weights, account test data and the independently built frontend are preserved.
 - Real browser operation and financial settlement remain untested pending the user's requested post-integration live test. This is a technical boundary, **not** a hidden global feature lock.
+
+## 2026-11-26 — native submission readback candidate
+
+Recovered gap: `decision.receipt` records a native-reported submission as
+`AWAITING_PLATFORM_RECONCILIATION`, but there was no decision-level binding
+of later transaction-history observations. Added `decision.reconcile` to the
+existing v2 bridge and envelope operation inventory. It matches the exact
+provider reference, account, placement kind, amount, later observation,
+origin and evidence digest; records the observed pending/settled/cancelled
+state as **platform-reported, independently unverified**; and preserves the
+request idempotency and audit chain. It does not execute any action, infer
+payouts, or convert a transaction status into a predictive learning label.
+
+Six signed local fixture tests cover the pending-to-settled progression,
+restart and duplicate request handling, wrong amount/origin/digest/reference,
+and absent transaction. Full source regression: **481/481 passed**.
+
+Remaining integration: the current desktop host's `observe` method passes
+financial fields but no transaction batch, and its recorded native decision
+fixture returns `NOT_EXECUTED`. It does not yet supply provider transaction
+IDs/settlements to this operation. Android parity, actual provider capture,
+unknown-submission recovery, cancellations/position-close attribution,
+realized P/L and authenticated outcome-to-learning linkage remain unproven.
+The exact installed application and its existing data are unchanged. No
+new global capability restrictions or changes to financial execution were
+introduced. The candidate is not a proof of autonomous execution or profit.
+Contribution: source implementation, verification and update existing handoff.
