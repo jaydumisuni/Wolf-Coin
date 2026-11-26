@@ -910,3 +910,27 @@ Wolf-Coin is self-sufficient when:
 17. guarded live only after gate evidence.
 
 The detailed phase breakdown and exit criteria are in `docs/ROADMAP.md`.
+
+## 25. Pre-live loss-feedback gate (2026-11-26)
+
+The pre-live research protocol and falsification outcome are documented at:
+
+- `docs/research/PRELIVE_LOSS_FEEDBACK_FROZEN_PROTOCOL_2026-11-26.md`
+- `docs/research/PRELIVE_LOSS_FEEDBACK_RESULT_2026-11-26.md`
+
+The original CC0 training and typed tabular evidence remain authoritative.
+A new, research-only settlement feedback loop was verified on 1,520
+chronologically replayed CC0 outcomes (736 synthetic losing selections),
+with precommitted forecast/settlement identity, bounded online calibration,
+sealed persistent journals and deterministic restart recovery.
+**Offline learning mechanics: PASS**.
+
+The predeclared repeated proper-score market and frozen-model tests
+**FAILED**. In all quoted seasons the adaptive candidate underperformed
+the bookmaker de-vigged probability baseline, and it underperformed the
+frozen model in all four evaluated seasons. It is not a production
+strategy, not approved for funds and not a real-account learning proof.
+The independent reviewer's result is `REJECT_KEEP_FROZEN`. Do not
+promote the adaptive challenger. A fresh future holdout remains necessary
+for a genuinely new strategy-generation attempt. No money moved and
+the running Wolf-Coin app is unchanged.
