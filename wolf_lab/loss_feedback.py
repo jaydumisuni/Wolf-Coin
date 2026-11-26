@@ -85,7 +85,7 @@ class Forecast:
         _identity(self.prediction_id)
         _identity(self.match_id)
         _datetime(self.forecast_utc)
-        _probs(self.probabilities)
+        object.__setattr__(self,"probabilities",_probs(self.probabilities))
         if type(self.selected_label) is not int or self.selected_label not in (0,1,2):
             raise FeedbackError("invalid selected outcome")
         _sha256(self.source_sha256)

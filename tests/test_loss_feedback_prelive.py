@@ -107,6 +107,8 @@ def test_restart_exact_replay_and_tampering_detected(tmp_path):
         write_immutable(tmp_path/"sealed.json",state)
     replay=LossLearner.from_snapshot(json.loads((tmp_path/"sealed.json").read_text()))
     assert replay.snapshot()==state
+    replay.register(forecast())  # exact same forecast remains idempotent after JSON reload
+    assert replay.snapshot()==state
     altered=deepcopy(state)
     altered["events"][1]["data"]["receipt"]["virtual_pnl"]=100
     with pytest.raises(FeedbackError,match="sealed journal"):
@@ -145,3 +147,25 @@ def test_market_evaluation_only_rejects_modified_digest(tmp_path):
     f.write_text("Date,HomeTeam,AwayTeam,FTR,B365H,B365D,B365A\n01/01/2025,A,B,H,2.0,3.2,4.0\n")
     with pytest.raises(FeedbackError,match="digest mismatch"):
         _market_eval_only(f,"0"*64,[])
+
+
+
+def test_constructed_distribution_shift_improves_without_market_claim():
+    """Synthetic always-away scenario validates efficacy of feedback plumbing only."""
+    from datetime import date,timedelta
+    x=LossLearner()
+    adaptive_loss=0.0
+    frozen_loss=0.0
+    for i in range(100):
+        day=(date(2025,1,1)+timedelta(days=i)).isoformat()
+        start=(0.60,0.20,0.20)
+        adjusted=x.predict(start)
+        ident=f"pred:synthetic-{i:03d}"
+        x.register(forecast(ident,adjusted,x.version,day+"T08:00:00Z",selected=0))
+        adaptive_loss+=sum((adjusted[j]-(1.0 if j==2 else 0.0))**2 for j in range(3))
+        frozen_loss+=sum((start[j]-(1.0 if j==2 else 0.0))**2 for j in range(3))
+        out=x.settle(receipt(ident,2,day+"T23:59:59Z",sid=f"settle:synthetic-{i:03d}"))
+        assert out["virtual_pnl"]==-1.0
+    assert x.version==100
+    assert adaptive_loss/100 < frozen_loss/100 - 0.03
+    assert x.snapshot()["no_live_execution"]
