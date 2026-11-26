@@ -181,3 +181,33 @@ Test additions:
 Revised contribution: new public-source market evidence captured and
 independently byte-verified (provisional origin), with unchanged
 model-promotion and real-account funding gates.
+
+## Cross-artifact evidence reconciliation follow-up
+
+The isolated `work/wolf-forward-evidence-reconciliation-20261126`
+branch extends the committed market intake without changing the separate
+uncommitted forward-score worktree or its artifacts. The read-only
+`wolf_lab.forward_evidence_reconcile` command byte-pins both frozen
+forecast universes, checks the source and paired report seals, validates
+fixture membership, coverage, capture chronology and per-fixture paired
+Brier arithmetic, and replays the market evidence. A changed fixture date
+is counted separately, not silently joined to an original-date result.
+This is a local evidence coverage audit, not a substitute for verification
+of raw settlement provenance or a market-relative performance test.
+
+Journal replay now also validates every historical snapshot against the
+latest replayed prefix and checks that each HTTP Date attestation links
+to a valid journal prefix containing its capture. A valid latest snapshot
+can no longer conceal altered earlier journal versions.
+
+Regression: 475/475 passed, including seven new checks and a synthetic
+post-match arithmetic/rescheduling case. Actual private artifact:
+`.workspace/proof-history/forward-evidence-reconciliation-20261126/reconciliation.json`;
+file SHA-256 `c60df9411bf3d2ff37d501c88d165827638fd4fda82100e4b5ac6da88b5b2857`.
+The verified local coverage is 270 frozen fixtures, 0 paired outcomes,
+270 pending, 1 provisional quote fixture (rescheduled), 269 without quote
+evidence, and 1 HTTP Date attestation. No model parameters, forecasts,
+application state, account data or installed packages were changed.
+Independent source authentication, actual-provider reconciliation and
+predictive superiority remain unproven. Contribution: correction,
+verification and update existing documentation.

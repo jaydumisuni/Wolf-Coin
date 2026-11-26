@@ -47,7 +47,20 @@ def _state(source:dict,directory:Path)->QuoteBook:
     if not entries:
         return QuoteBook(source)
     latest=json.loads(entries[-1][1].read_bytes())
-    return QuoteBook.replay(source,latest,directory)
+    ledger=QuoteBook.replay(source,latest,directory)
+    if len(ledger.records)!=len(entries):
+        raise QuoteRefused("journal version and record count differ")
+    # Each immutable version must be the exact prefix of the replayed ledger.
+    for number,path in entries:
+        prior=json.loads(path.read_bytes())
+        expected=dict(latest)
+        expected["records"]=ledger.records[:number]
+        expected["last_sha256"]=ledger.records[number-1]["sha256"]
+        expected.pop("seal_sha256")
+        expected["seal_sha256"]=digest(expected)
+        if prior!=expected:
+            raise QuoteRefused("immutable journal history differs from replayed prefix")
+    return ledger
 
 
 def ingest(source_path:Path,directory:Path,quote_path:Path,raw_path:Path,
@@ -151,6 +164,10 @@ def _transport_attestations(directory:Path,ledger:QuoteBook)->int:
         record=ledger.by_id.get(capture_id)
         if record is None or digest(record["quote"])!=copy.get("quote_sha256"):
             raise QuoteRefused("transport attestation unbound quote")
+        sequence=next(e["sequence"] for e in ledger.records if e["record"]["quote"]["capture_id"]==capture_id)
+        valid_tails={e["sha256"] for e in ledger.records[sequence-1:]}
+        if copy.get("journal_tail_sha256") not in valid_tails:
+            raise QuoteRefused("transport attestation journal tail is not a valid later prefix")
         if record["quote"]["observed_utc"]!=copy.get("source_observed_utc"):
             raise QuoteRefused("transport time contradicts quote")
         headers=(directory/(copy["http_headers_sha256"]+".headers")).read_bytes()
