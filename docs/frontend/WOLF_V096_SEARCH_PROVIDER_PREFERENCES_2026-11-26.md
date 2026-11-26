@@ -91,3 +91,61 @@ with Bing remaining available as the user-selectable alternative.
 Update existing documentation. This extends the browser search provider
 selection without changing the backend decision system, user profiles or
 the previously proven native window controls.
+
+## Native process restart and cross-platform search acceptance
+
+- Installed Linux wolf-coin 0.9.6~dev1, isolated user-data: Google default
+  observed, Bing manually selected, localStorage record verified as Bing,
+  normal Wolf window Close completed, then a fresh native process using
+  that same isolated profile reopened with Bing selected. The test restored
+  Google afterward. An abrupt SIGTERM immediately after saving had not
+  preserved the last update; that is not a qualified power-loss durability
+  path and is separate from normal shutdown persistence.
+- Android emulator com.thetechguy.wolfcoin.qa v0.9.6-dev, versionCode 18:
+  WOLF_SEARCH_ENGINE_PREFERENCES_PASS against the real appassets WebView;
+  Google default, Bing selection, reload persistence, direct URL.
+- Windows Builder-generated isolated v0.9.6-dev application on ATHENA:
+  WOLF_SEARCH_ENGINE_PREFERENCES_PASS; no user account profile changed.
+
+## Completed ATHENA graphical-installer acceptance
+
+2026-11-26: the installed THETECHGUY Software Builder's full
+windows-installer target was rerun against v0.9.6-dev staged source and
+owner-held D-XQT assets. Its native Electron/NSIS packaging, runtime launch
+test, custom graphical shell, installer package validation and graphical
+dry-run completed. Builder recorded 12/12 stages complete, ok: true,
+dry_run_passed: true, validation_exit_code: 0.
+
+Private owner-only Windows release artifacts are archived on ATHENA in:
+
+%LOCALAPPDATA%\THETECHGUY\Wolf-Coin\releases\v0.9.6-dev\
+
+- Wolf-Coin Setup 0.9.6-dev.exe — THETECHGUY custom graphical installer,
+  208,044,704 bytes,
+  SHA256 37bede84b5fa3c098b82647c52088697cd9f4d3cb4730e65e822f84e06dbf312.
+- Wolf-Coin NSIS Setup 0.9.6-dev.exe — standard NSIS installer,
+  105,462,287 bytes,
+  SHA256 61ff6b8c2c175f3171f3a96bb7f43c07a5efad9718362ae59f30c0d3fbdb7561.
+- Also present: SHA256SUMS.txt, windows-gui-installer-dryrun.json,
+  and target-execution.json.
+
+Builder's previous D: space preflight was resolved through a reversible
+maintenance operation. D: uses exFAT (not NTFS), so no filesystem junctions
+were used. Nine old Builder installer-shell cache snapshots were temporarily
+copied to C: with SHA256 verification and then restored to their original
+D: paths with every file hash rechecked after build completion. The new
+rebuildable v0.9.6 Windows single-file work cache and generated lean shell
+cache were themselves preserved under
+%LOCALAPPDATA%\TTG-Builder-Spill\ with recovery records, allowing D:
+space to be restored near its original level (~328 MB free). The v0.9.6
+standard installer was relocated from Builder's D: artifact folder into
+the private C: release folder with checksum verification; the Builder
+folder retains its proof reports and STANDARD_NSIS_LOCATION.txt pointer.
+The older v0.9.5 installer and prior project artifacts remain untouched.
+
+The graphical installer build and dry-run are now qualified; no production
+code-signing certificate was configured. Its real end-user installation
+and rollback on an independent external PC, original Android signing-key
+continuity, physical Android qualification and third-party provider
+financial execution/readback remain separate evidence gates. They are not
+misrepresented as completed by controlled lab testing.
