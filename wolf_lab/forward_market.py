@@ -89,14 +89,15 @@ class MarketQuote:
     evidence_kind: str="provider_snapshot_json"
     schedule_source_url: str|None=None
     schedule_evidence_sha256: str|None=None
+    transport_evidence_sha256: str|None=None
 
     def __post_init__(self):
         _identity(self.capture_id)
         _identity(self.fixture_identity)
         if not isinstance(self.provider,str) or not re.fullmatch(r"[A-Za-z0-9 .\-_]{3,100}",self.provider):
             raise QuoteRefused("provider identity invalid")
-        if self.evidence_kind!="provider_snapshot_json":
-            raise QuoteRefused("only structured provider evidence supported")
+        if self.evidence_kind not in ("provider_snapshot_json","public_1x2_html"):
+            raise QuoteRefused("unrecognized evidence structure")
         _url(self.source_url)
         if not isinstance(self.quoted_fixture_day,str):
             raise QuoteRefused("fixture day required")
@@ -119,6 +120,8 @@ class MarketQuote:
             _url(self.schedule_source_url)
         if self.schedule_evidence_sha256 is not None and not re.fullmatch("[0-9a-f]{64}",self.schedule_evidence_sha256):
             raise QuoteRefused("invalid schedule evidence SHA-256")
+        if self.transport_evidence_sha256 is not None and not re.fullmatch("[0-9a-f]{64}",self.transport_evidence_sha256):
+            raise QuoteRefused("invalid transport header SHA-256")
 
 
 def frozen(path:Path)->dict:
@@ -143,11 +146,90 @@ def frozen(path:Path)->dict:
     return x
 
 
+def _quote_dict(item:MarketQuote):
+    data=json.loads(canonical(asdict(item)))
+    # Preserve original pre-transport journals without altering their digest.
+    if data.get("transport_evidence_sha256") is None:
+        data.pop("transport_evidence_sha256",None)
+    return data
+
+
+def _transport_proof(raw:bytes,item:MarketQuote):
+    from email.utils import parsedate_to_datetime
+    if item.transport_evidence_sha256 is None:
+        raise QuoteRefused("transport evidence required for this capture")
+    if not isinstance(raw,bytes) or sha256(raw).hexdigest()!=item.transport_evidence_sha256:
+        raise QuoteRefused("transport header SHA-256 mismatch")
+    try:
+        lines=raw.decode("utf-8").splitlines()
+        entries=[]
+        for index,line in enumerate(lines):
+            if line.startswith("HTTP/"):
+                entries.append((index,line.strip()))
+        if not entries or not entries[-1][1].endswith(" 200") and " 200 " not in entries[-1][1]:
+            raise QuoteRefused("no successful HTTP source readback")
+        headers=lines[entries[-1][0]+1:]
+        dates=[x[5:].strip() for x in headers if x.lower().startswith("date:")]
+        if len(dates)!=1:
+            raise QuoteRefused("HTTP source Date not unique")
+        timestamp=parsedate_to_datetime(dates[0]).astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        if timestamp!=item.observed_utc:
+            raise QuoteRefused("observed timestamp contradicts HTTP Date")
+    except QuoteRefused:
+        raise
+    except (ValueError,TypeError,UnicodeError) as e:
+        raise QuoteRefused("invalid HTTP transport evidence") from e
+    return True
+
+
+def _html_quoted_evidence(raw:bytes,item:MarketQuote):
+    """Parse one pinned TipsterArea public source page, no DOM actions or wagers.
+
+    Matching of provider, teams, date and three odds is mandatory.
+    Arbitrary HTML, schedule-only pages and other markets are rejected.
+    """
+    from html import unescape
+    if not item.source_url.startswith("https://tipsterarea.com/match/"):
+        raise QuoteRefused("unrecognized public HTML quote publisher")
+    try:
+        html=raw.decode("utf-8")
+    except UnicodeError as e:
+        raise QuoteRefused("invalid public quote HTML encoding") from e
+    kickoff=re.search(r'<div\s+id="time"[^>]*content="([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2})"',html)
+    if not kickoff or (kickoff.group(1)+":00Z")!=item.kickoff_utc:
+        raise QuoteRefused("public page kickoff does not match quote")
+    teams=re.findall(r'<h2\s+itemprop="name">([^<]+)</h2>',html)
+    if len(teams)!=2:
+        raise QuoteRefused("public source team identity not unique")
+    names=tuple(re.sub(r"\s+"," ",unescape(x).strip().lower()) for x in teams)
+    parts=item.fixture_identity.split("|")
+    if len(parts)!=3 or names!=(parts[1],parts[2]):
+        raise QuoteRefused("public page teams do not match frozen fixture")
+    market=re.search(r'<th class="odds-type">Standard 1X2</th>(.*?)</table>',html,re.S)
+    if not market:
+        raise QuoteRefused("standard 1X2 quotes absent from page")
+    book=item.provider.removeprefix("TipsterArea ")
+    odds=re.findall(r'<tr>\s*<td class="bookmaker">\s*<img[^>]+alt="([^"]+)"[^>]*/>\s*</td>\s*<td class="odd">([0-9]+(?:\.[0-9]+)?)</td>\s*<td class="odd">([0-9]+(?:\.[0-9]+)?)</td>\s*<td class="odd">([0-9]+(?:\.[0-9]+)?)</td>',market.group(1),re.S)
+    selected=[tuple(float(x) for x in row[1:]) for row in odds if row[0]==book]
+    if len(selected)!=1 or selected[0]!=item.decimal_odds_1x2:
+        raise QuoteRefused("public bookmaker quote and captured prices disagree")
+    return True
+
+
+def _html_schedule_evidence(raw:bytes,item:MarketQuote):
+    if item.schedule_source_url!=item.source_url or item.schedule_evidence_sha256!=item.evidence_sha256:
+        raise QuoteRefused("public HTML reschedule must bind same source artifact")
+    return _html_quoted_evidence(raw,item)
+
+
 def _source_evidence(raw:bytes,item:MarketQuote):
     if not isinstance(raw,bytes) or not 0<len(raw)<=MAX_EVIDENCE_BYTES:
         raise QuoteRefused("source snapshot bytes missing or outside bounds")
     if sha256(raw).hexdigest()!=item.evidence_sha256:
         raise QuoteRefused("quote source evidence SHA-256 mismatch")
+    if item.evidence_kind=="public_1x2_html":
+        _html_quoted_evidence(raw,item)
+        return
     try:
         x=json.loads(raw)
     except (ValueError,UnicodeError) as e:
@@ -174,11 +256,12 @@ class QuoteBook:
         self.by_id={}
         self.tail="0"*64
 
-    def record(self,quote:MarketQuote,raw:bytes,*,schedule_raw:bytes|None=None):
+    def record(self,quote:MarketQuote,raw:bytes,*,schedule_raw:bytes|None=None,
+               transport_raw:bytes|None=None):
         if not isinstance(quote,MarketQuote):
             raise QuoteRefused("typed quote required")
         if quote.capture_id in self.by_id:
-            if self.by_id[quote.capture_id]["quote"]==json.loads(canonical(asdict(quote))):
+            if self.by_id[quote.capture_id]["quote"]==_quote_dict(quote):
                 return self.by_id[quote.capture_id]
             raise QuoteRefused("conflicting repeated quote identity")
         if quote.fixture_identity not in self.ids:
@@ -187,23 +270,30 @@ class QuoteBook:
         if quote.observed_utc<="2026-11-26T00:00:00Z":
             raise QuoteRefused("source quote predates forecast cutoff")
         _source_evidence(raw,quote)
+        if quote.transport_evidence_sha256 is not None:
+            _transport_proof(transport_raw,quote)
+        elif transport_raw is not None:
+            raise QuoteRefused("unbound HTTP transport evidence refused")
         rescheduled=(old_day!=quote.quoted_fixture_day)
         if rescheduled:
             if quote.schedule_evidence_sha256 is None or quote.schedule_source_url is None or schedule_raw is None:
                 raise QuoteRefused("rescheduled fixture requires explicit independent schedule evidence")
             if sha256(schedule_raw).hexdigest()!=quote.schedule_evidence_sha256:
                 raise QuoteRefused("schedule evidence source SHA-256 mismatch")
-            try:
-                schedule=json.loads(schedule_raw)
-            except (ValueError,UnicodeError) as e:
-                raise QuoteRefused("invalid schedule source") from e
-            if not isinstance(schedule,dict) or schedule.get("type")!="wolf.public-schedule-evidence.v1" or schedule.get("source_url")!=quote.schedule_source_url or schedule.get("fixture_identity")!=quote.fixture_identity or schedule.get("current_kickoff_utc")!=quote.kickoff_utc:
-                raise QuoteRefused("schedule evidence contradicts revised fixture")
+            if quote.evidence_kind=="public_1x2_html":
+                _html_schedule_evidence(schedule_raw,quote)
+            else:
+                try:
+                    schedule=json.loads(schedule_raw)
+                except (ValueError,UnicodeError) as e:
+                    raise QuoteRefused("invalid schedule source") from e
+                if not isinstance(schedule,dict) or schedule.get("type")!="wolf.public-schedule-evidence.v1" or schedule.get("source_url")!=quote.schedule_source_url or schedule.get("fixture_identity")!=quote.fixture_identity or schedule.get("current_kickoff_utc")!=quote.kickoff_utc:
+                    raise QuoteRefused("schedule evidence contradicts revised fixture")
         elif any(v is not None for v in (schedule_raw,quote.schedule_source_url,quote.schedule_evidence_sha256)):
             raise QuoteRefused("extraneous schedule evidence")
         probability=[1/x for x in quote.decimal_odds_1x2]
         margin=sum(probability)-1
-        record={"quote":json.loads(canonical(asdict(quote))),"frozen_fixture_day":old_day,
+        record={"quote":_quote_dict(quote),"frozen_fixture_day":old_day,
                 "schedule_changed":rescheduled,
                 "market_de_vig_1x2":[round(v/sum(probability),12) for v in probability],
                 "market_overround":round(margin,12),
@@ -211,6 +301,8 @@ class QuoteBook:
                 "independent_provider_authentication":False,
                 "price_executable_at_provider":False,
                 "financial_action_authorized":False}
+        if quote.transport_evidence_sha256 is not None:
+            record["transport_header_date_bound"] = True
         if margin < -0.10 or margin > 0.85:
             raise QuoteRefused("implausible three-way market overround")
         envelope={"sequence":len(self.records)+1,"previous_sha256":self.tail,
@@ -247,12 +339,14 @@ class QuoteBook:
             if entry.pop("sha256",None)!=digest(entry):
                 raise QuoteRefused("quote event digest mismatch")
             typed=MarketQuote(**envelope["record"]["quote"])
-            raw=(evidence_dir/(typed.evidence_sha256+".json")).read_bytes()
+            ext=".html" if typed.evidence_kind=="public_1x2_html" else ".json"
+            raw=(evidence_dir/(typed.evidence_sha256+ext)).read_bytes()
             if envelope["record"]["schedule_changed"]:
-                schedule_raw=(evidence_dir/(typed.schedule_evidence_sha256+".json")).read_bytes()
+                schedule_raw=(evidence_dir/(typed.schedule_evidence_sha256+ext)).read_bytes()
             else:
                 schedule_raw=None
-            result=obj.record(typed,raw,schedule_raw=schedule_raw)
+            transport=(evidence_dir/(typed.transport_evidence_sha256+".headers")).read_bytes() if typed.transport_evidence_sha256 else None
+            result=obj.record(typed,raw,schedule_raw=schedule_raw,transport_raw=transport)
             if result!=envelope["record"]:
                 raise QuoteRefused("quote event semantic replay mismatch")
         if obj.snapshot()!=state:

@@ -91,10 +91,13 @@ has not yet been ingested. Relevant public source references:
 ## Qualification verdict
 
 - 11 targeted source-evidence tests + 3 CLI end-to-end tests: PASS.
-- Complete existing Wolf source test suite: **464/464 PASS**.
+- Complete existing Wolf source test suite: **468/468 PASS**.
+  This includes 4 new source-bound public HTML and HTTP transport-date tests.
 - Original future-forecast byte SHA and event identity preserved.
 - Public weekly-odds CSV retrieval: **FAILED (HTML response)**.
-- Genuine independent pre-kickoff market quote captures: **0**.
+- Source-bound public *aggregator* 1X2 market quote captures: **1**
+  (captured after source reconnaissance; separate source addendum below).
+  This is not a direct bookmaker-authenticated or executable price.
 - Actual future settled match results in the 270 frozen window: **0** as
   of this session's November 26, 2026 timestamp.
 - Market-relative future proper-score superiority: **NOT TESTABLE YET**,
@@ -115,3 +118,66 @@ historical windows can replace an untouched future holdout.
 This extends existing Wolf-Coin protocol/evidence. No source
 of truth was overwritten. **Contribution type: New + Verification +
 Update existing documentation.**
+
+
+## Verified follow-up: first real public quote, no financial action
+
+After the source's failed CSV download, an independent public web
+listing was retrieved successfully from TipsterArea on KRATOS at
+**2026-11-26 13:48:17 UTC**. Its original HTML, HTTPS response headers
+and observed source time are retained in the existing owner-private
+`.workspace/proof-history/forward-market-evidence-20261126/` folder;
+no raw third-party HTML was added to Git.
+
+Source: `https://tipsterarea.com/match/arsenal-manchester-city-premier-league-england-957595`
+
+- Source HTML SHA-256:
+  `3db1955f2afa9768a74297b729d078b00fc4a80989c7616eac8191081adcada4`
+- HTTP response headers SHA-256:
+  `30819d14723b2807fd9f14eac8ea7f392db13059e863263e8cbfa40d444745d8`
+- Original frozen fixture identity:
+  `2026-11-28|arsenal|manchester city`
+- Public listing's current scheduled kickoff:
+  `2026-11-29T16:30:00Z`. The old, frozen identity was preserved,
+  while the changed schedule was independently represented by the
+  source-bound page evidence. No forecast was rewritten.
+- Aggregator's published **betfair** Standard 1X2 row:
+  home 1.95; draw 3.70; away 3.60.
+- De-vigged market class probabilities:
+  home 0.483396842678; draw 0.254763200871;
+  away 0.261839956451.
+- Immutable original captured quote journal:
+  `verified/journal-000001.json`.
+- Journal SHA-256:
+  `60e430d900fe3eb29f979818935563833fabb7b04988e86a66a36a8c42eac8d2`.
+- Additive, separately immutable HTTP Date attestation:
+  `LOCAL_HTTP_DATE_PROOF_RECORDED` for the same capture ID; does not
+  rewrite the earlier journal. Verification rechecks exact HTTP header
+  bytes and their reported source date against the typed observation.
+- CLI replay returned:
+  `SEALED_MARKET_JOURNAL_VERIFIED`,
+  `quotes_recorded=1`,
+  `http_server_date_attestations_checked=1`.
+
+**Limit:** TipsterArea is an aggregator. The quote is labeled as an
+aggregator-published Betfair price, **not a direct authenticated Betfair
+API quote, proof of available execution, an independent cryptographic
+timestamp, a verified profit opportunity, or a decision to bet**.
+Hashing local HTML and transport headers proves recorded byte identity
+only. The next eligibility check must still compare actual
+provider-reconciled pre-match prices and independently settled results
+against the original frozen predictions.
+
+Test additions:
+- Extract Standard 1X2 and kickoff time directly from the pinned HTML,
+  refuse price/fixture/date contradictions.
+- Preserve 28->29 November rescheduling with extra source evidence.
+- Bind the HTTP Date header to the observed time as an append-only,
+  independently replayed attestation.
+- Refuse altered transport dates or tampered attestation JSON.
+- Preserve all 11 generic and 3 CLI replay tests.
+- **468/468** complete research-suite tests pass.
+
+Revised contribution: new public-source market evidence captured and
+independently byte-verified (provisional origin), with unchanged
+model-promotion and real-account funding gates.
