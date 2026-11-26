@@ -38,6 +38,19 @@ with Bing remaining available as the user-selectable alternative.
 - Search-provider test verifies application navigation semantics, not
   Google's or Bing's external availability, rankings, or CAPTCHA response.
 
+
+## Additional native browser acceptance
+
+- WOLF_SEARCH_AND_DIRECT_NAVIGATION_PASS in isolated Chromium: Google
+  search destination reached successfully; switching to Bing returned
+  accessible public results, and the local fixture opened as a direct
+  URL. Provider-side Google traffic-verification challenges remain
+  outside Wolf's control and are not bypassed.
+- WOLF_COMPACT_BROWSER_UI_E2E_PASS: browser viewport and utility sidebar
+  geometry unchanged; 47 currencies and manual selection remain intact.
+- Google account login is not required, and switching search provider
+  neither alters saved credentials nor signs in to third-party websites.
+
 ## Contribution classification
 
 Update existing documentation. This extends the browser search provider
