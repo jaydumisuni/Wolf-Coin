@@ -27,12 +27,12 @@
     });
     return nativeRequest('account.read',d);
   }
-  async function observeAccount(account){
+  async function observeAccount(account,captured=null){
     const d=validateAccount(account);
     // Register before capturing evidence: backend session lineage cannot
     // accept an observation timestamp older than account creation.
     await registered(account);
-    const snapshot=await window.wolfNative.snapshot({accountId:account.id});
+    const snapshot=captured||await window.wolfNative.snapshot({accountId:account.id});
     if(snapshot.accountId!==account.id)throw Error('Account/snapshot mismatch');
     const ref=sessionRef(account),ts=snapshot.observedAt;
     const state=snapshot.auth==='probable_authenticated'?'ACTIVE':
@@ -118,9 +118,23 @@
       const results=[];
       for(const a of accounts.slice(0,100)){
         try{
-          await window.wolfNative.showBrowser({accountId:a.id,url:a.url});
-          await new Promise(r=>setTimeout(r,170));
-          const d=await observeAccount(a);
+          await registered(a);
+          await window.wolfNative.showBrowser({accountId:a.id,url:a.url,preserveSameOrigin:true});
+          let captured=null;
+          // WebView navigation returns before document load. Match the account and origin
+          // before recording a fresh observation rather than trusting a fixed delay.
+          const origin=new URL(a.url).origin;
+          for(let attempt=0;attempt<40;attempt++){
+            try{
+              const s=await window.wolfNative.snapshot({accountId:a.id});
+              if(s.accountId===a.id&&new URL(s.url).origin===origin&&s.documentReady==='complete'){
+                captured=s;break;
+              }
+            }catch{}
+            await new Promise(r=>setTimeout(r,200));
+          }
+          if(!captured){results.push({id:a.id,status:'PENDING_NAVIGATION'});continue;}
+          const d=await observeAccount(a,captured);
           results.push({id:a.id,status:'OBSERVED',auth:d.account?.session_state,
             identity:d.identity,opportunities:d.opportunities,backend:d.account});
         }catch(e){results.push({id:a.id,status:'ERROR',message:String(e).slice(0,180)})}

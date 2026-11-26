@@ -527,10 +527,10 @@ function configureWolfAutoSync(){
   try{
    if(state.settings.autosync){
     const id=getActiveBrowser()?.accountId;
-    if(id&&getAccount(id)?.status!=='paused'&&!state.monitorPausedIds?.[id])await syncNativeAccount(id,{quiet:true});
+    if(id&&getAccount(id)&&!state.monitorPausedIds?.[id])await syncNativeAccount(id,{quiet:true});
    }
    if(state.settings.enableAutomation&&window.wolfBackend?.syncAll){
-    const accounts=state.accounts.filter(a=>a.url&&a.status!=='paused'&&!state.monitorPausedIds?.[a.id]);
+    const accounts=state.accounts.filter(a=>a.url&&!state.monitorPausedIds?.[a.id]);
     if(accounts.length){await window.wolfBackend.syncAll(accounts);await window.WolfNativeIntegration?.refresh?.();}
    }
    wolfAutoLastFailure='';
@@ -889,7 +889,7 @@ async function syncNativeAccount(accountId,{quiet=false}={}){
   if(window.WolfPortfolio)window.WolfPortfolio.ingest(a,d);
   if(d.auth==='login_required'){
    a.status='loggedout';a.sync='Login required · last-known values stale';
-  }else if(d.auth==='probable_authenticated'&&d.authEvidence?.logoutControlVisible){
+  }else if(d.auth==='probable_authenticated'&&(d.authEvidence?.logoutControlVisible||d.authEvidence?.accountPanelAuthenticated)){
    a.status='connected';a.sync='Observed '+new Date(d.observedAt).toLocaleTimeString();a.device='Wolf Browser';
    const candidates=d.candidates||{};
    // Keep currency boundaries: only import fields sharing one observed currency.
@@ -907,6 +907,7 @@ async function syncNativeAccount(accountId,{quiet=false}={}){
   if(key!==nativeLastObserved){logEvent('Website inspected',`${a.name} · ${a.sync}`);nativeLastObserved=key;}
   if(!quiet)toast(`${a.name}: ${a.sync}; only consistently labeled same-currency figures are imported.`);
   render();
+  return d;
  }catch(e){if(!quiet)toast('Website inspection: '+String(e),'warn');}
  finally{nativeSnapshotInFlight=false;}
 }

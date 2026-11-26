@@ -7,7 +7,52 @@
  // A public "Create a portfolio" link is NOT evidence of a logged-in account.
  const signin=[...document.querySelectorAll('a,button')].some(e=>e.getClientRects().length>0&&/^(?:sign\s*in|log\s*in|login)$/i.test((e.innerText||e.getAttribute('aria-label')||'').trim()));
  const accountHeader=/(?:\bmy account\b|account overview|my wallet|account balance|account details)/i.test(sections.slice(0,140).join(' '));
- const auth=loginForm&&!signout?'login_required':signout?'probable_authenticated':signin?'unverified':accountHeader?'probable_authenticated':'unverified';
+ // A compact authenticated account panel can show an unlabelled wallet amount.
+ // Require a bounded account section and several independent account controls;
+ // never treat arbitrary page prices or public market quotes as wallet money.
+ const accountPanelHeading=/^(?:my account|account overview|my wallet)$/i;
+ const panelHasControls=text=>/\bdeposit\b/i.test(text)&&/\bwithdraw(?:al)?\b/i.test(text)&&
+   /\b(?:statement|transaction history|account history)\b/i.test(text);
+ const panelControlLabels=parent=>[...(parent.querySelectorAll?.('a,button,[role=button]')||[])]
+   .filter(el=>el.getClientRects().length)
+   .map(el=>String(el.getAttribute('aria-label')||el.innerText||'').trim());
+ const labelsConfirm=labels=>labels.some(x=>/^deposit$/i.test(x))&&
+   labels.some(x=>/^withdraw(?:al)?$/i.test(x))&&
+   labels.some(x=>/^(?:statement|transaction history|account history)$/i.test(x));
+ const splitPanel=text=>redact(text).split(/\n+/).map(x=>x.trim()).filter(Boolean);
+ let accountPanel=[],structuredPanel=false;
+ // Prefer a bounded visible container, including a menu appended after a long page.
+ for(const heading of document.querySelectorAll('h1,h2,h3,h4,[role=heading]')){
+  if(!heading.getClientRects().length||!accountPanelHeading.test(String(heading.innerText||'').trim()))continue;
+  let parent=heading.parentElement;
+  for(let depth=0;parent&&depth<5;depth++,parent=parent.parentElement){
+   const lines=splitPanel(parent.innerText||'');
+   if(lines.length>45)continue;
+   const confirmed=labelsConfirm(panelControlLabels(parent));
+   if(!confirmed&&!panelHasControls(lines.join(' ')))continue;
+   const i=lines.findIndex(x=>accountPanelHeading.test(x));
+   if(i>=0){accountPanel=lines.slice(i+1,i+16);structuredPanel=confirmed;break;}
+  }
+  if(accountPanel.length)break;
+ }
+ if(!accountPanel.length){
+  const i=sections.findIndex(x=>accountPanelHeading.test(x));
+  if(i>=0)accountPanel=sections.slice(i+1,i+16);
+ }
+ const accountPanelAuthenticated=!loginForm&&!signin&&(structuredPanel||panelHasControls(accountPanel.join(' ')));
+ const auth=loginForm&&!signout?'login_required':signout||accountPanelAuthenticated?'probable_authenticated':signin?'unverified':accountHeader?'probable_authenticated':'unverified';
+ function accountPanelBalance(){
+  if(!accountPanelAuthenticated)return null;
+  // Use only a standalone currency amount before the transaction controls.
+  const cut=accountPanel.findIndex(x=>/^(?:deposit|withdraw(?:al)?|statement|transaction history|account history)\b/i.test(x));
+  if(cut<0&&!structuredPanel)return null;
+  const values=accountPanel.slice(0,cut<0?accountPanel.length:cut).map(x=>x.match(/^(ZMW|K|ZK|USD|EUR|GBP)\s*([0-9][0-9,]*(?:\.[0-9]{1,2})?)$/i)).filter(Boolean);
+  if(values.length!==1)return null;
+  const m=values[0],value=Number(m[2].replaceAll(',',''));
+  if(!Number.isFinite(value)||value<0||value>1e12)return null;
+  const code=m[1].toUpperCase(),currency=['K','ZK','ZMW'].includes(code)?'ZMW':code;
+  return {value,currency,source:'authenticated account panel',label:'balance',verification:'candidate_only',confidence:'heuristic'};
+ }
  function candidate(type){
   const regex=type==='balance'?/^(?:available\s+)?(?:account\s+)?balance\b|^wallet(?: balance)?\b/i:type==='pending'?/^pending(?: bets| amount| exposure| stakes)?\b|^open(?: positions| bets| exposure)\b/i:/^(?:net\s+)?profit\s*(?:\/|&|and)\s*loss\b|^net\s*p\s*\/?\s*l\b|^realized\s+p\s*\/?\s*l\b/i;
   const found=[];
@@ -18,7 +63,9 @@
    if(!m)continue;const n=Number(m[1].replaceAll(',',''));if(!Number.isFinite(n)||Math.abs(n)>1e12)continue;
    found.push({value:n,currency:/USD|\$/i.test(combined)?'USD':'ZMW',source:s.slice(0,100),label:type,verification:'candidate_only',confidence:'heuristic'});
   }
-  return found.length===1?found[0]:null;
+  if(found.length===1)return found[0];
+  if(found.length===0&&type==='balance')return accountPanelBalance();
+  return null;
  }
  function identityCandidate(){
    if(auth!=='probable_authenticated')return null;
@@ -136,8 +183,8 @@
  }
  const opportunities=opportunityCandidates();
  const marketQuotes=publicMarketQuotes();
- return {url:location.href,title:document.title,visibleText:all.slice(0,12000),elementCount:document.querySelectorAll('*').length,
-  auth,authEvidence:{loginFormVisible:loginForm,logoutControlVisible:signout,signInControlVisible:signin,accountHeaderVisible:accountHeader},
+ return {url:location.href,title:document.title,documentReady:document.readyState,visibleText:all.slice(0,12000),elementCount:document.querySelectorAll('*').length,
+  auth,authEvidence:{loginFormVisible:loginForm,logoutControlVisible:signout,signInControlVisible:signin,accountHeaderVisible:accountHeader,accountPanelAuthenticated},
   candidates:{balance:candidate('balance'),pending:candidate('pending'),pnl:candidate('pnl')},identity:identityCandidate(),opportunities,marketQuotes,platformDiscovery:platformDiscovery(opportunities,marketQuotes),observedAt:new Date().toISOString(),
   provenance:'browser visible DOM; heuristic candidates not independently verified'};
 })()

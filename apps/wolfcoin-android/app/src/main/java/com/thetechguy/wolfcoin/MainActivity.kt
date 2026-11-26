@@ -385,7 +385,15 @@ class MainActivity : Activity() {
                 activeId=account
                 if (browser.parent != root) root.addView(browser)
                 attachBounds(browser)
-                if (requested[account] != address || browser.url == null) {
+                // Account inspection must not discard a loaded same-origin wallet or statement.
+                val preserve = args.optBoolean("preserveSameOrigin",false) && try {
+                    val existing=URI(browser.url ?: "")
+                    val target=URI(address)
+                    fun portOf(uri:URI)=if(uri.port>=0)uri.port else if(uri.scheme.equals("https",true))443 else 80
+                    existing.scheme.equals(target.scheme,true) &&
+                        existing.host?.equals(target.host,true)==true && portOf(existing)==portOf(target)
+                } catch(_:Exception) {false}
+                if (!preserve && (requested[account] != address || browser.url == null)) {
                     requested[account]=address;browser.loadUrl(address)
                 }
                 respond(reply,id,JSONObject().put("ok",true).put("accountId",account).put("url",address)

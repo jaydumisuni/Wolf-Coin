@@ -30,6 +30,11 @@ const server=http.createServer((req,res)=>{
  if(req.url==='/ack'&&req.method==='POST'){
   req.resume();req.on('end',()=>{res.writeHead(200,{'content-type':'text/html; charset=utf-8'});res.end('<!doctype html><title>Controlled Acknowledgement</title><h1>Fixture submitted</h1>')});return;
  }
+ if(req.url==='/compact-wallet'){
+  if(!cookies.includes('wolf_fixture=ok')){res.writeHead(302,{location:'/login'});res.end();return;}
+  res.writeHead(200,{'content-type':'text/html; charset=utf-8'});
+  res.end('<!doctype html><title>Controlled Account Wallet</title><section><h2>My Account</h2><div>Sample Account</div><div>K 3.50</div><button>Deposit</button><button>Withdraw</button><button>Statement</button></section>');return;
+ }
  if(req.url==='/dashboard'){
   if(!cookies.includes('wolf_fixture=ok')){res.writeHead(302,{location:'/login'});res.end();return;}
   res.writeHead(200,{'content-type':'text/html; charset=utf-8'});

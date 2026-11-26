@@ -2,7 +2,7 @@
 const {contextBridge,ipcRenderer}=require('electron');
 const invoke=(channel,payload)=>ipcRenderer.invoke(channel,payload);
 const api={
- version:'0.9.6-dev',contract:'wolf.browser.v1',
+ version:'0.9.7-dev',contract:'wolf.browser.v1',
  status:()=>invoke('wolf:status'),
  startupStatus:()=>invoke('wolf:startup-status'),
  startupSet:enabled=>invoke('wolf:startup-set',{enabled}),

@@ -190,7 +190,14 @@ async function synchronizeAccounts(accountList){
   try{
    const v=getView(id),url=safeUrl(a.url);
    const existing=v.webContents.getURL();
-   if(existing!==url&&v.webContents.isLoadingMainFrame()===false)await v.webContents.loadURL(url);
+   let sameOrigin=false;
+   try{sameOrigin=new URL(existing).origin===new URL(url).origin}catch{}
+   if(v.webContents.isLoadingMainFrame()){results.push({id,status:'PENDING_NAVIGATION'});continue;}
+   if(!sameOrigin){
+    if(v===activeView&&existing&&existing!=='about:blank'){results.push({id,status:'ACCOUNT_PAGE_NOT_ACTIVE'});continue;}
+    await v.webContents.loadURL(url);
+   }
+   await backend.ensureAccount(a);
    website=await backgroundSnapshot(id);
    const result=await backend.observe(a,website);
    results.push({id,status:'OBSERVED',auth:website.auth,identity:website.identity||null,
@@ -204,7 +211,7 @@ function setupBackendIPC(){
  on('wolf:backend-status',()=>({available:!!appAdapter,schema:'wolf.app.bridge.v2',error:backendInitError}));
  on('wolf:backend-request',p=>requireAdapter().request(p.operation,p.payload||{}));
  on('wolf:backend-register',p=>requireAdapter().ensureAccount(p));
- on('wolf:backend-observe',p=>snapshot(idOf(p.id)).then(d=>requireAdapter().observe(p,d)));
+ on('wolf:backend-observe',async p=>{const backend=requireAdapter();await backend.ensureAccount(p);return backend.observe(p,await snapshot(idOf(p.id)));});
  on('wolf:backend-session',p=>requireAdapter().session(p.account,p.state));
  on('wolf:backend-remove',p=>requireAdapter().remove(p));
  on('wolf:backend-snapshot',()=>requireAdapter().snapshot());

@@ -20,8 +20,8 @@ function updateAccount(x){
  a.pending=values.pending_bets!==undefined?Number(values.pending_bets):null;
  a.pnl=values.realized_pnl!==undefined?Number(values.realized_pnl):null;
  a.known=a.balance!==null&&Number.isFinite(a.balance);
- a.status=state.monitorPausedIds?.[a.id]?'paused':x.session_state==='PAUSED'?'paused':x.session_state==='LOGGED_OUT'?((Number(x.observation_count)>0||a.status==='loggedout'||Date.parse(x.session_changed_at)>Date.parse(x.registered_at))?'loggedout':'unverified'):x.session_state==='ACTIVE'&&x.freshness==='CURRENT_UNVERIFIED'?'connected':'unverified';
- a.sync=x.freshness;
+ a.status=state.monitorPausedIds?.[a.id]?'paused':x.session_state==='PAUSED'?'unverified':x.session_state==='LOGGED_OUT'?((Number(x.observation_count)>0||a.status==='loggedout'||Date.parse(x.session_changed_at)>Date.parse(x.registered_at))?'loggedout':'unverified'):x.session_state==='ACTIVE'&&x.freshness==='CURRENT_UNVERIFIED'?'connected':'unverified';
+ a.sync=x.session_state==='PAUSED'&&!state.monitorPausedIds?.[a.id]?'Revalidation required':x.freshness;
  a.lastObserved=x.latest_financial?.observed_at||null;
 }
 async function refresh(){
@@ -153,7 +153,7 @@ function nativeSessionRows(){
  return accounts.map(a=>{
   const active=a.session_state==='ACTIVE';
   const statusText=a.session_state==='LOGGED_OUT'?'Logged out':
-    a.session_state==='PAUSED'?'Paused':active?'Active':'Unverified';
+    a.session_state==='PAUSED'?(state.monitorPausedIds?.[a.account_id]?'Paused':'Revalidation required'):active?'Active':'Unverified';
   const statusClass=active?'status':a.session_state==='LOGGED_OUT'?'status out':'status warn';
   return '<div class="session-row backend-session-row">'+
     '<span class="backend-session-dot '+(active?'is-active':'')+'"></span>'+
@@ -255,7 +255,7 @@ const oldSyncAll=syncAll;
 syncAll=async function(){
  if(!connected)return oldSyncAll();
  try{
-  const sync=await back.syncAll(state.accounts.filter(a=>a.url&&a.status!=='paused'&&!state.monitorPausedIds?.[a.id]&&['Betting','Trading'].includes(a.type)));
+  const sync=await back.syncAll(state.accounts.filter(a=>a.url&&!state.monitorPausedIds?.[a.id]&&['Betting','Trading'].includes(a.type)));
   for(const item of sync.results){
    const a=state.accounts.find(x=>x.id===item.id);
    if(!a)continue;
@@ -273,8 +273,8 @@ syncAll=async function(){
 };
 const oldSync=syncNativeAccount;
 syncNativeAccount=async function(id,opts={}){
- await oldSync(id,opts);
- if(!connected)return;
+ const captured=await oldSync(id,opts);
+ if(!connected||!captured||state.monitorPausedIds?.[id])return;
  const a=getAccount(id);
  if(!a||a.type==='Other')return;
  try{

@@ -5,21 +5,22 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'..','wolf_snapshot.js'),'utf8');
-function element({text='',label='',dataset={},href=''}={}){
+function element({text='',label='',dataset={},href='',parent=null}={}){
  return {
   innerText:text,
   textContent:text,
-  dataset,
+  dataset,parentElement:parent,
   getClientRects:()=>[{}],
   getAttribute:n=>n==='aria-label'?label:n==='href'?href:null,
   closest:()=>null
  };
 }
-function inspect({url,title,body,buttons=[],inputs=[],headings=[],opportunities=[]}){
+function inspect({url,title,body,buttons=[],inputs=[],headings=[],opportunities=[],accountHeadings=[]}){
  const nodes={
   'input[type=password]':inputs,
   'a,button':buttons,
   'h1,h2,h3':headings.map(text=>element({text})),
+  'h1,h2,h3,h4,[role=heading]':accountHeadings,
   'a[href]':buttons.filter(x=>x.href),
   'input:not([type=hidden]),textarea,select':inputs,
   'button,[role=button]':buttons,
@@ -79,3 +80,35 @@ console.log('WOLF_PUBLIC_MARKET_DOM_EVIDENCE_REGRESSION_PASS',JSON.stringify({
  bettingCategory:betting.platformDiscovery.category,walletAuth:wallet.auth,
  balance:wallet.candidates.balance.value
 }));
+
+const compact=inspect({
+ url:'https://wallet.example.invalid/account',title:'Account',
+ body:'Sports\nMy Account\nSample Account\nK 3.50\nDeposit\nWithdraw\nMy activity\nStatement\nHelp',
+ buttons:[element({text:'Deposit'}),element({text:'Withdraw'}),element({text:'Statement'})]
+});
+assert.equal(compact.auth,'probable_authenticated');
+assert.equal(compact.authEvidence.accountPanelAuthenticated,true);
+assert.equal(compact.candidates.balance.value,3.5);
+assert.equal(compact.candidates.balance.currency,'ZMW');
+const ambiguous=inspect({url:'https://wallet.example.invalid/account',title:'Account',
+ body:'My Account\nK3.50\nK7.00\nDeposit\nWithdraw\nStatement'});
+assert.equal(ambiguous.candidates.balance,null);
+const unauth=inspect({url:'https://wallet.example.invalid/',title:'Public',
+ body:'My Account\nK3.50\nDeposit\nWithdraw\nStatement',
+ buttons:[element({text:'Sign in'})]});
+assert.equal(unauth.auth,'unverified');
+assert.equal(unauth.candidates.balance,null);
+const arbitrary=inspect({url:'https://wallet.example.invalid/',title:'Public',
+ body:'K3.50\nDeposit\nWithdraw\nStatement'});
+assert.equal(arbitrary.candidates.balance,null);
+const android=fs.readFileSync(path.join(__dirname,'..','..','wolfcoin-android','app','src','main','assets','wolf_snapshot.js'),'utf8');
+assert.equal(android,source,'Android and desktop observer source diverged');
+console.log('WOLF_COMPACT_WALLET_AND_ANDROID_PARITY_PASS');
+
+const latePanel=element({text:'My Account\nSample Account\nK3.50\nDeposit\nWithdraw\nStatement'});
+const late=inspect({url:'https://wallet.example.invalid/',title:'Account',
+ body:'Other page text\n'.repeat(5000),
+ accountHeadings:[element({text:'My Account',parent:latePanel})]});
+assert.equal(late.authEvidence.accountPanelAuthenticated,true);
+assert.equal(late.candidates.balance.value,3.5);
+console.log('WOLF_LATE_VISIBLE_ACCOUNT_PANEL_PASS');
