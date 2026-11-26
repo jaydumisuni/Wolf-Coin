@@ -934,3 +934,18 @@ The independent reviewer's result is `REJECT_KEEP_FROZEN`. Do not
 promote the adaptive challenger. A fresh future holdout remains necessary
 for a genuinely new strategy-generation attempt. No money moved and
 the running Wolf-Coin app is unchanged.
+
+## 26. Forward pre-match market evidence intake (2026-11-26)
+
+See `docs/research/FORWARD_MARKET_INTAKE_2026-11-26.md`.
+A separate no-account source-only adapter now records typed pre-match
+market quote evidence with provenance digests and fixture identity
+against the existing sealed 270-forecast CC0 future holdout. It
+preserves original fixture dates when independent schedule corrections
+are required, refuses unstructured HTML passed as CSV, records only
+provisional (not provider-authenticated) odds, and prevents financial
+authority being inferred from model/quote evidence. All source tests
+pass. This complements, rather than duplicates, the independently
+in-progress Poisson prospective comparator and paired scoring branch.
+The actual quote archive and source capture remain private; no
+market edge or future outcome was available at capture time.
