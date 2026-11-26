@@ -51,6 +51,41 @@ with Bing remaining available as the user-selectable alternative.
 - Google account login is not required, and switching search provider
   neither alters saved credentials nor signs in to third-party websites.
 
+## Installed package and Builder readback
+
+- ATHENA installed Wolf-Coin v0.9.6-dev was updated from the separately
+  tested Windows QA application, preserving the existing browser/profile
+  directory. Old v0.9.5 resource files are retained with SHA256 manifest
+  under `resources/app-backup-v095-before-v096-20261126`. The installed
+  GUI was reopened successfully.
+- WOLF_SEARCH_ENGINE_PREFERENCES_PASS on ATHENA Windows controlled
+  Chromium with the v0.9.6 desktop HTML and owner-held D-XQT.
+  Compiled app HTML SHA256:
+  `e2a4f82179a18774a2e0e79620204dccfa301f6eac84ce5706ec62c452443d5e`.
+- THETECHGUY Software Builder, existing `windows-exe` target, completed
+  successfully on ATHENA. Electron NSIS setup and unpacked app built,
+  actual program launched in Builder runtime smoke test, and ASAR HTML
+  was SHA256-equivalent to the tested v0.9.6 source.
+  Private NSIS archived at:
+  `D:\projects\THETECHGUY Software Builder\builder_artifacts\Wolf-Coin\v0.9.6-dev\Wolf-Coin Setup 0.9.6-dev.exe`
+  SHA256 `61ff6b8c2c175f3171f3a96bb7f43c07a5efad9718362ae59f30c0d3fbdb7561`.
+  It is unsigned; this does not claim a release-signing certificate.
+- Android v0.9.6-dev QA/versionCode 18 installed and package hash read
+  back exactly on an Android 15 API35 emulator. The same
+  `WOLF_SEARCH_ENGINE_PREFERENCES_PASS` verified Google, Bing,
+  persistence, both address bars and direct URLs in its live WebView.
+  APK SHA256:
+  `3c85b7a0866e8434f003df8526ec386e42e162332a0561cb11a9fa3d245692f0`.
+  The original Android production package and signing identity remain
+  unchanged and need separate qualification for production rollout.
+- Linux `wolf-coin 0.9.6~dev1` installed on KRATOS; installed app HTML
+  matches its native Debian package by content hash.
+- Private Debian and Android QA artifacts are frozen under
+  `/home/kratos/projects/Wolf-Coin/.workspace/releases/wolf-v0.9.6-dev1`
+  with SHA256SUMS. Temporary QA profiles, local extracted private
+  runtime and duplicated packaging output were cleaned without touching
+  installed profiles or the Builder executable.
+
 ## Contribution classification
 
 Update existing documentation. This extends the browser search provider
