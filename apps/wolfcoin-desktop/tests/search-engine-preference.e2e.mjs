@@ -14,6 +14,12 @@ const evalJS=async expression=>{
 };
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 try{
+ let ready=false;
+ for(let i=0;i<90;i++){
+  try{if(await evalJS("typeof state!=='undefined'&&!!document.querySelector('#app')")){ready=true;break}}catch{}
+  await delay(100);
+ }
+ assert(ready,'Wolf search UI failed to initialize');
  const starting=await evalJS("state.settings.searchEngine");
  assert.equal(starting,'google','Fresh profiles must default to Google');
  await evalJS("state.tab='overview';render();(()=>{const form=document.querySelector('#top-address-form');form.querySelector('[name=address]').value='Lusaka weather forecast';form.requestSubmit();return true})()");
