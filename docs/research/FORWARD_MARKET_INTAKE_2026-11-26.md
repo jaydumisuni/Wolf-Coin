@@ -211,3 +211,31 @@ application state, account data or installed packages were changed.
 Independent source authentication, actual-provider reconciliation and
 predictive superiority remain unproven. Contribution: correction,
 verification and update existing documentation.
+
+## Controlled application settlement-to-learning qualification
+
+Recovered existing `wolf.app.bridge.v2` implementation: a native submission
+receipt enters `AWAITING_PLATFORM_RECONCILIATION`, and financial observations
+can transition a transaction from PENDING to SETTLED. Neither schema alone
+identifies the underlying sports outcome or binds it to a frozen prediction.
+The isolated `wolf_lab.controlled_settlement_replay` qualification adapter
+checks an explicit controlled outcome payload against the application audit,
+account-scoped decision, native receipt reference, settled transaction,
+observation evidence SHA-256, stake and chronology. It then updates a separate
+copy of the existing offline calibrator; the application DB is read-only.
+
+Five new tests use the actual application store/IPC request handler and a
+controlled fixture. Pending transactions never update the learner; a settled
+loss updates probabilities once; reload and duplicate replay yield identical
+state; modified outcome evidence, foreign account scope and corrupt audit
+are refused. Full source regression: **480/480 PASS** on KRATOS.
+
+This proves a controlled receipt/readback-to-calibrator handoff, not a native
+provider adapter, authenticated actual-account outcome ingestion, automatic
+neural retraining, order execution, live profitability or production deployment.
+The fixture explicitly identifies itself as synthetic; real provider records
+must supply the missing outcome/prediction/transaction binding and independent
+readback evidence. The existing installed application, product capabilities,
+private account data, frozen models and independent worktrees were not changed.
+No financial transactions were performed. Contribution: new qualification,
+verification and update existing documentation.
