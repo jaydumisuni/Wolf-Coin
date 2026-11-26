@@ -24,14 +24,14 @@ try{
  await evalJS("(()=>{const form=document.querySelector('#browser-address-form'),input=form.querySelector('input[name=address]');input.value='Lusaka weather forecast';form.requestSubmit();return true})()");
  const ui=JSON.parse(await evalJS("JSON.stringify({tab:state.tab,url:getActiveBrowser().url})"));
  assert.equal(ui.tab,'browser');
- assert.equal(ui.url,'https://www.bing.com/search?q=Lusaka%20weather%20forecast');
- await waitFor(async()=>{const t=(await targets()).find(x=>x.url?.includes('bing.com/search?q='));return t||null});
+ assert.equal(ui.url,'https://www.google.com/search?q=Lusaka%20weather%20forecast');
+ await waitFor(async()=>{const t=(await targets()).find(x=>x.url?.includes('google.com/search?q='));return t||null});
  await sleep(2500);
  const actual=await waitFor(async()=>{try{
  const d=await evalJS("window.wolfNative.snapshot({accountId:'default'}).then(x=>({url:x.url,text:(x.visibleText||'').slice(0,2000),title:x.title}))");
- return d.url.includes('bing.com/search?q=')&&d.text.length>100?d:null;
+ return d.url.includes('google.com/search?q=')&&d.text.length>100?d:null;
  }catch{return null}},70);
- assert(actual.url.includes('bing.com/search?q='));
+ assert(actual.url.includes('google.com/search?q='));
  assert(actual.text.length>100,'Search returned no visible results');
  assert(!/verifying you're not a bot|verification required|unusual traffic/i.test(actual.text),'Search was blocked by a provider challenge');
  assert(/Lusaka|weather|result/i.test(actual.text),'Search text did not reflect query');
@@ -39,5 +39,5 @@ try{
  await evalJS("(()=>{const form=document.querySelector('#browser-address-form');form.querySelector('input[name=address]').value="+JSON.stringify(directAddress)+";form.requestSubmit();return true})()");
  const direct=await waitFor(async()=>{const t=(await targets()).find(x=>x.url?.includes(new URL(directAddress).host+'/login'));return t||null});
  assert(direct.url.startsWith(directAddress));
- console.log('WOLF_SEARCH_AND_DIRECT_NAVIGATION_PASS',JSON.stringify({engine:'Bing',queryUrl:ui.url,returnedResults:true,title:actual.title,independentAccount:true,directUrl:direct.url}));
+ console.log('WOLF_SEARCH_AND_DIRECT_NAVIGATION_PASS',JSON.stringify({engine:'Google',queryUrl:ui.url,returnedResults:true,title:actual.title,independentAccount:true,directUrl:direct.url}));
 }finally{ws.close()}
