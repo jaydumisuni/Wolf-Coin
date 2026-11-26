@@ -119,7 +119,7 @@ call that a market edge without usable pre-match market quotes.
 
 ## Gate results before connecting a real account
 
-- **Historical loss-feedback mechanics:** PASS; Elo offline, signed/hash-linked
+- **Historical loss-feedback mechanics:** PASS; Elo offline, hash-linked (not cryptographically signed)
   journal integrity checked, retrospective simulated outcomes only.
 - **Prospective no-account forecast freeze:** CREATED, pending future events.
 - **Robust repeated predictive superiority vs market:** NOT PROVEN; new
