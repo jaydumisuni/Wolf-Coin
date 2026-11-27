@@ -23,22 +23,42 @@ a{color:#3dbaff;text-decoration:none} a:hover{text-decoration:underline}
 .brand:hover img{filter:brightness(1.13)}
 .brand:focus-visible,.wolf-chat-mobile:focus-visible{outline:2px solid #55adff;outline-offset:-3px}
 .wolf-chat-mobile{display:none}
-.wolf-chat-log{display:flex;flex-direction:column;gap:12px;min-height:180px;max-height:42dvh;overflow:auto;padding:4px 2px}
-.wolf-chat-message{max-width:92%;border:1px solid #294b66;border-radius:14px;padding:10px 12px;background:#122940;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
-.wolf-chat-message.user{align-self:flex-end;background:#165282;border-color:#378dcc}
-.wolf-chat-message strong{display:block;font-size:11px;color:#99c8f3;margin-bottom:4px}
-.wolf-chat-form{display:flex;align-items:end;gap:8px;margin-top:14px}
-.wolf-chat-form textarea{flex:1;min-width:0;min-height:48px;max-height:128px;resize:vertical;background:#091a2b;color:#edf6ff;border:1px solid #416584;border-radius:10px;padding:10px;font:inherit}
-.wolf-chat-caption{font-size:12px;color:#aac2d8;margin:0 0 12px}
+/* Wolf conversation shell: same compact glass interaction family as Lumi. */
+.wolf-chat-panel{position:fixed;right:19px;bottom:24px;z-index:31;width:min(390px,calc(100vw - 28px));height:min(540px,calc(100dvh - 70px));display:grid;grid-template-rows:auto minmax(0,1fr) auto;border:1px solid rgba(132,104,255,.34);border-radius:20px;overflow:hidden;background:linear-gradient(145deg,rgba(14,21,32,.92),rgba(7,11,18,.94));backdrop-filter:blur(26px) saturate(138%);box-shadow:0 28px 90px #0009,inset 0 1px 0 #ffffff13;color:#dbe8f6;font:12px/1.45 "Segoe UI",Arial,sans-serif}
+.wolf-chat-head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #ffffff12;background:linear-gradient(110deg,#57a5ff17,#7c6dff12)}
+.wolf-chat-avatar{width:30px;height:30px;border-radius:9px;object-fit:cover;object-position:left}
+.wolf-chat-title{flex:1;min-width:0}.wolf-chat-title strong{display:block;color:#f1f5ff;font-size:13px}.wolf-chat-title small{display:block;color:#a1acc0;font-size:10px;margin-top:2px}
+.wolf-chat-head button,.wolf-answer-action{border:1px solid transparent;background:transparent;color:#aeb9c9;border-radius:7px;cursor:pointer}
+.wolf-chat-head button{width:30px;height:30px;padding:5px;display:grid;place-items:center}
+.wolf-chat-head button:hover,.wolf-answer-action:hover{border-color:#7867bc;background:#7c6dff18;color:#fff}
+.wolf-chat-head svg{width:16px;height:16px}.wolf-chat-log{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto;padding:12px 10px;scrollbar-width:thin;scrollbar-color:#33425a transparent}
+.wolf-chat-message{max-width:88%;padding:9px 11px;border:1px solid #ffffff10;border-radius:13px;font-size:12px;line-height:1.48;white-space:pre-wrap;overflow-wrap:anywhere;align-self:flex-start;background:linear-gradient(145deg,#17223180,#101723a0)}
+.wolf-chat-message.user{align-self:flex-end;background:linear-gradient(145deg,#3952a6,#6244ad);border-color:#9081dc66;color:#fff}
+.wolf-answer-block{display:flex;flex-direction:column;align-items:flex-start;width:100%;min-width:0}
+.wolf-answer-tools{width:100%}.wolf-answer-actions{display:flex;align-items:center;gap:1px;flex-wrap:wrap;margin:3px 0 4px}
+.wolf-answer-action{display:inline-flex;align-items:center;gap:4px;padding:4px 5px;min-height:26px;font:600 10px/1.1 "Segoe UI",Arial,sans-serif;white-space:nowrap}
+.wolf-answer-action svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wolf-answer-action.active{border-color:#795be4;background:#7457d324;color:#d9caff}.wolf-answer-action[data-vote="helpful"].active{border-color:#399c69;color:#65df96}.wolf-answer-action[data-vote="not-helpful"].active{border-color:#c26565;color:#ff9b9b}
+.wolf-answer-popover{width:100%;padding:8px;border:1px solid #7161ca66;border-radius:11px;background:#0b0d1a;font-size:10px;margin:2px 0 7px}
+.wolf-answer-popover strong{font-size:10px;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:5px}
+.wolf-answer-source{padding:8px;border:1px solid #294b66;border-radius:8px;background:#101c2d;line-height:1.5}
+.wolf-answer-popover[hidden]{display:none}
+.wolf-chat-form{display:flex;align-items:center;gap:7px;padding:10px 9px;border-top:1px solid #ffffff12;background:#080d15a0}
+.wolf-chat-form textarea{flex:1;min-width:0;min-height:36px;max-height:92px;resize:none;background:#0c131da0;color:#edf6ff;border:1px solid #8797c533;border-radius:11px;padding:9px 10px;font:inherit;outline-offset:1px}
+.wolf-chat-form button{height:36px;border:0;border-radius:12px;background:linear-gradient(135deg,#57a5ff,#7c6dff);color:white;font:700 11px "Segoe UI",Arial,sans-serif;padding:0 12px;cursor:pointer}
+.wolf-chat-form button:disabled{opacity:.5}
+.wolf-chat-caption{font-size:10px;color:#94a2b7;margin:4px 2px}
+.wolf-chat-panel button:focus-visible{outline:2px solid #8c9eff;outline-offset:1px}
 @media(max-width:600px){
  .wolf-chat-mobile{display:flex;align-items:center;justify-content:center;gap:7px;position:fixed;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));height:48px;border-radius:999px;z-index:18;padding:5px 13px 5px 7px;border:1px solid #48a6ef;background:linear-gradient(145deg,#122d48,#081728);color:#eaf7ff;box-shadow:0 6px 22px #0009,0 0 14px #139aff40;cursor:pointer;font-size:12px;font-weight:700}
  .wolf-chat-mobile img{height:34px;width:34px;object-fit:cover;object-position:left;border-radius:50%}
  .wolf-chat-mobile .wolf-chat-label{white-space:nowrap}
  .browser-focus .wolf-chat-mobile{position:relative;right:auto;bottom:auto;flex:0 0 40px;width:40px;height:36px;padding:2px;border-radius:50%;z-index:2}
  .browser-focus .wolf-chat-mobile .wolf-chat-label{display:none}
- .wolf-chat-log{max-height:38dvh}
+ .wolf-chat-panel{right:8px;bottom:calc(72px + env(safe-area-inset-bottom,0px));width:calc(100vw - 16px);height:min(560px,calc(100dvh - 96px));border-radius:18px}
+ .browser-focus .wolf-chat-panel{bottom:8px;height:min(560px,calc(100dvh - 64px))}
  .wolf-chat-form textarea{font-size:16px}
- .modal:has(#wolf-chat-form){width:100%;max-height:calc(100dvh - 24px);border-radius:20px}
+ .wolf-answer-action{gap:3px;padding:5px 4px;font-size:10px}
 }
 .side-nav{padding:8px 14px;position:relative;z-index:3;display:flex;flex-direction:column;gap:4px;max-height:calc(100dvh - 120px);overflow:auto;scrollbar-width:thin}
 .nav-button{height:45px;min-height:45px;width:100%;border:1px solid transparent;background:transparent;color:#f0f5fb;border-radius:11px;display:flex;align-items:center;gap:17px;text-align:left;padding:0 13px;font-weight:570;font-size:15px;transition:background .15s,border-color .15s}
@@ -566,7 +586,8 @@ function wolfChatWorkspace(){
 }
 function wolfChatIntent(message){
  const q=String(message).trim().toLowerCase();
- if(/^(?:hi|hello|hey|help|what can you do)[!?. ]*$/.test(q))return 'help';
+ if(/^(?:hi|hello|hey)[!?. ]*$/.test(q))return 'greeting';
+ if(/^(?:help|what can you do)[!?. ]*$/.test(q))return 'help';
  if(/^(?:what are your capabilities|show (?:your )?capabilities|capabilities|what can wolf do|cog status|iam status)[!?. ]*$/.test(q))return 'capabilities';
  if(/\b(?:history|transactions?|statement|settlement)\b/.test(q))return 'history';
  if(/\b(?:balance|funds|profit|loss|p\/l|wallet)\b/.test(q))return 'balance';
@@ -575,9 +596,10 @@ function wolfChatIntent(message){
 }
 async function wolfChatAnswer(message,backend){
  const intent=wolfChatIntent(message);
- if(intent==='help')return 'I can explain my current recorded account status, wallet observations and transaction history. This local conversation uses read-only native backend records. You can also ask me to open any of the nine application screens, show reports, notifications or bookmarks, and adjust supported workspace preferences. General COG conversation is not connected yet.';
- if(intent==='capabilities')return 'My implemented conversation routes: '+Object.keys(WOLF_CHAT_PAGES).filter(x=>!['dashboard','financial data'].includes(x)).join(', ')+'. Dialogs: '+Object.keys(WOLF_CHAT_DIALOGS).join(', ')+'. Workspace writes: sidebar layout, notifications, tab restoration, theme and search engine. Account and transaction records: '+(backend?.request?'native backend interface available':'native backend unavailable')+'. iAM/COG general cognition is not connected. Other application functions remain available through their own controls; no broader chat capability is claimed.';
- if(intent==='unknown')return 'I do not have a general cognition service connected yet. Ask about account status, recorded balances or transaction history.';
+ if(intent==='greeting')return 'Hi. What do you need?';
+ if(intent==='help')return 'I can explain my current recorded account status, wallet observations and transaction history. This local conversation uses read-only native backend records. You can also ask me to open any of the nine application screens, show reports, notifications or bookmarks, and adjust supported workspace preferences. My advanced cognition is not yet available.';
+ if(intent==='capabilities')return 'My implemented conversation routes: '+Object.keys(WOLF_CHAT_PAGES).filter(x=>!['dashboard','financial data'].includes(x)).join(', ')+'. Dialogs: '+Object.keys(WOLF_CHAT_DIALOGS).join(', ')+'. Workspace writes: sidebar layout, notifications, tab restoration, theme and search engine. Account and transaction records: '+(backend?.request?'native backend interface available':'native backend unavailable')+'. My advanced cognition is not yet available. Other application functions remain available through their own controls; no broader chat capability is claimed.';
+ if(intent==='unknown')return 'My advanced cognition is not yet available. Ask about account status, recorded balances or transaction history.';
  if(!backend?.request)return 'Native backend unavailable. I cannot verify account data in this preview.';
  const result=await backend.request('accounts.list',{});
  if(!Array.isArray(result?.accounts))throw Error('Invalid account response');
@@ -586,7 +608,7 @@ async function wolfChatAnswer(message,backend){
  const selected=accounts.slice(0,30);
  const label=a=>String(a.display_name||a.account_id);
  const cap=accounts.length>30?'\nShowing the first 30 accounts.':'';
- if(intent==='status')return selected.map(a=>label(a)+': '+String(a.session_state||'UNKNOWN')+' · '+String(a.freshness||'freshness unknown')+' · '+String(a.observation_count??0)+' observations').join('\n')+cap+'\nCOG conversation is not connected yet.';
+ if(intent==='status')return selected.map(a=>label(a)+': '+String(a.session_state||'UNKNOWN')+' · '+String(a.freshness||'freshness unknown')+' · '+String(a.observation_count??0)+' observations').join('\n')+cap+'\nMy advanced cognition is not yet available.';
  if(intent==='balance')return selected.map(a=>{const f=a.latest_financial?.fields||{};return label(a)+': '+(f.cash_balance==null?'no recorded balance':String(a.currency||'')+' '+String(f.cash_balance))+(f.realized_pnl==null?' · P/L not recorded':' · reported P/L '+String(f.realized_pnl))+' · '+String(a.freshness||'freshness unknown');}).join('\n')+cap+'\nThese are recorded platform observations, not independently verified settlements.';
  const rows=await Promise.all(selected.map(async a=>{
   const h=await backend.request('financial.history',{domain:a.domain,account_id:a.account_id,kind:'TRANSACTIONS',limit:20});
@@ -596,32 +618,73 @@ async function wolfChatAnswer(message,backend){
  }));
  return rows.join('\n\n')+cap+'\nRecorded transactions are not independently verified settlements.';
 }
-function renderWolfChat(){
- const log=document.querySelector('#wolf-chat-log');
- if(!log)return;
- log.replaceChildren();
- for(const m of wolfChatMessages){
-  const bubble=document.createElement('div');bubble.className='wolf-chat-message '+m.role;
-  const name=document.createElement('strong');name.textContent=m.role==='user'?'You':'Wolf';
-  const content=document.createElement('span');content.textContent=m.text;
-  bubble.append(name,content);log.append(bubble);
+  function wolfAnswerIcon(name){
+    const paths={
+      copy:'<rect x="9" y="9" width="11" height="11" rx="2"></rect><rect x="4" y="4" width="11" height="11" rx="2"></rect>',
+      helpful:'<path d="M7 10v10H4V10h3Z"></path><path d="M7 18h9.2a2 2 0 0 0 1.9-1.4l1.5-5A2 2 0 0 0 17.7 9H14l.7-3.3A2.2 2.2 0 0 0 12.6 3L7 10v8Z"></path>',
+      'not-helpful':'<path d="M7 14V4H4v10h3Z"></path><path d="M7 6h9.2a2 2 0 0 1 1.9 1.4l1.5 5a2 2 0 0 1-1.9 2.6H14l.7 3.3a2.2 2.2 0 0 1-2.1 2.7L7 14V6Z"></path>',
+      share:'<path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"></path>',
+      sources:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11a3 3 0 0 1 3 3v14a3 3 0 0 0-3-3H6.5A2.5 2.5 0 0 0 4 19.5v-14Z"></path><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H14v17a3 3 0 0 1 3-3h.5a2.5 2.5 0 0 1 2.5 2.5v-14Z"></path>',
+      more:'<circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle>'
+    };
+    return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]||''}</svg>`;
+  }
+
+function wolfChatSource(m){
+ if(m.source==='records')return ['Native Wolf records','Signed local backend readback; platform observations are not independently verified outcomes.'];
+ if(m.source==='workspace')return ['Local Wolf workspace','Existing application action handler and observed workspace state.'];
+ if(m.source==='error')return ['Local error state','The requested read or action could not be confirmed.'];
+ return ['Local Wolf state','No external source was required.'];
+}
+async function wolfCopy(text){
+ if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(text);return true;}catch{}}
+ const t=document.createElement('textarea');t.value=text;t.style.position='fixed';t.style.opacity='0';document.body.append(t);t.select();
+ try{return document.execCommand('copy');}catch{return false;}finally{t.remove();}
+}
+function wolfAnswerTools(m){
+ const wrap=document.createElement('div');wrap.className='wolf-answer-tools';
+ const row=document.createElement('div');row.className='wolf-answer-actions';
+ const pop=document.createElement('div');pop.className='wolf-answer-popover';pop.hidden=true;
+ const add=(label,ic,fn)=>{const b=document.createElement('button');b.type='button';b.className='wolf-answer-action';b.title=label;b.setAttribute('aria-label',label);b.innerHTML=wolfAnswerIcon(ic)+(ic==='more'?'':'<span>'+label+'</span>');b.addEventListener('click',()=>fn(b));row.append(b);return b;};
+ const panel=(button,kind,fill)=>{const opening=pop.hidden||pop.dataset.kind!==kind;for(const b of row.querySelectorAll('[aria-expanded]')){b.setAttribute('aria-expanded','false');b.classList.remove('active');}pop.hidden=!opening;pop.dataset.kind=kind;if(opening){pop.replaceChildren();fill();button.setAttribute('aria-expanded','true');button.classList.add('active');}};
+ add('Copy','copy',async b=>{if(await wolfCopy(m.text)){b.classList.add('active');toast('Response copied');}else toast('Clipboard unavailable','warn');});
+ const vote=(b,v)=>{m.vote=m.vote===v?null:v;for(const x of row.querySelectorAll('[data-vote]')){const yes=x.dataset.vote===m.vote;x.classList.toggle('active',yes);x.setAttribute('aria-pressed',String(yes));}};
+ for(const [name,v] of [['Helpful','helpful'],['Not helpful','not-helpful']]){
+  const b=add(name,v,btn=>vote(btn,v));b.dataset.vote=v;b.setAttribute('aria-pressed',String(m.vote===v));b.classList.toggle('active',m.vote===v);
  }
- if(wolfChatBusy){const wait=document.createElement('p');wait.className='wolf-chat-caption';wait.textContent='Working on your request…';log.append(wait);}
+ add('Share','share',async()=>{if(navigator.share){try{await navigator.share({title:'Wolf',text:m.text});return;}catch(e){if(e?.name==='AbortError')return;}}if(await wolfCopy(m.text))toast('Response copied for sharing');else toast('Sharing unavailable','warn');});
+ const sources=add('Sources','sources',b=>panel(b,'sources',()=>{const [label,detail]=wolfChatSource(m);const h=document.createElement('strong');h.textContent='Sources';const source=document.createElement('div');source.className='wolf-answer-source';const title=document.createElement('b');title.textContent=label;const text=document.createElement('div');text.textContent=detail;source.append(title,text);pop.append(h,source);}));sources.setAttribute('aria-expanded','false');
+ const more=add('More','more',b=>panel(b,'more',()=>{const save=document.createElement('button');save.type='button';save.className='wolf-answer-action';save.textContent='Save response';save.addEventListener('click',()=>exportFile('wolf-response.txt',m.text,'text/plain'));pop.append(save);}));more.setAttribute('aria-expanded','false');
+ wrap.append(row,pop);return wrap;
+}
+function renderWolfChat(){
+ const log=document.querySelector('#wolf-chat-log');if(!log)return;
+ log.replaceChildren();
+ for(const [i,m] of wolfChatMessages.entries()){
+  const bubble=document.createElement('div');bubble.className='wolf-chat-message '+m.role;bubble.textContent=m.text;
+  if(m.role==='wolf'&&i>0){const block=document.createElement('div');block.className='wolf-answer-block';block.append(bubble,wolfAnswerTools(m));log.append(block);}else log.append(bubble);
+ }
+ if(wolfChatBusy){const wait=document.createElement('p');wait.className='wolf-chat-caption';wait.textContent='Thinking…';log.append(wait);}
  log.scrollTop=log.scrollHeight;
  const send=document.querySelector('#wolf-chat-send');if(send)send.disabled=wolfChatBusy;
+ const clear=document.querySelector('#wolf-chat-clear');if(clear)clear.disabled=wolfChatBusy;
 }
 function openWolfChat(){
- modal('Talk to Wolf','<p class="wolf-chat-caption">Local conversation · workspace controls and recorded evidence · iAM/COG pending</p><div id="wolf-chat-log" class="wolf-chat-log" role="log" aria-label="Wolf conversation"></div><form id="wolf-chat-form" class="wolf-chat-form"><textarea name="message" maxlength="1200" rows="2" required aria-label="Message Wolf" placeholder="Ask Wolf a question…"></textarea><button id="wolf-chat-send" type="submit" class="btn primary">Send</button></form>');
+ const root=document.querySelector('#modalRoot');
+ root.innerHTML='<section class="wolf-chat-panel" role="dialog" aria-label="Talk to Wolf"><header class="wolf-chat-head">'+img('brand','wolf-chat-avatar','')+'<div class="wolf-chat-title"><strong>Wolf</strong><small>Local conversation · advanced cognition pending</small></div><button type="button" id="wolf-chat-clear" title="Clear conversation" aria-label="Clear conversation">'+icon('trash','sm')+'</button><button type="button" data-action="close-modal" title="Close" aria-label="Close">'+icon('close','sm')+'</button></header><div id="wolf-chat-log" class="wolf-chat-log" role="log" aria-live="polite" aria-label="Wolf conversation"></div><form id="wolf-chat-form" class="wolf-chat-form"><textarea name="message" maxlength="1200" rows="1" required aria-label="Message Wolf" placeholder="Ask Wolf…"></textarea><button id="wolf-chat-send" type="submit">Send</button></form></section>';
+ document.querySelector('#wolf-chat-clear').addEventListener('click',()=>{if(wolfChatBusy)return;wolfChatMessages.splice(1);renderWolfChat();});
+ const composer=document.querySelector('#wolf-chat-form textarea');
+ composer.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();composer.form.requestSubmit();}});
  renderWolfChat();
  if(window.wolfNative&&state.tab==='browser')queueMicrotask(syncNativeBrowser);
- document.querySelector('#wolf-chat-form textarea')?.focus();
+ if(!matchMedia('(max-width:600px)').matches)composer.focus();
 }
 async function submitWolfChat(form){
  const message=String(new FormData(form).get('message')||'').trim().slice(0,1200);
  if(!message||wolfChatBusy)return;
  wolfChatMessages.push({role:'user',text:message});form.reset();wolfChatBusy=true;renderWolfChat();
- try{const command=wolfChatCommand(message);const text=command?await wolfChatRunCommand(command,wolfChatWorkspace()):await wolfChatAnswer(message,window.wolfBackend);wolfChatMessages.push({role:'wolf',text});}
- catch{wolfChatMessages.push({role:'wolf',text:'I could not complete that request. Check the current workspace and try again.'});}
+ try{const command=wolfChatCommand(message),intent=wolfChatIntent(message);const text=command?await wolfChatRunCommand(command,wolfChatWorkspace()):await wolfChatAnswer(message,window.wolfBackend);const source=command?'workspace':(['status','balance','history'].includes(intent)&&window.wolfBackend?.request&&!text.startsWith('Native backend unavailable')?'records':'local');wolfChatMessages.push({role:'wolf',text,source});}
+ catch{wolfChatMessages.push({role:'wolf',text:'I could not complete that request. Check the current workspace and try again.',source:'error'});}
  finally{wolfChatBusy=false;if(wolfChatMessages.length>61)wolfChatMessages.splice(1,wolfChatMessages.length-61);renderWolfChat();}
 }
 // WOLF_CHAT_END

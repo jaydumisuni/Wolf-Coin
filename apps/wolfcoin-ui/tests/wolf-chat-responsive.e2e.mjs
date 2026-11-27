@@ -24,7 +24,19 @@ try{
  await click('.brand');await until('!!document.querySelector("#wolf-chat-form")');
  await ask('Open Settings');await until('state.tab==="settings" && !document.querySelector("#wolf-chat-form")');
  await click('.brand');await until('document.querySelector("#wolf-chat-log").textContent.includes("Opened settings.")');
- await ask('What are your capabilities?');await until('document.querySelector("#wolf-chat-log").textContent.includes("iAM/COG general cognition is not connected")');
+ await ask('What are your capabilities?');await until('document.querySelector("#wolf-chat-log").textContent.includes("My advanced cognition is not yet available")');
+ const panel=await evaluate('(()=>{const r=document.querySelector(".wolf-chat-panel").getBoundingClientRect();return {w:r.width,h:r.height,right:r.right}})()');
+ assert(panel.w<=390&&panel.h<=540);
+ assert.equal(await evaluate('!!document.querySelector(".modal-backdrop")'),false);
+ assert.deepEqual(await evaluate('[...document.querySelector(".wolf-answer-actions").children].map(b=>b.getAttribute("aria-label"))'),['Copy','Helpful','Not helpful','Share','Sources','More']);
+ await click('.wolf-answer-action[data-vote="helpful"]');
+ assert.equal(await evaluate('document.querySelector("[data-vote=helpful]").getAttribute("aria-pressed")'),'true');
+ await click('.wolf-answer-action[data-vote="not-helpful"]');
+ assert.equal(await evaluate('document.querySelector("[data-vote=helpful]").getAttribute("aria-pressed")'),'false');
+ await click('.wolf-answer-action[aria-label="Sources"]');
+ assert(await evaluate('!document.querySelector(".wolf-answer-popover").hidden && document.querySelector(".wolf-answer-popover").textContent.includes("Local Wolf")'));
+ await click('.wolf-answer-action[aria-label="More"]');
+ assert(await evaluate('document.querySelector(".wolf-answer-popover").textContent.includes("Save response")'));
  await click('#modalRoot [data-action="close-modal"]');
  await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
  await until('getComputedStyle(document.querySelector("#wolfChatLauncher button")).display==="flex"');
@@ -37,6 +49,7 @@ try{
  await click('.browser-tabs .wolf-chat-mobile');await until('document.querySelector("#wolf-chat-log").textContent.includes("Opened browser.")');
  await ask('Use high contrast theme');await until('state.settings.theme==="high-contrast"');
  assert(await evaluate('!!document.querySelector("#wolf-chat-form")'));
+ await click('#wolf-chat-clear');assert.equal(await evaluate('document.querySelectorAll(".wolf-chat-message").length'),1);
  console.log('WOLF_CHAT_DESKTOP_MOBILE_PREVIEW_PASS',JSON.stringify(dims));
 }finally{ws.close()}
 
