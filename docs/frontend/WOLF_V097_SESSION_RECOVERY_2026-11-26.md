@@ -312,3 +312,27 @@ learning authority is granted by this work.
 
 Contribution: documentation reconciliation; update existing handoff. No
 additional runtime, UI or registry changes in this reconciliation.
+
+### Explicit read/write capability scope
+
+The approved product direction is Wolf as the self-subject of its integrated
+iAM/COG faculty, with conversation as an interface to its actual host
+capabilities, not a separate assistant. Read and write are distinct:
+- Implemented local chat reads: native account status, recorded wallet
+  observations and transaction history; evidence/source attribution.
+- Implemented local workspace writes: screen/dialog navigation, opening a
+  browser tab, sidebar state, notification and tab-restoration preferences,
+  theme and search engine. Existing application handlers and state readback
+  are reused. These are not arbitrary backend, account or credential writes.
+- The qualified read-only Foundry contract and candidate registry do not
+  grant effect authority. Native read-only iAM binding remains outstanding.
+- Broader host-governed read/write design is already defined by
+  TTG-decisions/decisions/2026-11-22-cog-capability-neutral-upgrade.md and
+  Cookpit/docs/COG_UPGRADE_ACCEPTED_SCOPE_20261122.md (G3 and G6).
+  It requires independently qualified host capabilities, effect policy,
+  current authority and outcome proof. No general write dispatch,
+  autonomous financial execution or admitted learning is claimed here.
+
+Do not conflate local workspace command acceptance with admission of the
+native cognitive faculty. Preserve the approved conversation UI and report
+actual capability status.
