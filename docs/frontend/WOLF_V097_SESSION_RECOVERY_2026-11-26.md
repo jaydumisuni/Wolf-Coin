@@ -250,3 +250,65 @@ application runtime was changed. G6 remains HOLD/NO-GO in the authoritative
 Cookpit candidate record, and the installed pending status remains truthful.
 No Windows/Linux/Android application build was performed for cognition.
 Contribution: qualification progress and evidence recovery, not closure.
+
+## 2026-11-27 — continuation reconciliation: approved UI, native effects, admission
+
+### Approved default UI reference
+
+The owner approved the Lumi-style conversation UI as the default for
+COG-equipped products with conversation surfaces. Recover the actual shared
+source instead of requesting another video:
+- Cookpit PR #112, head 909df2b83c70907fdecb7092b6c25daa6e1328a3:
+  ui/cog-conversation (reusable shell, icons, host adapter and smoke fixture).
+- OS-playbook PR #3, head a5be68492afb21fb404116b86c6cf28d7f71dcf1:
+  05_STANDARDS/UI_UX.md.
+Both PRs remain open; Cookpit #112 is draft. Two fixture identities passed
+desktop/mobile interaction tests. These are not yet mainline fleet changes.
+
+### Native conversation response effects
+
+Windows and Linux installed v0.9.9-dev independently passed actual OS
+clipboard readback, Share's clipboard fallback and exact filesystem export
+(21-byte greeting). Linux evidence: v099-native-effects.pROzKF/effects.log
+under this recovery's proof-history directory. Windows evidence: existing
+Builder stage v099-chat-effects-519e3d018f574e6da709960b136b34e0/effects.log.
+Android emulator v0.9.9-dev Copy was verified by system paste into the composer.
+
+Source dc10022 implements Android-native ACTION_SEND chooser and
+ACTION_CREATE_DOCUMENT export through the trusted UI bridge, with cancellation
+and write-result handling. Existing Builder produced Android v0.9.10-dev
+(versionCode 22); builder-v0910-android.exit is 0. The frozen Android asset
+SHA-256 is 1d95c1f14341910b0653eca4d7cc49ca28538147c0de6ee82fec5b3bb169d3d7.
+The emulator still reports v0.9.9-dev/code 21. Do not mistake the new
+unsigned build for an installed or accepted release. Remaining Android
+work: existing dev signing, install, verify actual share chooser and
+document bytes, then physical-device acceptance when available.
+
+### First-time read-only registration correction
+
+Cookpit PR #113, head f7c9e2edd6cc67d4cc62355a1845269568e04078, adds explicit
+first-time admission for a current fully qualified product-scoped receipt.
+The existing refresh path remains unchanged by default. All 68 focused
+Foundry/CLI tests passed. Actual Wolf receipt succeeded in an isolated
+registry candidate, returning Wolf's evidence-bound self-subject; all 24
+existing registration rows remained unchanged. No production registry write.
+
+Under the Cookpit qualification evidence root recorded above:
+- registry-admission-candidate.json SHA-256:
+  d72c3e6d2f6f667e1a2ffd7a0717940554bf95b25c2ebe10b2fe95efc75ca96b
+- candidate-identity-query.json SHA-256:
+  a9bdab8aa52cbc583261f8ccc150024ccdac24883f076901f4e1ae935a65d138
+- first-admission-tests.log: 68 passed.
+- live auto-registry.json SHA-256 at reconciliation:
+  9baaacdeb1ecc7ecf1129712c5462e7953acf8df8f64ad5bcadd7a3ae3cac8f9
+
+PR #113 remains open. The candidate is not live activation. Next cognition
+frontier is independent review and governed read-only registry promotion,
+then native product binding and installed acceptance on Windows, Linux and
+Android. Recheck the receipt's current candidate/snapshot binding before
+promotion. Advanced G0-G6 admission remains HOLD/NO-GO; do not change the
+pending indicator to imply unavailable cognition. No production effect or
+learning authority is granted by this work.
+
+Contribution: documentation reconciliation; update existing handoff. No
+additional runtime, UI or registry changes in this reconciliation.
