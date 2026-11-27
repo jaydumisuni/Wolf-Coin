@@ -19,6 +19,18 @@ a{color:#3dbaff;text-decoration:none} a:hover{text-decoration:underline}
 .sidebar{width:var(--sidebar);flex:0 0 var(--sidebar);height:100vh;height:100dvh;position:sticky;top:0;background:linear-gradient(180deg,#07121e,#06101d 72%,#020814);border-right:1px solid #2c4761;display:flex;flex-direction:column;z-index:12;overflow:hidden}
 .brand{display:flex;align-items:center;justify-content:center;width:100%;height:108px;background:transparent;border:0;padding:0;position:relative;z-index:2}
 .brand img{display:block;width:239px;height:108px;object-fit:cover}
+.brand{cursor:pointer}
+.brand:hover img{filter:brightness(1.13)}
+.brand:focus-visible,.wolf-chat-mobile:focus-visible{outline:2px solid #55adff;outline-offset:-3px}
+.wolf-chat-mobile{display:none}
+.wolf-chat-log{display:flex;flex-direction:column;gap:12px;min-height:180px;max-height:42dvh;overflow:auto;padding:4px 2px}
+.wolf-chat-message{max-width:92%;border:1px solid #294b66;border-radius:14px;padding:10px 12px;background:#122940;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.wolf-chat-message.user{align-self:flex-end;background:#165282;border-color:#378dcc}
+.wolf-chat-message strong{display:block;font-size:11px;color:#99c8f3;margin-bottom:4px}
+.wolf-chat-form{display:flex;align-items:end;gap:8px;margin-top:14px}
+.wolf-chat-form textarea{flex:1;min-width:0;min-height:48px;max-height:128px;resize:vertical;background:#091a2b;color:#edf6ff;border:1px solid #416584;border-radius:10px;padding:10px;font:inherit}
+.wolf-chat-caption{font-size:12px;color:#aac2d8;margin:0 0 12px}
+@media(max-width:600px){.wolf-chat-mobile{display:flex;align-items:center;justify-content:center;flex:0 0 38px;width:38px;height:38px;overflow:hidden;background:transparent;border:0;padding:0;cursor:pointer}.wolf-chat-mobile img{height:36px;width:36px;object-fit:cover;object-position:left}.wolf-chat-log{max-height:38dvh}}
 .side-nav{padding:8px 14px;position:relative;z-index:3;display:flex;flex-direction:column;gap:4px;max-height:calc(100dvh - 120px);overflow:auto;scrollbar-width:thin}
 .nav-button{height:45px;min-height:45px;width:100%;border:1px solid transparent;background:transparent;color:#f0f5fb;border-radius:11px;display:flex;align-items:center;gap:17px;text-align:left;padding:0 13px;font-weight:570;font-size:15px;transition:background .15s,border-color .15s}
 .nav-button:hover{background:#122b45}
@@ -448,12 +460,77 @@ function modal(title,body,buttons=''){document.querySelector('#modalRoot').inner
 function closeModal(){document.querySelector('#modalRoot').innerHTML='';if(window.wolfNative&&state.tab==='browser')queueMicrotask(syncNativeBrowser)}
 const _wolfOriginalModal=modal;
 modal=function(...args){_wolfOriginalModal(...args);if(window.wolfNative&&state.tab==='browser')window.wolfNative.browserBounds({x:0,y:0,width:0,height:0}).catch(()=>{});};
+
+// WOLF_CHAT_BEGIN
+const wolfChatMessages=[{role:'wolf',text:'I am Wolf. Ask me about my connected accounts, recorded balances, transaction history or system status.'}];
+let wolfChatBusy=false;
+function wolfChatMobile(){return '<button type="button" class="wolf-chat-mobile" data-action="wolf-chat" title="Talk to Wolf" aria-label="Talk to Wolf">'+img('brand','','')+'</button>';}
+function wolfChatIntent(message){
+ const q=String(message).trim().toLowerCase();
+ if(/^(?:hi|hello|hey|help|what can you do)[!?. ]*$/.test(q))return 'help';
+ if(/\b(?:history|transactions?|statement|settlement)\b/.test(q))return 'history';
+ if(/\b(?:balance|funds|profit|loss|p\/l|wallet)\b/.test(q))return 'balance';
+ if(/\b(?:status|accounts?|connected|session|health|sync|cog|capabilit(?:y|ies))\b/.test(q))return 'status';
+ return 'unknown';
+}
+async function wolfChatAnswer(message,backend){
+ const intent=wolfChatIntent(message);
+ if(intent==='help')return 'I can explain my current recorded account status, wallet observations and transaction history. This local conversation uses read-only native backend records. General COG conversation is not connected yet.';
+ if(intent==='unknown')return 'I do not have a general cognition service connected yet. Ask about account status, recorded balances or transaction history.';
+ if(!backend?.request)return 'Native backend unavailable. I cannot verify account data in this preview.';
+ const result=await backend.request('accounts.list',{});
+ if(!Array.isArray(result?.accounts))throw Error('Invalid account response');
+ const accounts=result.accounts;
+ if(!accounts.length)return 'The native backend has no registered accounts.';
+ const selected=accounts.slice(0,30);
+ const label=a=>String(a.display_name||a.account_id);
+ const cap=accounts.length>30?'\nShowing the first 30 accounts.':'';
+ if(intent==='status')return selected.map(a=>label(a)+': '+String(a.session_state||'UNKNOWN')+' · '+String(a.freshness||'freshness unknown')+' · '+String(a.observation_count??0)+' observations').join('\n')+cap+'\nCOG conversation is not connected yet.';
+ if(intent==='balance')return selected.map(a=>{const f=a.latest_financial?.fields||{};return label(a)+': '+(f.cash_balance==null?'no recorded balance':String(a.currency||'')+' '+String(f.cash_balance))+(f.realized_pnl==null?' · P/L not recorded':' · reported P/L '+String(f.realized_pnl))+' · '+String(a.freshness||'freshness unknown');}).join('\n')+cap+'\nThese are recorded platform observations, not independently verified settlements.';
+ const rows=await Promise.all(selected.map(async a=>{
+  const h=await backend.request('financial.history',{domain:a.domain,account_id:a.account_id,kind:'TRANSACTIONS',limit:20});
+  if(!Array.isArray(h?.entries))throw Error('Invalid history response');
+  const entries=h.entries;
+  return label(a)+': '+(entries.length?entries.map(t=>String(t.occurred_at||'')+' '+String(t.kind||'record')+' '+String(t.status||'unknown')+' '+String(t.amount??'unknown')+' '+String(a.currency||'')).join('\n'):'No transaction records available.')+(h?.next_offset!=null?'\nMore records available in Financial Data.':'');
+ }));
+ return rows.join('\n\n')+cap+'\nRecorded transactions are not independently verified settlements.';
+}
+function renderWolfChat(){
+ const log=document.querySelector('#wolf-chat-log');
+ if(!log)return;
+ log.replaceChildren();
+ for(const m of wolfChatMessages){
+  const bubble=document.createElement('div');bubble.className='wolf-chat-message '+m.role;
+  const name=document.createElement('strong');name.textContent=m.role==='user'?'You':'Wolf';
+  const content=document.createElement('span');content.textContent=m.text;
+  bubble.append(name,content);log.append(bubble);
+ }
+ if(wolfChatBusy){const wait=document.createElement('p');wait.className='wolf-chat-caption';wait.textContent='Reading recorded evidence…';log.append(wait);}
+ log.scrollTop=log.scrollHeight;
+ const send=document.querySelector('#wolf-chat-send');if(send)send.disabled=wolfChatBusy;
+}
+function openWolfChat(){
+ modal('Talk to Wolf','<p class="wolf-chat-caption">Local conversation · read-only records · COG not connected</p><div id="wolf-chat-log" class="wolf-chat-log" role="log" aria-label="Wolf conversation"></div><form id="wolf-chat-form" class="wolf-chat-form"><textarea name="message" maxlength="1200" rows="2" required aria-label="Message Wolf" placeholder="Ask Wolf a question…"></textarea><button id="wolf-chat-send" type="submit" class="btn primary">Send</button></form>');
+ renderWolfChat();
+ if(window.wolfNative&&state.tab==='browser')queueMicrotask(syncNativeBrowser);
+ document.querySelector('#wolf-chat-form textarea')?.focus();
+}
+async function submitWolfChat(form){
+ const message=String(new FormData(form).get('message')||'').trim().slice(0,1200);
+ if(!message||wolfChatBusy)return;
+ wolfChatMessages.push({role:'user',text:message});form.reset();wolfChatBusy=true;renderWolfChat();
+ try{wolfChatMessages.push({role:'wolf',text:await wolfChatAnswer(message,window.wolfBackend)});}
+ catch{wolfChatMessages.push({role:'wolf',text:'I could not read the native backend. No account state was changed.'});}
+ finally{wolfChatBusy=false;if(wolfChatMessages.length>61)wolfChatMessages.splice(1,wolfChatMessages.length-61);renderWolfChat();}
+}
+// WOLF_CHAT_END
+
 let wolfWindowMaximized=false;
 function windowChrome(){if(!window.wolfNative?.windowMinimize)return '';
  return `<div class="win-controls" role="group" aria-label="Window controls"><button type="button" class="win-button" data-action="window-minimize" aria-label="Minimize" title="Minimize">${icon('minus','sm')}</button><button type="button" class="win-button" data-action="window-maximize" aria-label="${wolfWindowMaximized?'Restore':'Maximize'}" title="${wolfWindowMaximized?'Restore window':'Maximize window'}">${icon(wolfWindowMaximized?'restore-window':'maximize-window','sm')}</button><button type="button" class="win-button close-window" data-action="window-close" aria-label="Close" title="Close Wolf-Coin">${icon('close','sm')}</button></div>`;}
 function refreshWindowChrome(){for(const c of document.querySelectorAll('.win-controls'))c.outerHTML=windowChrome();}
-function titleBar(){const t=getActiveBrowser();return `<form class="omnibox" id="top-address-form">${img('header-globe','header-crop','')}<input name="address" aria-label="Search or open address" autocomplete="off" placeholder="Search or enter an address" value="${esc(t.url||'')}"><button type="submit" title="Navigate" aria-label="Navigate">${icon('arrow')}</button></form><button class="header-icon tabs-count" data-action="nav-browser" title="Browser tabs" aria-label="Browser tabs">${img('header-tabs','header-crop','')}<span class="tabs-digit">${state.browserTabs.length}</span></button><button class="header-icon" data-action="new-browser-tab" title="New tab" aria-label="New tab">${img('header-plus','header-crop','')}</button><span class="header-gap"></span><button class="header-icon" data-action="notifications" title="Notifications" aria-label="Notifications">${img('header-bell','header-crop','')}</button>${windowChrome()}`}
-function drawNav(){document.querySelector('#sidebar').innerHTML=`<button class="brand" data-action="go" data-tab="overview" aria-label="Wolf-Coin overview">${img('brand','brand-img','Wolf-Coin Intelligent Browser')}</button><button type="button" class="sidebar-collapse-btn" data-action="toggle-sidebar" aria-expanded="${!state.sidebarCollapsed}" aria-label="${state.sidebarCollapsed?'Expand':'Collapse'} navigation" title="${state.sidebarCollapsed?'Expand navigation':'Collapse navigation'}">${icon('chevron')}</button><nav class="side-nav">${NAV.map(([id,label,ic])=>`<button type="button" class="nav-button ${state.tab===id?'active':''}" data-action="go" data-tab="${id}" aria-current="${state.tab===id?'page':'false'}">${ic.startsWith('nav-')?img(ic,'nav-img',''):icon(ic,'nav-svg')}<span>${label}</span></button>`).join('')}</nav><div class="sidebar-art"></div><div class="side-foot"><span class="inline-row gap-sm"><span class="on"></span> ${window.wolfNative?'Wolf Browser':(STORAGE_AVAILABLE?'Local Workspace':'Backup Required')}</span>${STORAGE_AVAILABLE?'<span class="muted">Native</span>':`<button class="tiny-backup" data-action="backup-json" title="Backup local UI data">Backup</button>`}</div>`;
+function titleBar(){const t=getActiveBrowser();return `${wolfChatMobile()}<form class="omnibox" id="top-address-form">${img('header-globe','header-crop','')}<input name="address" aria-label="Search or open address" autocomplete="off" placeholder="Search or enter an address" value="${esc(t.url||'')}"><button type="submit" title="Navigate" aria-label="Navigate">${icon('arrow')}</button></form><button class="header-icon tabs-count" data-action="nav-browser" title="Browser tabs" aria-label="Browser tabs">${img('header-tabs','header-crop','')}<span class="tabs-digit">${state.browserTabs.length}</span></button><button class="header-icon" data-action="new-browser-tab" title="New tab" aria-label="New tab">${img('header-plus','header-crop','')}</button><span class="header-gap"></span><button class="header-icon" data-action="notifications" title="Notifications" aria-label="Notifications">${img('header-bell','header-crop','')}</button>${windowChrome()}`}
+function drawNav(){document.querySelector('#sidebar').innerHTML=`<button class="brand" data-action="wolf-chat" aria-label="Talk to Wolf" title="Talk to Wolf">${img('brand','brand-img','Wolf-Coin Intelligent Browser')}</button><button type="button" class="sidebar-collapse-btn" data-action="toggle-sidebar" aria-expanded="${!state.sidebarCollapsed}" aria-label="${state.sidebarCollapsed?'Expand':'Collapse'} navigation" title="${state.sidebarCollapsed?'Expand navigation':'Collapse navigation'}">${icon('chevron')}</button><nav class="side-nav">${NAV.map(([id,label,ic])=>`<button type="button" class="nav-button ${state.tab===id?'active':''}" data-action="go" data-tab="${id}" aria-current="${state.tab===id?'page':'false'}">${ic.startsWith('nav-')?img(ic,'nav-img',''):icon(ic,'nav-svg')}<span>${label}</span></button>`).join('')}</nav><div class="sidebar-art"></div><div class="side-foot"><span class="inline-row gap-sm"><span class="on"></span> ${window.wolfNative?'Wolf Browser':(STORAGE_AVAILABLE?'Local Workspace':'Backup Required')}</span>${STORAGE_AVAILABLE?'<span class="muted">Native</span>':`<button class="tiny-backup" data-action="backup-json" title="Backup local UI data">Backup</button>`}</div>`;
  document.querySelector('#topbar').innerHTML=titleBar();
  const mob=['overview','browser','accounts','sessions','finance','menu'];document.querySelector('#mobileNav').innerHTML=mob.map(id=>{let n=NAV.find(x=>x[0]===id),label=n?.[1]||'More',ic=n?.[2]||'menu';return `<button data-action="${id==='menu'?'more-mobile':'go'}" data-tab="${id}" class="${state.tab===id?'active':''}">${ic.startsWith('nav-')?img(ic,'nav-img',''):icon(ic)}<span>${label==='Financial Data'?'Finance':label}</span></button>`}).join('');}
 function pageHeader(name,subtitle,tools='',wolf=false){return `<div class="two-line-header"><div class="hero ${wolf?'wolf':''}"><h1>${esc(name)}</h1><p>${esc(subtitle)}</p></div>${tools?`<div class="page-tools">${tools}</div>`:''}</div>`}
@@ -489,7 +566,7 @@ function browserToolsPane(){const t=getActiveBrowser(),tab=state.browserToolTab|
  return `<aside class="browser-tools-pane" aria-label="Browser sidebar"><div class="browser-tools-tabs">${panes.map(([id,label,ic])=>`<button type="button" class="${tab===id?'active':''}" data-action="browser-panel-tab" data-panel="${id}" title="${label}" aria-label="${label}">${icon(ic,'sm')}</button>`).join('')}<button type="button" data-action="toggle-browser-panel" title="Close" aria-label="Close browser sidebar">${icon('close','sm')}</button></div><div class="browser-side-content">${content}</div></aside>`;}
 async function refreshVault(){if(!window.wolfNative?.vaultList)return;try{vaultMeta=(await window.wolfNative.vaultList()).items||[]}catch(e){toast('Password vault: '+String(e),'warn')}if(state.tab==='browser'&&state.browserToolsOpen&&state.browserToolTab==='vault')render();}
 async function refreshDownloads(){try{downloadMeta=(await window.wolfNative?.downloads?.())?.items||[]}catch{}if(state.tab==='browser'&&state.browserToolsOpen&&state.browserToolTab==='downloads')render();}
-function browserPage(){const t=getActiveBrowser();return `<section class="browser-shell browser-workspace-shell" aria-label="Browser workspace"><div class="browser-tabs">${state.browserTabs.map(b=>`<div class="browser-tab-wrap ${b.id===state.activeBrowser?'active':''}"><button class="browser-tab ${b.id===state.activeBrowser?'active':''}" data-action="select-browser-tab" data-id="${b.id}" title="${esc(b.name)}">${icon('globe','sm')}<span>${esc(b.name)}</span></button><button class="browser-tab-close" data-action="close-browser-tab" data-id="${b.id}" title="Close tab">×</button></div>`).join('')}<button class="header-icon" data-action="new-browser-tab" title="New tab">${icon('plus','sm')}</button><span class="header-gap"></span><button class="header-icon" data-action="toggle-browser-panel" title="Toggle browser sidebar" aria-label="Toggle browser sidebar">${icon('menu')}</button><button class="header-icon browser-notifications" data-action="notifications" title="Notifications" aria-label="Notifications">${icon('bell','sm')}</button>${windowChrome()}</div><form id="browser-address-form" class="browser-bar"><button type="button" class="header-icon" data-action="browser-back" title="Back">${icon('back')}</button><button type="button" class="header-icon" data-action="browser-forward" title="Forward">${icon('arrow')}</button><button type="button" class="header-icon" data-action="browser-reload" title="Reload">${icon('refresh')}</button><label class="browser-address">${icon('lock','sm')}<input type="text" name="address" id="browser-address" autocomplete="off" aria-label="Search or enter address" value="${esc(t.url||'')}" placeholder="Search or enter an address"></label><button type="submit" class="header-icon" title="Go">${icon('arrow')}</button><button type="button" class="header-icon" data-action="bookmark-current" title="Bookmark">${icon('bookmark')}</button><button type="button" class="browser-order-entry" data-action="start-bet" title="Place a bet">Bet</button><button type="button" class="browser-order-entry" data-action="start-trade" title="Trade">Trade</button><button type="button" class="header-icon" data-action="browser-panel-tools" title="Page tools">${icon('settings')}</button></form><div class="browser-stage"><div class="browser-content">${t.url?`<div class="browser-loading">${icon('globe','lg')}<p>${esc(t.name)}</p></div>`:`<div class="browser-start"><h2>New tab</h2><p>Search or enter an address above</p><div class="browser-shortcuts">${state.accounts.slice(0,8).map(a=>`<button class="browser-shortcut" data-action="browse-account" data-id="${a.id}">${platIcon(a)}<strong>${esc(a.name)}</strong></button>`).join('')}${btn(icon('plus')+' Add site','add-account')}</div></div>`}</div>${state.browserToolsOpen?browserToolsPane():''}</div></section>`;}
+function browserPage(){const t=getActiveBrowser();return `<section class="browser-shell browser-workspace-shell" aria-label="Browser workspace"><div class="browser-tabs">${wolfChatMobile()}${state.browserTabs.map(b=>`<div class="browser-tab-wrap ${b.id===state.activeBrowser?'active':''}"><button class="browser-tab ${b.id===state.activeBrowser?'active':''}" data-action="select-browser-tab" data-id="${b.id}" title="${esc(b.name)}">${icon('globe','sm')}<span>${esc(b.name)}</span></button><button class="browser-tab-close" data-action="close-browser-tab" data-id="${b.id}" title="Close tab">×</button></div>`).join('')}<button class="header-icon" data-action="new-browser-tab" title="New tab">${icon('plus','sm')}</button><span class="header-gap"></span><button class="header-icon" data-action="toggle-browser-panel" title="Toggle browser sidebar" aria-label="Toggle browser sidebar">${icon('menu')}</button><button class="header-icon browser-notifications" data-action="notifications" title="Notifications" aria-label="Notifications">${icon('bell','sm')}</button>${windowChrome()}</div><form id="browser-address-form" class="browser-bar"><button type="button" class="header-icon" data-action="browser-back" title="Back">${icon('back')}</button><button type="button" class="header-icon" data-action="browser-forward" title="Forward">${icon('arrow')}</button><button type="button" class="header-icon" data-action="browser-reload" title="Reload">${icon('refresh')}</button><label class="browser-address">${icon('lock','sm')}<input type="text" name="address" id="browser-address" autocomplete="off" aria-label="Search or enter address" value="${esc(t.url||'')}" placeholder="Search or enter an address"></label><button type="submit" class="header-icon" title="Go">${icon('arrow')}</button><button type="button" class="header-icon" data-action="bookmark-current" title="Bookmark">${icon('bookmark')}</button><button type="button" class="browser-order-entry" data-action="start-bet" title="Place a bet">Bet</button><button type="button" class="browser-order-entry" data-action="start-trade" title="Trade">Trade</button><button type="button" class="header-icon" data-action="browser-panel-tools" title="Page tools">${icon('settings')}</button></form><div class="browser-stage"><div class="browser-content">${t.url?`<div class="browser-loading">${icon('globe','lg')}<p>${esc(t.name)}</p></div>`:`<div class="browser-start"><h2>New tab</h2><p>Search or enter an address above</p><div class="browser-shortcuts">${state.accounts.slice(0,8).map(a=>`<button class="browser-shortcut" data-action="browse-account" data-id="${a.id}">${platIcon(a)}<strong>${esc(a.name)}</strong></button>`).join('')}${btn(icon('plus')+' Add site','add-account')}</div></div>`}</div>${state.browserToolsOpen?browserToolsPane():''}</div></section>`;}
 
 function toggleRow(key,title,description){return `<div class="toggle-line"><div><div class="label-title">${esc(title)}</div><div class="label-desc">${esc(description)}</div></div><button type="button" class="toggle ${state.settings[key]?'on':''}" aria-pressed="${state.settings[key]?'true':'false'}" aria-label="Toggle ${esc(title)}" data-action="toggle-setting" data-key="${key}"></button></div>`}
 const PREFS=['General','Browser','Accounts & Sessions','Automation','Notifications','Appearance','Data & Sync','About'];
@@ -549,7 +626,7 @@ async function syncNativeBrowser(){
  const t=getActiveBrowser();
  const area=document.querySelector('.browser-content');
  try {
-  if(state.tab!=='browser'||!area||!t.url){await window.wolfNative.hideBrowser();return;}
+  if(document.querySelector('#wolf-chat-form')||state.tab!=='browser'||!area||!t.url){await window.wolfNative.hideBrowser();return;}
   const rect=area.getBoundingClientRect();
   await window.wolfNative.browserBounds({x:rect.x,y:rect.y,width:rect.width,height:rect.height});
   if(seq!==nativeViewSeq)return;
@@ -643,6 +720,7 @@ async function dxqtApply(account,action){
  }catch(error){toast('D-XQT action blocked: '+String(error.message||error),'error');return null;}
 }
 async function runAction(action,el,event){const id=el.dataset.id;let a=getAccount(id);switch(action){
+case 'wolf-chat':openWolfChat();return;
 case 'go':closeModal();navigate(el.dataset.tab);return;
 case 'nav-browser':closeModal();navigate('browser');return;
 case 'start-bet':startFinancial('bet',el.dataset.id||'');return;
@@ -928,7 +1006,7 @@ if(window.wolfNative?.onPageState){window.wolfNative.onPageState((d)=>{
  if(t.accountId)setTimeout(()=>syncNativeAccount(t.accountId,{quiet:true}),1000);
 });}
 document.addEventListener('click',e=>{const el=e.target.closest('[data-action]');if(!el)return; if(el.dataset.action==='modal-backdrop'&&e.target!==el)return; e.preventDefault();runAction(el.dataset.action,el,e)});
-document.addEventListener('submit',async e=>{const f=e.target;const formId=f.getAttribute('id');if(!['top-address-form','browser-address-form','account-form','detect-form','native-action-form','vault-save-form','financial-start-form'].includes(formId))return;e.preventDefault();let values=Object.fromEntries(new FormData(f));if(formId==='top-address-form'||formId==='browser-address-form'){if(state.tab!=='browser')navigate('browser');visitAddress(values.address);return;}
+document.addEventListener('submit',async e=>{const f=e.target;const formId=f.getAttribute('id');if(formId==='wolf-chat-form'){e.preventDefault();await submitWolfChat(f);return;}if(!['top-address-form','browser-address-form','account-form','detect-form','native-action-form','vault-save-form','financial-start-form'].includes(formId))return;e.preventDefault();let values=Object.fromEntries(new FormData(f));if(formId==='top-address-form'||formId==='browser-address-form'){if(state.tab!=='browser')navigate('browser');visitAddress(values.address);return;}
  if(formId==='financial-start-form'){
  const kind=values.kind==='trade'?'trade':'bet',a=state.accounts.find(x=>x.id===values.accountId&&x.type===(kind==='bet'?'Betting':'Trading'));
  if(!a||!a.url||a.url.includes('example.com')){toast('Choose a registered platform with its actual website','warn');return;}
