@@ -170,3 +170,51 @@ new financial execution capability was introduced. Do not infer full
 natural-language or autonomous financial capability from chat acceptance.
 
 Contribution: verification; update existing documentation.
+
+## 2026-11-27 — v0.9.9-dev Lumi-style chat correction and deployment
+
+Frozen source: 462d3f0b2e1569a71761881c3e83061f4995463d.
+Reference: existing Lumi Assistant UI at Lumi-DM 345583f. Wolf retains
+its own identity and mobile launcher; shared frontend now uses a compact
+non-blocking glass panel, header, message composer, clear/close and
+Lumi-style response actions. Feedback remains local, not durable learning.
+
+Builder completed all three existing targets. The first Linux build was
+interrupted and recovered using the existing stage. Windows Builder's
+artifact-discovery log named a retained older installer; the newly built
+0.9.9-dev installer and executable were independently identified by
+version and installation/ASAR readback. No ad hoc installer builder used.
+
+- Linux DEB SHA-256:
+  903e173c38587df1ed1a352d8f4c5883fec4ec1faa22d07ba5ff9302751a2800.
+  Installed version 0.9.9~dev; HTML matched frozen assembly
+  9e171055ab1c0bed4e9c8cd6eb90c323ff50ab83078d8737cb88f26261f9be49.
+  Restored the verified Chromium sandbox mode 4755 to match DEB metadata.
+  Installed isolated chat interaction test passed; proof log
+  v099-chat-installed-linux.log.
+- Windows installer SHA-256:
+  3188767058d416f56b424ab074ad77bc195f32e6fd0c5e6fb2e2d9c4b7142234.
+  Installed v0.9.9-dev ASAR matched Builder output:
+  416bb29928c664fd3ffd1da5fd18a04929689228f096406067197c8d49208f3d.
+  Installed executable launched and passed isolated chat interaction
+  suite (existing stage v099-chat-native-proof/test.log).
+  Prior live application profile and backend were not used for QA.
+- Android APK SHA-256:
+  8b68c41f004fc503df8d3d25c091ac21536b23544dba5606955f6231c13374ce.
+  Frozen HTML matched APK asset. Installed versionCode 21 and base APK
+  hash matched retained release. Existing lab AVD was restarted without
+  downloading another system image. Actual mobile launcher, message entry,
+  short greeting and six response controls visibly confirmed.
+  Oracle screenshot proof: wolf-v099-android-chat.
+  No physical Android device was connected. Development signing unchanged.
+
+Desktop interaction checks covered navigation, workspace preferences,
+reopening the conversation, responsive launcher, feedback exclusivity,
+Sources, More, and clear conversation. Copy/share/export were implemented
+but their native platform side effects were not separately verified.
+Visual comparison confirms the compact Lumi-style design; pixel-exact
+identity with Lumi is not claimed. No additional financial execution
+capabilities were introduced. Full iAM-derived cognitive faculty remains
+unintegrated: existing COG admission record remains HOLD / NO-GO.
+This closes the corrected chat deployment, not all production gates.
+Contribution: correction + verification; update existing documentation.
