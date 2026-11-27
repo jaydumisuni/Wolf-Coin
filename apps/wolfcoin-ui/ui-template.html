@@ -462,9 +462,94 @@ const _wolfOriginalModal=modal;
 modal=function(...args){_wolfOriginalModal(...args);if(window.wolfNative&&state.tab==='browser')window.wolfNative.browserBounds({x:0,y:0,width:0,height:0}).catch(()=>{});};
 
 // WOLF_CHAT_BEGIN
-const wolfChatMessages=[{role:'wolf',text:'I am Wolf. Ask me about my connected accounts, recorded balances, transaction history or system status.'}];
+const wolfChatMessages=[{role:'wolf',text:'I am Wolf. Ask me about my records, or ask me to open a screen, show a report, or change a workspace preference. Try: Open Financial Data.'}];
 let wolfChatBusy=false;
 function wolfChatMobile(){return '<button type="button" class="wolf-chat-mobile" data-action="wolf-chat" title="Talk to Wolf" aria-label="Talk to Wolf">'+img('brand','','')+'</button>';}
+// Explicit typed command routes. Never execute message text as code or invoke
+// arbitrary backend operations. The ordinary UI remains the action authority.
+const WOLF_CHAT_PAGES=Object.freeze({
+ overview:'overview',dashboard:'overview',browser:'browser',accounts:'accounts',
+ sessions:'sessions',platforms:'platforms',finance:'finance','financial data':'finance',
+ activity:'activity',settings:'settings',security:'security'
+});
+const WOLF_CHAT_DIALOGS=Object.freeze({
+ 'report':'reports','financial report':'reports','notifications':'notifications',
+ 'device status':'device-status','integration status':'integration-status',
+ 'bookmarks':'bookmarks','add account':'add-account'
+});
+function wolfChatCommand(message){
+ const q=String(message).trim().toLowerCase().replace(/^please\s+/,'').replace(/[.!?]+$/,'').trim();
+ const page=q.match(/^(?:open|go to|show|switch to)\s+(?:the\s+)?(.+?)(?:\s+(?:page|screen|tab))?$/);
+ if(page&&Object.hasOwn(WOLF_CHAT_PAGES,page[1]))return {kind:'navigate',page:WOLF_CHAT_PAGES[page[1]]};
+ if(page&&Object.hasOwn(WOLF_CHAT_DIALOGS,page[1]))return {kind:'dialog',action:WOLF_CHAT_DIALOGS[page[1]],label:page[1]};
+ if(q==='new browser tab'||q==='open new tab'||q==='open a new tab')return {kind:'dialog',action:'new-browser-tab',label:'new browser tab'};
+ if(q==='collapse sidebar'||q==='expand sidebar')return {kind:'sidebar',value:q.startsWith('collapse')};
+ const pref=q.match(/^(?:turn (on|off)|(?:set|switch)\s+)(?:\s+)?(notifications|tab restoration)(?:\s+(on|off))?$/);
+ if(pref&&(pref[1]||pref[3])&&!(pref[1]&&pref[3]))return {kind:'preference',key:pref[2]==='notifications'?'notifications':'persist',value:(pref[1]||pref[3])==='on'};
+ const theme=q.match(/^(?:set|switch to|use)\s+(?:theme\s+)?(dark|high contrast)(?:\s+theme)?$/);
+ if(theme)return {kind:'select',key:'theme',value:theme[1]==='dark'?'dark':'high-contrast'};
+ const search=q.match(/^set (?:default )?search engine to (google|bing)$/);
+ if(search)return {kind:'select',key:'searchEngine',value:search[1]};
+ return null;
+}
+async function wolfChatRunCommand(command,ui){
+ // All dispatch values are selected from fixed routes above, never user-supplied
+ // action IDs, selectors, JS, website commands, financial or credential writes.
+ if(command.kind==='navigate'){
+  await ui.go(command.page);
+  return 'Opened '+command.page+'.';
+ }
+ if(command.kind==='dialog'){
+  await ui.action(command.action);
+  return 'Opened '+command.label+'.';
+ }
+ if(command.kind==='sidebar'){
+  if(ui.sidebar()!==command.value)await ui.action('toggle-sidebar');
+  return 'Sidebar '+(command.value?'collapsed.':'expanded.');
+ }
+ if(command.kind==='preference'){
+  if(ui.preference(command.key)!==command.value)await ui.action('toggle-setting',{key:command.key});
+  if(ui.preference(command.key)!==command.value)throw Error('Preference not applied');
+  return command.key+' is '+(command.value?'on.':'off.');
+ }
+ if(command.kind==='select'){
+  await ui.select(command.key,command.value);
+  if(ui.preference(command.key)!==command.value)throw Error('Preference not applied');
+  return command.key+' set to '+command.value+'.';
+ }
+ throw Error('Unknown workspace command');
+}
+function wolfChatWorkspace(){
+ return {
+  go:async page=>{closeModal();navigate(page);if(state.tab!==page)throw Error('Navigation failed');},
+  action:async(action,dataset={})=>{
+   // Close the conversation only for screen/dialog transitions. The thread
+   // survives reopening the logo within the same application session.
+   if(!['toggle-sidebar','toggle-setting'].includes(action))closeModal();
+   const before=state.browserTabs.length;
+   await runAction(action,{dataset});
+   if(action==='new-browser-tab'){
+    if(state.browserTabs.length!==before+1)throw Error('Tab not opened');
+   }else if(action==='bookmarks'&&state.tab==='browser'){
+    if(!state.browserToolsOpen||state.browserToolTab!=='bookmarks')throw Error('Bookmarks not opened');
+   }else if(!['toggle-sidebar','toggle-setting'].includes(action)&&!document.querySelector('#modalRoot [role="dialog"]')){
+    throw Error('Dialog not opened');
+   }
+  },
+  sidebar:()=>state.sidebarCollapsed,
+  preference:key=>state.settings[key],
+  select:async(key,value)=>{
+   // Reuse the same settings change handler as the visible controls.
+   const previous=state.tab,section=state.prefSection;
+   state.tab='settings';state.prefSection=key==='theme'?'Appearance':'Browser';render();
+   const input=document.querySelector('[data-setting-select="'+key+'"]');
+   try{
+    if(!input||![...input.options].some(o=>o.value===value))throw Error('Preference not available');
+    input.value=value;input.dispatchEvent(new Event('change',{bubbles:true}));
+   }finally{state.tab=previous;state.prefSection=section;render();}
+  }
+ };
+}
 function wolfChatIntent(message){
  const q=String(message).trim().toLowerCase();
  if(/^(?:hi|hello|hey|help|what can you do)[!?. ]*$/.test(q))return 'help';
@@ -475,7 +560,7 @@ function wolfChatIntent(message){
 }
 async function wolfChatAnswer(message,backend){
  const intent=wolfChatIntent(message);
- if(intent==='help')return 'I can explain my current recorded account status, wallet observations and transaction history. This local conversation uses read-only native backend records. General COG conversation is not connected yet.';
+ if(intent==='help')return 'I can explain my current recorded account status, wallet observations and transaction history. This local conversation uses read-only native backend records. You can also ask me to open any of the nine application screens, show reports, notifications or bookmarks, and adjust supported workspace preferences. General COG conversation is not connected yet.';
  if(intent==='unknown')return 'I do not have a general cognition service connected yet. Ask about account status, recorded balances or transaction history.';
  if(!backend?.request)return 'Native backend unavailable. I cannot verify account data in this preview.';
  const result=await backend.request('accounts.list',{});
@@ -505,12 +590,12 @@ function renderWolfChat(){
   const content=document.createElement('span');content.textContent=m.text;
   bubble.append(name,content);log.append(bubble);
  }
- if(wolfChatBusy){const wait=document.createElement('p');wait.className='wolf-chat-caption';wait.textContent='Reading recorded evidence…';log.append(wait);}
+ if(wolfChatBusy){const wait=document.createElement('p');wait.className='wolf-chat-caption';wait.textContent='Working on your request…';log.append(wait);}
  log.scrollTop=log.scrollHeight;
  const send=document.querySelector('#wolf-chat-send');if(send)send.disabled=wolfChatBusy;
 }
 function openWolfChat(){
- modal('Talk to Wolf','<p class="wolf-chat-caption">Local conversation · read-only records · COG not connected</p><div id="wolf-chat-log" class="wolf-chat-log" role="log" aria-label="Wolf conversation"></div><form id="wolf-chat-form" class="wolf-chat-form"><textarea name="message" maxlength="1200" rows="2" required aria-label="Message Wolf" placeholder="Ask Wolf a question…"></textarea><button id="wolf-chat-send" type="submit" class="btn primary">Send</button></form>');
+ modal('Talk to Wolf','<p class="wolf-chat-caption">Local conversation · workspace controls and recorded evidence · COG not connected</p><div id="wolf-chat-log" class="wolf-chat-log" role="log" aria-label="Wolf conversation"></div><form id="wolf-chat-form" class="wolf-chat-form"><textarea name="message" maxlength="1200" rows="2" required aria-label="Message Wolf" placeholder="Ask Wolf a question…"></textarea><button id="wolf-chat-send" type="submit" class="btn primary">Send</button></form>');
  renderWolfChat();
  if(window.wolfNative&&state.tab==='browser')queueMicrotask(syncNativeBrowser);
  document.querySelector('#wolf-chat-form textarea')?.focus();
@@ -519,8 +604,8 @@ async function submitWolfChat(form){
  const message=String(new FormData(form).get('message')||'').trim().slice(0,1200);
  if(!message||wolfChatBusy)return;
  wolfChatMessages.push({role:'user',text:message});form.reset();wolfChatBusy=true;renderWolfChat();
- try{wolfChatMessages.push({role:'wolf',text:await wolfChatAnswer(message,window.wolfBackend)});}
- catch{wolfChatMessages.push({role:'wolf',text:'I could not read the native backend. No account state was changed.'});}
+ try{const command=wolfChatCommand(message);const text=command?await wolfChatRunCommand(command,wolfChatWorkspace()):await wolfChatAnswer(message,window.wolfBackend);wolfChatMessages.push({role:'wolf',text});}
+ catch{wolfChatMessages.push({role:'wolf',text:'I could not complete that request. Check the current workspace and try again.'});}
  finally{wolfChatBusy=false;if(wolfChatMessages.length>61)wolfChatMessages.splice(1,wolfChatMessages.length-61);renderWolfChat();}
 }
 // WOLF_CHAT_END
