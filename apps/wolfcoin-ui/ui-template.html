@@ -30,7 +30,16 @@ a{color:#3dbaff;text-decoration:none} a:hover{text-decoration:underline}
 .wolf-chat-form{display:flex;align-items:end;gap:8px;margin-top:14px}
 .wolf-chat-form textarea{flex:1;min-width:0;min-height:48px;max-height:128px;resize:vertical;background:#091a2b;color:#edf6ff;border:1px solid #416584;border-radius:10px;padding:10px;font:inherit}
 .wolf-chat-caption{font-size:12px;color:#aac2d8;margin:0 0 12px}
-@media(max-width:600px){.wolf-chat-mobile{display:flex;align-items:center;justify-content:center;flex:0 0 38px;width:38px;height:38px;overflow:hidden;background:transparent;border:0;padding:0;cursor:pointer}.wolf-chat-mobile img{height:36px;width:36px;object-fit:cover;object-position:left}.wolf-chat-log{max-height:38dvh}}
+@media(max-width:600px){
+ .wolf-chat-mobile{display:flex;align-items:center;justify-content:center;gap:7px;position:fixed;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));height:48px;border-radius:999px;z-index:18;padding:5px 13px 5px 7px;border:1px solid #48a6ef;background:linear-gradient(145deg,#122d48,#081728);color:#eaf7ff;box-shadow:0 6px 22px #0009,0 0 14px #139aff40;cursor:pointer;font-size:12px;font-weight:700}
+ .wolf-chat-mobile img{height:34px;width:34px;object-fit:cover;object-position:left;border-radius:50%}
+ .wolf-chat-mobile .wolf-chat-label{white-space:nowrap}
+ .browser-focus .wolf-chat-mobile{position:relative;right:auto;bottom:auto;flex:0 0 40px;width:40px;height:36px;padding:2px;border-radius:50%;z-index:2}
+ .browser-focus .wolf-chat-mobile .wolf-chat-label{display:none}
+ .wolf-chat-log{max-height:38dvh}
+ .wolf-chat-form textarea{font-size:16px}
+ .modal:has(#wolf-chat-form){width:100%;max-height:calc(100dvh - 24px);border-radius:20px}
+}
 .side-nav{padding:8px 14px;position:relative;z-index:3;display:flex;flex-direction:column;gap:4px;max-height:calc(100dvh - 120px);overflow:auto;scrollbar-width:thin}
 .nav-button{height:45px;min-height:45px;width:100%;border:1px solid transparent;background:transparent;color:#f0f5fb;border-radius:11px;display:flex;align-items:center;gap:17px;text-align:left;padding:0 13px;font-weight:570;font-size:15px;transition:background .15s,border-color .15s}
 .nav-button:hover{background:#122b45}
@@ -351,6 +360,7 @@ button.browser-side-entry{cursor:pointer}button.browser-side-entry:hover{backgro
       <main id="main" class="main-panel" tabindex="-1"></main>
     </div>
     <nav id="mobileNav" class="mobile-nav" aria-label="Mobile navigation"></nav>
+    <div id="wolfChatLauncher"></div>
     <div id="modalRoot" class="modal-root" aria-live="polite"></div>
     <div id="toastRoot" class="toast-root" aria-live="polite"></div>
   </div>
@@ -464,7 +474,11 @@ modal=function(...args){_wolfOriginalModal(...args);if(window.wolfNative&&state.
 // WOLF_CHAT_BEGIN
 const wolfChatMessages=[{role:'wolf',text:'I am Wolf. Ask me about my records, or ask me to open a screen, show a report, or change a workspace preference. Try: Open Financial Data.'}];
 let wolfChatBusy=false;
-function wolfChatMobile(){return '<button type="button" class="wolf-chat-mobile" data-action="wolf-chat" title="Talk to Wolf" aria-label="Talk to Wolf">'+img('brand','','')+'</button>';}
+function wolfChatMobile(){return '<button type="button" class="wolf-chat-mobile" data-action="wolf-chat" title="Talk to Wolf" aria-label="Talk to Wolf">'+img('brand','','')+'<span class="wolf-chat-label">Talk to Wolf</span></button>';}
+function renderWolfChatLauncher(){
+ const root=document.querySelector('#wolfChatLauncher');
+ if(root)root.innerHTML=state.tab==='browser'?'':wolfChatMobile();
+}
 // Explicit typed command routes. Never execute message text as code or invoke
 // arbitrary backend operations. The ordinary UI remains the action authority.
 const WOLF_CHAT_PAGES=Object.freeze({
@@ -553,6 +567,7 @@ function wolfChatWorkspace(){
 function wolfChatIntent(message){
  const q=String(message).trim().toLowerCase();
  if(/^(?:hi|hello|hey|help|what can you do)[!?. ]*$/.test(q))return 'help';
+ if(/^(?:what are your capabilities|show (?:your )?capabilities|capabilities|what can wolf do|cog status|iam status)[!?. ]*$/.test(q))return 'capabilities';
  if(/\b(?:history|transactions?|statement|settlement)\b/.test(q))return 'history';
  if(/\b(?:balance|funds|profit|loss|p\/l|wallet)\b/.test(q))return 'balance';
  if(/\b(?:status|accounts?|connected|session|health|sync|cog|capabilit(?:y|ies))\b/.test(q))return 'status';
@@ -561,6 +576,7 @@ function wolfChatIntent(message){
 async function wolfChatAnswer(message,backend){
  const intent=wolfChatIntent(message);
  if(intent==='help')return 'I can explain my current recorded account status, wallet observations and transaction history. This local conversation uses read-only native backend records. You can also ask me to open any of the nine application screens, show reports, notifications or bookmarks, and adjust supported workspace preferences. General COG conversation is not connected yet.';
+ if(intent==='capabilities')return 'My implemented conversation routes: '+Object.keys(WOLF_CHAT_PAGES).filter(x=>!['dashboard','financial data'].includes(x)).join(', ')+'. Dialogs: '+Object.keys(WOLF_CHAT_DIALOGS).join(', ')+'. Workspace writes: sidebar layout, notifications, tab restoration, theme and search engine. Account and transaction records: '+(backend?.request?'native backend interface available':'native backend unavailable')+'. iAM/COG general cognition is not connected. Other application functions remain available through their own controls; no broader chat capability is claimed.';
  if(intent==='unknown')return 'I do not have a general cognition service connected yet. Ask about account status, recorded balances or transaction history.';
  if(!backend?.request)return 'Native backend unavailable. I cannot verify account data in this preview.';
  const result=await backend.request('accounts.list',{});
@@ -595,7 +611,7 @@ function renderWolfChat(){
  const send=document.querySelector('#wolf-chat-send');if(send)send.disabled=wolfChatBusy;
 }
 function openWolfChat(){
- modal('Talk to Wolf','<p class="wolf-chat-caption">Local conversation · workspace controls and recorded evidence · COG not connected</p><div id="wolf-chat-log" class="wolf-chat-log" role="log" aria-label="Wolf conversation"></div><form id="wolf-chat-form" class="wolf-chat-form"><textarea name="message" maxlength="1200" rows="2" required aria-label="Message Wolf" placeholder="Ask Wolf a question…"></textarea><button id="wolf-chat-send" type="submit" class="btn primary">Send</button></form>');
+ modal('Talk to Wolf','<p class="wolf-chat-caption">Local conversation · workspace controls and recorded evidence · iAM/COG pending</p><div id="wolf-chat-log" class="wolf-chat-log" role="log" aria-label="Wolf conversation"></div><form id="wolf-chat-form" class="wolf-chat-form"><textarea name="message" maxlength="1200" rows="2" required aria-label="Message Wolf" placeholder="Ask Wolf a question…"></textarea><button id="wolf-chat-send" type="submit" class="btn primary">Send</button></form>');
  renderWolfChat();
  if(window.wolfNative&&state.tab==='browser')queueMicrotask(syncNativeBrowser);
  document.querySelector('#wolf-chat-form textarea')?.focus();
@@ -614,9 +630,9 @@ let wolfWindowMaximized=false;
 function windowChrome(){if(!window.wolfNative?.windowMinimize)return '';
  return `<div class="win-controls" role="group" aria-label="Window controls"><button type="button" class="win-button" data-action="window-minimize" aria-label="Minimize" title="Minimize">${icon('minus','sm')}</button><button type="button" class="win-button" data-action="window-maximize" aria-label="${wolfWindowMaximized?'Restore':'Maximize'}" title="${wolfWindowMaximized?'Restore window':'Maximize window'}">${icon(wolfWindowMaximized?'restore-window':'maximize-window','sm')}</button><button type="button" class="win-button close-window" data-action="window-close" aria-label="Close" title="Close Wolf-Coin">${icon('close','sm')}</button></div>`;}
 function refreshWindowChrome(){for(const c of document.querySelectorAll('.win-controls'))c.outerHTML=windowChrome();}
-function titleBar(){const t=getActiveBrowser();return `${wolfChatMobile()}<form class="omnibox" id="top-address-form">${img('header-globe','header-crop','')}<input name="address" aria-label="Search or open address" autocomplete="off" placeholder="Search or enter an address" value="${esc(t.url||'')}"><button type="submit" title="Navigate" aria-label="Navigate">${icon('arrow')}</button></form><button class="header-icon tabs-count" data-action="nav-browser" title="Browser tabs" aria-label="Browser tabs">${img('header-tabs','header-crop','')}<span class="tabs-digit">${state.browserTabs.length}</span></button><button class="header-icon" data-action="new-browser-tab" title="New tab" aria-label="New tab">${img('header-plus','header-crop','')}</button><span class="header-gap"></span><button class="header-icon" data-action="notifications" title="Notifications" aria-label="Notifications">${img('header-bell','header-crop','')}</button>${windowChrome()}`}
+function titleBar(){const t=getActiveBrowser();return `<form class="omnibox" id="top-address-form">${img('header-globe','header-crop','')}<input name="address" aria-label="Search or open address" autocomplete="off" placeholder="Search or enter an address" value="${esc(t.url||'')}"><button type="submit" title="Navigate" aria-label="Navigate">${icon('arrow')}</button></form><button class="header-icon tabs-count" data-action="nav-browser" title="Browser tabs" aria-label="Browser tabs">${img('header-tabs','header-crop','')}<span class="tabs-digit">${state.browserTabs.length}</span></button><button class="header-icon" data-action="new-browser-tab" title="New tab" aria-label="New tab">${img('header-plus','header-crop','')}</button><span class="header-gap"></span><button class="header-icon" data-action="notifications" title="Notifications" aria-label="Notifications">${img('header-bell','header-crop','')}</button>${windowChrome()}`}
 function drawNav(){document.querySelector('#sidebar').innerHTML=`<button class="brand" data-action="wolf-chat" aria-label="Talk to Wolf" title="Talk to Wolf">${img('brand','brand-img','Wolf-Coin Intelligent Browser')}</button><button type="button" class="sidebar-collapse-btn" data-action="toggle-sidebar" aria-expanded="${!state.sidebarCollapsed}" aria-label="${state.sidebarCollapsed?'Expand':'Collapse'} navigation" title="${state.sidebarCollapsed?'Expand navigation':'Collapse navigation'}">${icon('chevron')}</button><nav class="side-nav">${NAV.map(([id,label,ic])=>`<button type="button" class="nav-button ${state.tab===id?'active':''}" data-action="go" data-tab="${id}" aria-current="${state.tab===id?'page':'false'}">${ic.startsWith('nav-')?img(ic,'nav-img',''):icon(ic,'nav-svg')}<span>${label}</span></button>`).join('')}</nav><div class="sidebar-art"></div><div class="side-foot"><span class="inline-row gap-sm"><span class="on"></span> ${window.wolfNative?'Wolf Browser':(STORAGE_AVAILABLE?'Local Workspace':'Backup Required')}</span>${STORAGE_AVAILABLE?'<span class="muted">Native</span>':`<button class="tiny-backup" data-action="backup-json" title="Backup local UI data">Backup</button>`}</div>`;
- document.querySelector('#topbar').innerHTML=titleBar();
+ document.querySelector('#topbar').innerHTML=titleBar();renderWolfChatLauncher();
  const mob=['overview','browser','accounts','sessions','finance','menu'];document.querySelector('#mobileNav').innerHTML=mob.map(id=>{let n=NAV.find(x=>x[0]===id),label=n?.[1]||'More',ic=n?.[2]||'menu';return `<button data-action="${id==='menu'?'more-mobile':'go'}" data-tab="${id}" class="${state.tab===id?'active':''}">${ic.startsWith('nav-')?img(ic,'nav-img',''):icon(ic)}<span>${label==='Financial Data'?'Finance':label}</span></button>`}).join('');}
 function pageHeader(name,subtitle,tools='',wolf=false){return `<div class="two-line-header"><div class="hero ${wolf?'wolf':''}"><h1>${esc(name)}</h1><p>${esc(subtitle)}</p></div>${tools?`<div class="page-tools">${tools}</div>`:''}</div>`}
 function metric(label,value,name,extra=''){return `<div class="metric ${name}">${img(name==='profit'?'kpi-profit':name==='pending'?'kpi-pending':name==='accounts'?'kpi-accounts':'kpi-wallet','metric-icon',label)}<div><div class="label">${label}</div><div class="value">${value}</div>${extra?`<div class="delta">${extra}</div>`:''}</div></div>`}
