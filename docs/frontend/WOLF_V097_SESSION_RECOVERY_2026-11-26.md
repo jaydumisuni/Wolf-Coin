@@ -218,3 +218,35 @@ capabilities were introduced. Full iAM-derived cognitive faculty remains
 unintegrated: existing COG admission record remains HOLD / NO-GO.
 This closes the corrected chat deployment, not all production gates.
 Contribution: correction + verification; update existing documentation.
+
+## 2026-11-27 — product-scoped COG read-only qualification
+
+Recovered the existing Cookpit automatic Foundry identity for Wolf-Coin.
+The live observer reported a new product, SHADOW, not registered active,
+with only authority binding and self-model interrogation complete.
+
+Ran the existing product-scoped qualification-request command from
+Cookpit's deployed main-runtime source dafe00d. All six pre-assurance
+gates passed. Sergeant (existing checkout 3a19dff) ran its documented
+diff-review against that exact request: PASS, zero findings. The
+Foundry's assurance and qualify-product commands then produced a
+QUALIFIED receipt with all seven gates complete, no pending gates,
+eligible_for_activation=true and active=false.
+
+Evidence root on KRATOS:
+~/projects/cookpit/.workspace/proof-history/wolf-cog-readonly-qualification-20261127/
+- request digest: 79b584c2881183d1c8134735dd875a01c6262b1b273ade2efc9d9de140d4d4a2
+- candidate: f48bec2661c5aad9344716cb735805ab028291f2111fa03e136f2ebfd949ef5a
+- snapshot: 8dbcea1ba093ab6517448c3b2e7a08c365fd241d3db1532f7e4f659c86d65c50
+- receipt digest: c81d9a17e5f27a85b097ea7c293f592ec4adbda16a0028ca64d8ca97d3bd8c34
+- receipt SHA-256: 43f8e3872dc5c80f2a5e0873e114614df0a434f1ba26515167a707dc7a88ca4e
+
+This qualifies the existing read-only self-model contract at that exact
+evidence generation; it does not certify native application integration,
+advanced G0-G6 cognition, financial execution, durable learning or
+performance improvements. Recheck current target binding before any
+separately admitted read-only registration. No production registry or
+application runtime was changed. G6 remains HOLD/NO-GO in the authoritative
+Cookpit candidate record, and the installed pending status remains truthful.
+No Windows/Linux/Android application build was performed for cognition.
+Contribution: qualification progress and evidence recovery, not closure.
