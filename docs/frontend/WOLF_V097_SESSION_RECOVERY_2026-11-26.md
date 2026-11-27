@@ -97,3 +97,35 @@ transaction capture or real settlement qualification can be claimed from
 an empty provider statement. No bet, deposit, withdrawal, or trade was made.
 Android acceptance remains deferred per owner instruction. Contribution:
 verification and update existing documentation.
+
+## 2026-11-27 — accounting and installed-package qualification
+
+- Ten isolated accounting regressions passed both on the separate native
+  readback source branch (87e1bcc) and on the actual installed KRATOS backend
+  loaded from `/opt/Wolf-Coin/resources/app/backend-runtime`. These cover
+  ingestion of reported records, pending/settled deduplication, conflict
+  rejection, history isolation/pagination and currency boundaries.
+- The installed KRATOS executable (not source Electron) passed the existing
+  compact wallet/revalidation fixture, using a loopback-only website, separate
+  profile and backend, and normal Chromium sandbox. The synthetic amount was
+  3.50; session PAUSED -> ACTIVE, two observations, same account page retained.
+- Six existing readback regressions on 87e1bcc passed with synthetic evidence.
+  They establish reported status linkage, not external settlement truth or
+  realized profit. That branch is distinct from the installed backend.
+- Six historical evidence-integrity regressions passed: coverage, sealed
+  report identity, future-date rejection and journal immutability. No model
+  optimization or claim of predictive profitability was performed.
+- Android emulator still runs v0.9.7-dev, code 19. Installed APK hash matches
+  the retained release, and its packaged observer is byte-identical to the
+  desktop observer. This is artifact/runtime smoke evidence, not a native
+  Android account-flow or physical device acceptance.
+
+Live provider transaction ingestion and transaction-derived P/L remain
+unqualified: the previously observed real account statement contained no
+transactions. Betway authentication, unattended restart recovery and live
+settlement have not been established. Production qualification is not claimed.
+No new financial actions or autonomous execution capabilities were introduced.
+Proof logs: `ledger-qualification.log`, `installed-ledger-qualification.log`,
+`installed-native-recovery.log`, `settlement-evidence-qualification.log`,
+`historical-evidence-integrity.log` in the existing project proof directory.
+Contribution: verification; update existing documentation.
