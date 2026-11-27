@@ -74,3 +74,26 @@ emulator. Actual provider synchronization, live settlement, autonomous
 financial execution and profitability are outside this deployment proof
 and remain unverified. No funds moved. Local proof:
 `.workspace/proof-history/session-recovery-20261126/deployment-linux-android.txt`.
+
+## 2026-11-27 — actual ATHENA read-only wallet acceptance
+
+After the independent Oracle desktop-control recovery, all 15 installed donor
+files matched their manifest, and Oracle pointer actions were accepted and
+visibly changed the native application. No Oracle source or policy changes
+were made by this Wolf-Coin session.
+
+Actual authenticated provider account panel showed ZMW 3.50. Installed
+v0.9.7-dev captured two observations and reported ACTIVE with cash_balance
+3.5 in the persistent application database. The provider statement page
+showed an empty history and the betslip was empty. A clean application
+restart preserved three observations and the last-known amount; host startup
+correctly required revalidation. Reopening the preserved browser statement
+page and its account panel, without credentials or another manual login,
+produced a fourth observation and returned the backend session to ACTIVE.
+Latest verified observation: 2026-11-27T02:21:40.468000+00:00, balance 3.5,
+transaction count 0. The account panel was opened manually; unattended
+startup revalidation without this interaction is not established. No
+transaction capture or real settlement qualification can be claimed from
+an empty provider statement. No bet, deposit, withdrawal, or trade was made.
+Android acceptance remains deferred per owner instruction. Contribution:
+verification and update existing documentation.
