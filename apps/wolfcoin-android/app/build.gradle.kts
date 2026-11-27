@@ -11,8 +11,8 @@ android {
   applicationId = "com.thetechguy.wolfcoin"
   minSdk = 26
   targetSdk = 35
-  versionCode = 21
-  versionName = "0.9.9-dev"
+  versionCode = 22
+  versionName = "0.9.10-dev"
  }
  buildTypes { getByName("debug") { if (System.getenv("WOLF_QA_INSTALL") == "1") applicationIdSuffix = ".qa" }; getByName("release") { isMinifyEnabled = false } }
  compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }

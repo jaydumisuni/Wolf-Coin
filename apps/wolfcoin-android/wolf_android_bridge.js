@@ -22,7 +22,7 @@
     catch(error){pending.delete(id);reject(error)}
   });
   window.wolfNative=Object.freeze({
-    version:'0.9.7-dev',contract:'wolf.browser.v1',
+    version:'0.9.10-dev',contract:'wolf.browser.v1',
     status:()=>invoke('status'),
     showBrowser:data=>invoke('showBrowser',data),
     hideBrowser:()=>invoke('hideBrowser'),
@@ -38,6 +38,8 @@
     vaultSave:entry=>invoke('vaultSave',entry),
     vaultDelete:entry=>invoke('vaultDelete',entry),
     vaultFill:entry=>invoke('vaultFill',entry),
+    chatShare:text=>invoke('chatShare',{text}),
+    chatExport:text=>invoke('chatExport',{text}),
     downloads:()=>invoke('downloads'),
     openExternal:url=>invoke('openExternal',{url}),
     onPageState:callback=>{if(typeof callback!=='function')throw TypeError('callback');listeners.add(callback);return()=>listeners.delete(callback)}

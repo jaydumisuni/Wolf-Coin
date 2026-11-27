@@ -53,6 +53,8 @@ class MainActivity : Activity() {
         const val CONTRACT = "wolf.browser.v1"
         const val UI_URL = "$ORIGIN/assets/wolfcoin.html"
         const val WEBSITE_PERMISSION_REQUEST = 8107
+        const val CHAT_EXPORT_REQUEST = 8108
+        const val CHAT_TEXT_MAX_BYTES = 131072
     }
     private lateinit var root: FrameLayout
     private lateinit var ui: WebView
@@ -62,6 +64,8 @@ class MainActivity : Activity() {
     private val network = ConcurrentHashMap<String, MutableList<JSONObject>>()
     private var activeId: String? = null
     private var pendingWebPermission: PermissionRequest? = null
+    private data class PendingChatExport(val id:String,val reply:JavaScriptReplyProxy,val bytes:ByteArray)
+    private var pendingChatExport:PendingChatExport?=null
     private val backendWorker=Executors.newSingleThreadExecutor()
     private var nativePythonBackend:PyObject?=null
     private val passwords by lazy { PasswordStore(this) }
@@ -357,6 +361,58 @@ class MainActivity : Activity() {
                 "Autofill unavailable: "+(e.message?:"browser error"))
         }
     }
+    private fun chatText(args:JSONObject):String {
+        val value=args.getString("text")
+        require(value.isNotBlank() && value.toByteArray(Charsets.UTF_8).size<=CHAT_TEXT_MAX_BYTES) {
+            "Response is empty or exceeds the export limit"
+        }
+        return value
+    }
+
+    // Only the origin-restricted, main-frame application UI can request these.
+    // The OS chooser owns the destination; there is no arbitrary path or recipient.
+    private fun shareChat(id:String,args:JSONObject,reply:JavaScriptReplyProxy){
+        val send=Intent(Intent.ACTION_SEND).apply {
+            type="text/plain"
+            putExtra(Intent.EXTRA_TEXT,chatText(args))
+            putExtra(Intent.EXTRA_TITLE,"Wolf response")
+        }
+        startActivity(Intent.createChooser(send,"Share Wolf response"))
+        respond(reply,id,JSONObject().put("opened",true))
+    }
+
+    private fun exportChat(id:String,args:JSONObject,reply:JavaScriptReplyProxy){
+        check(pendingChatExport==null){"Another response export is already pending"}
+        val bytes=chatText(args).toByteArray(Charsets.UTF_8)
+        val create=Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type="text/plain"
+            putExtra(Intent.EXTRA_TITLE,"wolf-response.txt")
+        }
+        pendingChatExport=PendingChatExport(id,reply,bytes)
+        try { startActivityForResult(create,CHAT_EXPORT_REQUEST) }
+        catch(e:Exception){pendingChatExport=null;throw e}
+    }
+
+    @Deprecated("Uses Android Storage Access Framework document result")
+    override fun onActivityResult(requestCode:Int,resultCode:Int,data:Intent?){
+        super.onActivityResult(requestCode,resultCode,data)
+        if(requestCode!=CHAT_EXPORT_REQUEST)return
+        val pending=pendingChatExport?:return
+        pendingChatExport=null
+        val uri=data?.data
+        if(resultCode!=RESULT_OK || uri==null){
+            respond(pending.reply,pending.id,JSONObject().put("saved",false).put("cancelled",true))
+            return
+        }
+        try{
+            require(uri.scheme=="content"){"Document provider returned invalid URI"}
+            val out=contentResolver.openOutputStream(uri,"w")?:error("Document is not writable")
+            out.use { it.write(pending.bytes);it.flush() }
+            respond(pending.reply,pending.id,JSONObject().put("saved",true).put("bytes",pending.bytes.size))
+        }catch(e:Exception){respond(pending.reply,pending.id,null,"Export failed: "+(e.message?:"document error"))}
+    }
+
     private fun dispatch(id: String, method: String, args: JSONObject, reply: JavaScriptReplyProxy) {
         when (method) {
             "backendStatus" -> backendCall(id,"bridge.capabilities",JSONObject(),reply,true)
@@ -375,6 +431,8 @@ class MainActivity : Activity() {
                 val account=accountId(args.getString("accountId"))
                 fillSavedLogin(account,activeBrowser(account),false,id,reply)
             }
+            "chatShare" -> shareChat(id,args,reply)
+            "chatExport" -> exportChat(id,args,reply)
             "downloads" -> respond(reply,id,JSONObject().put("items",JSONArray()))
             "browserBounds" -> { bounds(args);respond(reply,id,JSONObject().put("ok",true)) }
             "hideBrowser" -> { hide();respond(reply,id,JSONObject().put("ok",true)) }
