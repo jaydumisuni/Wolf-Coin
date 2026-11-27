@@ -129,3 +129,44 @@ Proof logs: `ledger-qualification.log`, `installed-ledger-qualification.log`,
 `installed-native-recovery.log`, `settlement-evidence-qualification.log`,
 `historical-evidence-integrity.log` in the existing project proof directory.
 Contribution: verification; update existing documentation.
+
+## 2026-11-27 — v0.9.8-dev chat deployment and acceptance
+
+Source generation: eea8b97090faa213ee96602c85bf44a256cea4ac.
+The Wolf logo opens the native product's conversation; Android uses the
+floating Talk to Wolf launcher and a compact browser-header entry point.
+Wolf is the product identity; iAM-derived cognition is an internal faculty,
+not a separate assistant or identity.
+
+- Existing Builder Windows, Linux and Android targets completed with exit
+  code 0. Windows and Android terminal timeouts were reconciled against
+  actual package/build evidence. Android used the existing development key.
+- ATHENA: installed 0.9.8-dev, ASAR hash matched the staged artifact
+  (8435b055cd850f431b081b77be46d69c2e9b9c5317c5cd5ffd45198b72ba465d).
+  Actual installed conversation showed a user greeting and Wolf's response.
+  Oracle proof run: wolf-v098-windows-visible.
+- KRATOS: installed 0.9.8~dev, HTML payload matched frozen desktop assembly
+  (627e789dbf7b4735b079b64c9230b2b6d038c09e4e7858daa94a018395d2f06d).
+  Restored the package's root-owned Chromium sandbox mode 4755.
+  Installed executable passed the chat navigation, preference, reopen
+  and responsive-layout test in an isolated test profile.
+  Proof: v098-chat-installed-linux.log.
+- Android emulator: installed versionCode 20 and base APK matched retained
+  release SHA-256 3cadc2424963b6934d052d66a5c902408d3449db5ccbca86569e9b1fb1704e05.
+  Actual launcher opened the conversation, typed message was accepted,
+  and capability response was visibly rendered. Accessibility XML omitted
+  scroll-log text; screenshot independently confirmed the response.
+  Oracle proof run: wolf-v098-android-chat-proof.
+  Physical Android device acceptance not performed.
+
+COG currentness checked against Cookpit main
+5f10390c1806ee678b393fc4f3c25ff801536cad and G0-G6 draft
+8dce551b8b12d5b626b213474587c73b93bd7846. iAM architecture source
+62102d6629113f530a50691368da909324cb3d91. The existing admission
+record remains HOLD / NO-GO pending independent owner and gate evidence.
+The current local conversation/typed workspace router is not the
+qualified iAM-derived cognition runtime. No native COG activation or
+new financial execution capability was introduced. Do not infer full
+natural-language or autonomous financial capability from chat acceptance.
+
+Contribution: verification; update existing documentation.
