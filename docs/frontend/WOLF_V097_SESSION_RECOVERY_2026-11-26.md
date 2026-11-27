@@ -30,3 +30,47 @@ or omit the owner-held D-XQT and exact previously installed backend source.
 Production package identity, installed real-account readback and Android runtime
 qualification remain separate acceptance gates until proven. Contribution:
 correction, verification and update existing frontend documentation.
+
+## 2026-11-27 — installed development deployment
+
+Source freeze: `3add4cda6f90d6955fb8b4b210f535af3e68d9e5`.
+
+- **KRATOS:** Builder Linux DEB succeeded; system `wolf-coin` upgraded
+  from 0.9.6~dev1 to 0.9.7~dev. Actual installed application payload
+  matches the staged source; the visible native window and backend
+  database were confirmed. The new package uses `/opt/Wolf-Coin` and
+  the system alternative points there. The DEB carried the setuid
+  sandbox bit, but the installed mode was 0755; restored root-owned
+  4755 to match the established installation before normal launch.
+  Package SHA-256: `e56f771789d22351892e9c7fb152f3e7ce04fb90dd353baa6548d3c9c9ee7880`.
+  Previous DEB retained for rollback. Builder packaging used the
+  cached runtime and existing shared tooling, not a new installer engine.
+- **ATHENA:** Builder windows-exe target completed with exit 0 after
+  a retry outside the initial terminal timeout. Standard Builder NSIS
+  installer completed exit 0. Installed exe file version 0.9.7-dev;
+  main window running from the normal per-user installation path.
+  Installed exe, ASAR, and unpacked backend store matched the Builder
+  output byte-for-byte. Installer SHA-256:
+  `7411038eb6c49367c015f9381860e884464c8a34d185cfecfb3b21322daf69c9`.
+  Existing two registered account records were preserved; both remain
+  PAUSED without observed balances at this readback. Actual wallet
+  synchronization is NOT accepted by the installation check. Windows
+  development installer is unsigned. Builder log and artifact retained
+  in the existing local Wolf-Coin release directory.
+- **Android:** Builder release APK compiled; existing main application
+  on emulator-5580 (Android 15) was 0.9.3-dev, code 14, signed with the
+  original main-app debug certificate. Matching-key `adb install -r`
+  succeeded: 0.9.7-dev, code 19, original firstInstallTime unchanged,
+  installed APK hash matched the signed package. Overview rendered
+  with 13 retained account registrations after a transient emulator
+  System UI ANR. No uninstall or data clear was performed. The separate
+  QA variant (0.9.6, distinct signing key) remains untouched. Main APK
+  SHA-256: `df5159277423dde0bcc4294acca55d6e0dc772c358cc93aff20979cfa92db738`.
+  No physical Android device was connected. This is development signing,
+  not production distribution qualification.
+
+Installation gate passed on both desktops and the existing Android
+emulator. Actual provider synchronization, live settlement, autonomous
+financial execution and profitability are outside this deployment proof
+and remain unverified. No funds moved. Local proof:
+`.workspace/proof-history/session-recovery-20261126/deployment-linux-android.txt`.
